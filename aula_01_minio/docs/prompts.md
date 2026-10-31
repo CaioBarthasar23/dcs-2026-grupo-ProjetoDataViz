@@ -198,3 +198,43 @@ Se uma decisão acima contradisser a spec, aponte a contradição e pergunte. Pa
 
 ## P05: Tarefas
 
+- Data e hora: 2026-10-31, 20:22 (horário de Brasília, UTC-03:00)
+- Quem enviou: CaioBarthasar23
+- Agente e modelo usados: GitHub Copilot Chat (modo Agent) no Codespaces; modelo: GPT-6 Luna
+- Arquivos alterados: specs/tasks.md
+- Resultado da revisão ("Revise antes de seguir"): refeito. A primeira versão cobria todos os RF e RNF e separava as tarefas manuais, mas o T-06 dependia do T-04 e o T-04 do T-06 (ciclo), o T-07 não trazia comandos executáveis e o T-09 estava fora da seção de manuais. O agente também propôs `railway up` no T-07, rejeitado porque o redeploy é manual no painel. Segunda versão aceita após correção pelo agente. Antes da escrita, foram pedidos três ajustes: tarefa de acompanhamento de custo (RNF-01), T-04 sem retry e T-08 com falha simulada.
+
+[C] Personagem
+Você é o líder técnico do grupo. Você quebra o plano em tarefas pequenas, cada uma com requisito, verificação executável e evidência esperada.
+
+[R] Pedido
+Escreva specs/tasks.md a partir de specs/spec.md e specs/plan.md. Inclua no mínimo:
+T-01 docker-compose.yml do MinIO local;
+T-02 minio_railway/Dockerfile;
+T-03 scripts/criar_buckets.sh (local e railway, idempotente);
+T-04 scripts/verificar.sh (local e railway: saúde, 403 anônimo, buckets, ida e volta de objeto, saída salva em docs/evidencias/);
+T-05 README.md da pasta com recriação do zero;
+T-06 deploy no Railway (executado pelo prompt 8);
+T-07 teste de persistência com redeploy.
+Separe as tarefas manuais do grupo (login no Railway, geração e cadastro da senha, cópia do domínio para o .env).
+
+[E] Exemplos
+| T-03 | Criar scripts/criar_buckets.sh que cria raw, bronze, silver e gold com mc mb --ignore-existing | RF-02 | bash scripts/criar_buckets.sh local, executado duas vezes | segunda execução termina com código 0; mc ls local lista 4 buckets | [ ] |
+
+[A] Ajustes
+- Cada tarefa cabe num único prompt de implementação e toca poucos arquivos.
+- Cada RF e RNF é coberto por pelo menos uma tarefa, ou aparece em "sem tarefa" com o motivo.
+- Marque as tarefas que criam recursos no Railway ou consomem crédito.
+- Indique a ordem de execução e as dependências.
+- Todas as tarefas começam com status [ ].
+
+[T] Tipo de saída
+Somente specs/tasks.md, em Markdown, com a tabela do modelo. Mostre a lista de tarefas antes de escrever e espere confirmação.
+
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md, specs/plan.md, specs/tasks.md.
+Os scripts devem funcionar com o mc instalado no Codespace e ler as variáveis MINIO_ROOT_USER, MINIO_ROOT_PASSWORD (local) e MINIO_RAILWAY_ENDPOINT, MINIO_RAILWAY_USER, MINIO_RAILWAY_PASSWORD (Railway) do .env, conforme .env.example.
+Pare ao final.
+
+## P06: Implementação, uma tarefa por vez
+
