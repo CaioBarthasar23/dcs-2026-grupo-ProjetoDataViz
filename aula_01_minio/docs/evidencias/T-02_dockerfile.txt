@@ -1,0 +1,7 @@
+$ docker build -f minio_railway/Dockerfile -t minio-grupo:RELEASE.2025-10-15T17-29-55Z minio_railway
+[+] Building 0.6s (5/5) FINISHED docker:default
+ => [internal] load build definition from Dockerfile
+ => [internal] load metadata for ghcr.io/coollabsio/minio:RELEASE.2025-10-15T17-29-55Z
+ => [1/1] FROM ghcr.io/coollabsio/minio:RELEASE.2025-10-15T17-29-55Z
+ => exporting to image
+ => naming to docker.io/library/minio-grupo:RELEASE.2025-10-15T17-29-55Z
