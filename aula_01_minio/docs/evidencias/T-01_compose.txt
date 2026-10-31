@@ -1,0 +1,17 @@
+$ docker compose config --quiet
+(sem saída; código de saída 0)
+
+$ docker compose -p aula_01_minio down
+[+] down 2/2
+ ✔ Container aula_01_minio-minio-1 Removed 0.2s
+ ✔ Network aula_01_minio_default Removed 0.1s
+
+$ docker compose up -d
+WARN[0000] volume "minio_data" already exists but was created for project "aula_01_minio" (expected "minio_local"). Use "external: true" to use an existing volume
+[+] up 2/2
+ ✔ Network minio_local_default Created 0.0s
+ ✔ Container minio_local-minio-1 Started 0.4s
+
+$ docker compose ps
+NAME                  IMAGE                                                   COMMAND                  SERVICE   CREATED          STATUS                   PORTS
+minio_local-minio-1   ghcr.io/coollabsio/minio:RELEASE.2025-10-15T17-29-55Z   "/usr/bin/docker-ent…"   minio     10 seconds ago   Up 9 seconds (healthy)   0.0.0.0:9000-9001->9000-9001/tcp, [::]:9000-9001->9000-9001/tcp
