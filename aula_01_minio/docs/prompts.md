@@ -89,3 +89,64 @@ Se faltar informação, pergunte. Ao terminar, liste perguntas abertas e pare.
 
 ## P03: Especificação
 
+- Data e hora: 2026-10-31, 19:44 (horário de Brasília, UTC-03:00)
+- Quem enviou: CaioBarthasar23
+- Agente e modelo usados: GitHub Copilot Chat (modo Agent) no Codespaces; modelo: GPT-6 Luna
+- Arquivos alterados: specs/spec.md
+- Resultado da revisão ("Revise antes de seguir"): aceito. Os 11 itens do pedido viraram RF-01 a RF-07 e RNF-01 a RNF-04; critérios em Dado/Quando/Então e verificáveis; todo requisito com origem; único número fora de docs/ (tentativas máximas) marcado como hipótese; sem tecnologia fora das restrições. Houve uma rodada de esclarecimento: o agente perguntou se o Docker Compose podia ser citado; autorizado pelo pedido e registrado como pergunta aberta, sem alterar docs/.
+
+[C] Personagem
+Você é um engenheiro de requisitos de dados. Você escreve requisitos funcionais e não funcionais com critérios de aceite verificáveis. Você não escreve código e só cita tecnologia quando ela já é uma restrição em docs/01_objetivos_negocio.md.
+
+[R] Pedido
+Escreva specs/spec.md para o projeto aula_01_minio, derivando os requisitos de docs/00_persona.md e docs/01_objetivos_negocio.md. Cubra no mínimo:
+- API compatível com S3 publicada por HTTPS num domínio do Railway;
+- buckets raw, bronze, silver e gold;
+- ambiente local equivalente por docker compose, com a mesma imagem e tag;
+- verificação automatizada (saúde, acesso anônimo negado, buckets, gravação e leitura de objeto de teste), local e no Railway;
+- recriação documentada do zero;
+- persistência entre deploys;
+- acesso autenticado e segredos fora do Git;
+- custo acompanhado dentro do crédito;
+- imagem fixada por tag, nunca latest;
+- tolerância a 502 do proxy com nova tentativa e operações idempotentes;
+- evidências de verificação registradas em docs/evidencias/.
+
+[E] Exemplos
+### RF-02: buckets da arquitetura medalhão
+O storage do grupo oferece os buckets raw, bronze, silver e gold.
+- Origem: OBJ-04
+- Critério de aceite:
+  - Dado o MinIO no ar e credenciais válidas no .env
+  - Quando scripts/criar_buckets.sh railway for executado duas vezes seguidas
+  - Então as duas execuções terminam com código 0 e mc ls lista exatamente os quatro buckets
+
+### RNF-05: tolerância a 502 do proxy
+- Atributo: disponibilidade e idempotência
+- Origem: DRV-xx (proxy do Railway devolve 502 esporádico)
+- Critério de aceite:
+  - Dado um 502 numa gravação
+  - Quando o cliente repetir a operação com espera crescente
+  - Então o objeto existe uma única vez na chave esperada; número máximo de tentativas: hipótese: validação pendente
+
+[A] Ajustes
+- Numere RF-01, RF-02... e RNF-01, RNF-02...; cada requisito tem origem (OBJ, DRV ou RES).
+- Todo critério de aceite usa Dado/Quando/Então e pode ser verificado por um comando ou teste.
+- Não invente números de latência, disponibilidade ou volume. Valor ausente = "hipótese: validação pendente".
+- Hipóteses de docs/ continuam hipóteses aqui; não as transforme em fato.
+- Inclua "Fora do escopo" coerente com docs/01_objetivos_negocio.md.
+
+[T] Tipo de saída
+Somente specs/spec.md, em Markdown, com no máximo duas páginas. Mostre a lista de RF e RNF (só títulos) antes de escrever e espere confirmação.
+
+[E] Extras
+Leia antes: AGENTS.md, docs/00_persona.md, docs/01_objetivos_negocio.md, specs/spec.md.
+Fato adicional (origem: experiência do professor com serviços no Railway): o proxy do Railway devolve 502 esporádico; reenviar uma escrita às cegas pode duplicar dados se a operação não for idempotente.
+Se algum objetivo não gerar requisito, explique por quê. Ao terminar, liste perguntas abertas e pare.
+
+## P04: Plano e Arquitetura
+
+git add specs/spec.md docs/prompts.md
+git commit -m "docs(T-00): spec do projeto aula_01_minio"
+git push
+git status --short
