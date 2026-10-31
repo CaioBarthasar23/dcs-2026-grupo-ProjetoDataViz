@@ -146,7 +146,55 @@ Se algum objetivo não gerar requisito, explique por quê. Ao terminar, liste pe
 
 ## P04: Plano e Arquitetura
 
-git add specs/spec.md docs/prompts.md
-git commit -m "docs(T-00): spec do projeto aula_01_minio"
-git push
-git status --short
+- Data e hora: 2026-10-31, [hora do envio da correção] (horário de Brasília, UTC-03:00)
+- Quem enviou: CaioBarthasar23
+- Agente e modelo usados: GitHub Copilot Chat (modo Agent) no Codespaces; modelo: GPT-6 Luna
+- Arquivos alterados: specs/plan.md
+- Resultado da revisão ("Revise antes de seguir"): refeito. Primeira versão reprovada nas perguntas 1, 2 e 5 do quadro: restos do modelo (blocos de exemplo, tabela vazia, cabeçalho duplicado), rótulos ambíguos no nível 2 e ADR-003 a ADR-008 numerados além do previsto; origem do fato do 502 também corrigida (Prompt 3, não Prompt 4). Segunda versão aceita após uma rodada de correção pelo agente.
+
+[C] Personagem
+Você é um arquiteto de software de dados. Você transforma a spec em arquitetura, justificando cada escolha por um requisito ou restrição. Você não escreve código nesta etapa.
+
+[R] Pedido
+Escreva specs/plan.md com:
+1. C4 nível 1 (contexto), nível 2 (contêineres) e nível 3 (componentes do script de verificação), em blocos Mermaid;
+2. tabela de escolhas técnicas: escolha, alternativas consideradas, requisito ou restrição, ADR previsto;
+3. ambientes local (docker compose no Codespace) e publicado (Railway), lado a lado;
+4. riscos técnicos iniciais e perguntas abertas.
+O plano deve conter estas decisões, já tomadas pelo grupo:
+- Dockerfile em minio_railway/ com FROM ghcr.io/coollabsio/minio:RELEASE.2025-10-15T17-29-55Z e CMD server /data --console-address ":9001";
+- volume do Railway montado em /data;
+- domínio público do Railway apenas para a porta 9000; console 9001 só no ambiente local;
+- credenciais como variáveis do serviço no Railway e no .env local, nunca em arquivo versionado;
+- docker-compose.yml com a mesma imagem e tag, portas 9000 e 9001, volume nomeado e healthcheck com "mc ready local" (a imagem não tem curl nem wget);
+- cliente mc para operar e verificar; scripts em scripts/ carregam o .env sem imprimir valores.
+
+[E] Exemplos
+flowchart LR
+  subgraph rw["Railway: projeto minio-grupo-xx"]
+    dom["Domínio público HTTPS"]
+    svc["Serviço minio"]
+    vol[("Volume em /data")]
+  end
+  dom -->|"porta 9000"| svc
+  svc --- vol
+
+| Escolha | Alternativas | Requisito/restrição | ADR |
+| Imagem coolLabs com tag fixada | imagem minio/minio antiga; latest da coolLabs; compilar do código-fonte | RNF-xx (imagem fixada), RES-02 | ADR-001 |
+
+[A] Ajustes
+- Os nomes usados nos diagramas são exatamente os nomes usados no texto.
+- Toda escolha técnica aponta para RF, RNF ou RES; escolha sem origem fica marcada "sem requisito correspondente".
+- Para cada decisão relevante, liste pelo menos duas alternativas descartadas e o motivo.
+- Não acrescente componentes que a spec não pede (proxy reverso, orquestrador, banco de dados).
+
+[T] Tipo de saída
+Somente specs/plan.md, em Markdown com blocos ```mermaid. Mostre a lista de seções antes de escrever e espere confirmação.
+
+[E] Extras
+Leia antes: AGENTS.md, docs/00_persona.md, docs/01_objetivos_negocio.md, specs/spec.md, specs/plan.md.
+Os ADRs serão escritos na etapa 7; aqui apenas indique o número previsto (ADR-001 para a imagem, ADR-002 para a exposição de portas).
+Se uma decisão acima contradisser a spec, aponte a contradição e pergunte. Pare ao final.
+
+## P05: Tarefas
+
