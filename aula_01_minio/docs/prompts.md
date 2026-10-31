@@ -45,3 +45,47 @@ Fatos do contexto (origem: enunciado da Aula 01):
 Se faltar informação para uma linha, pergunte antes de supor. Ao terminar, liste as perguntas abertas e pare.
 
 ## P02: Objetivos de negócio
+
+- Data e hora: 2026-10-31, 19:33 (horário de Brasília, UTC-03:00)
+- Quem enviou: CaioBarthasar23
+- Agente e modelo usados: GitHub Copilot Chat (modo Agent) no Codespaces; modelo: modelo: GPT-6 Luna
+- Arquivos alterados: docs/01_objetivos_negocio.md
+- Resultado da revisão ("Revise antes de seguir"): aceito. As 5 perguntas passaram: métricas verificáveis nos quatro objetivos (OBJ-04 com evidência marcada como hipótese e forma de medir); valores do enunciado copiados sem alteração; drivers ligados a cada objetivo; fora do escopo com os três itens; persona sem alteração. Duas perguntas abertas mantidas (escopo da meta de custo e evidência de recriação).
+
+[C] Personagem
+Você é um product owner técnico de uma equipe de dados. Você traduz a dor da persona em objetivos de negócio mensuráveis, drivers e restrições. Você não escreve requisitos técnicos nem código.
+
+[R] Pedido
+Preencha docs/01_objetivos_negocio.md a partir de docs/00_persona.md. Escreva exatamente estes quatro objetivos, cada um com métrica de sucesso e origem:
+OBJ-01 custo dentro do crédito de US$ 5 do trial do Railway;
+OBJ-02 dados persistem entre deploys e reinícios do serviço;
+OBJ-03 acesso somente autenticado, sem segredo versionado no repositório público;
+OBJ-04 storage recriável do zero por comandos documentados, por qualquer integrante.
+Liste também os drivers de negócio, as restrições e o que fica fora do escopo.
+
+[E] Exemplos
+| OBJ-02 | Objetos gravados continuam disponíveis depois de um novo deploy ou reinício do serviço. | Um objeto de verificação gravado antes do redeploy aparece na listagem depois dele; zero objetos perdidos. | Persona: dor "os dados somem" |
+| RES-02 | Imagem do MinIO: ghcr.io/coollabsio/minio, tag fixada | técnica | MinIO comunitário em manutenção, sem imagens oficiais (enunciado da Aula 01) |
+
+[A] Ajustes
+- Cada objetivo precisa de uma métrica verificável. Se o valor não estiver nos fatos abaixo, escreva "hipótese: validação pendente" e diga como medir.
+- Restrições têm tipo (técnica, financeira, legal, prazo) e origem.
+- Fora do escopo, inclua pelo menos: alta disponibilidade com múltiplos nós, console web público, backup automático agendado.
+- Preserve a persona; não altere docs/00_persona.md.
+- Não escolha tecnologia além das que estão nas restrições.
+
+[T] Tipo de saída
+Somente docs/01_objetivos_negocio.md, em Markdown, com as tabelas do modelo. Mostre o plano antes de editar e espere confirmação.
+
+[E] Extras
+Leia antes: AGENTS.md, docs/00_persona.md, docs/01_objetivos_negocio.md.
+Fatos e restrições (origem: enunciado da Aula 01):
+- Railway trial: crédito único de US$ 5, até 30 dias; depois, plano Free com US$ 1 por mês; 1 GB de RAM, vCPU compartilhada, até 5 serviços por projeto; volumes de contas trial apagados 30 dias após o fim dos créditos.
+- MinIO: imagem ghcr.io/coollabsio/minio:RELEASE.2025-10-15T17-29-55Z; porta 9000 = API S3, 9001 = console.
+- Repositório do grupo público no GitHub.
+- Agente de código: o de preferência de cada integrante, sem chave de API em arquivo versionado.
+- O storage será usado pelas Aulas 02, 03 e 04 e pelo projeto final.
+Se faltar informação, pergunte. Ao terminar, liste perguntas abertas e pare.
+
+## P03: Especificação
+
