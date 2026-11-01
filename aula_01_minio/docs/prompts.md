@@ -376,5 +376,50 @@ Leia antes: AGENTS.md, specs/spec.md, specs/plan.md, specs/tasks.md e .env.examp
 O .env local já foi criado pelo grupo a partir do .env.example. O cliente mc está instalado no Codespace (mc --version).
 Pare ao final da tarefa.
 
+- Data e hora: 2026-10-31, 21:18 (horário de Brasília, UTC-03:00)
+- Quem enviou: CaioBarthasar23
+- Agente e modelo usados: GitHub Copilot Chat (modo Agent) no Codespaces; modelo: GPT-6 Luna
+- Arquivos alterados: scripts/verificar.sh, docs/evidencias/T-04_verificar_local.txt, docs/evidencias/verificar_local.txt, specs/tasks.md (status da T-04)
+- Resultado da revisão ("Revise antes de seguir"): aceito para o destino local, após uma rodada de correção. O agente executou o destino railway apesar do pedido de verificar só local (HTTP 404, sem credenciais; evidência descartada). A primeira versão não gravava a evidência pelo script e a saída tinha a barra de progresso do mc; corrigido com tee e --quiet. Local validado: saúde 200, anônimo 403, quatro buckets, conteúdo gravado comparado ao lido. Os typos do tasks.md já estavam corrigidos (a suspeita contrária veio de um diff antigo). Railway pendente até o prompt 8. Lição: escrever "não execute o destino railway" no pedido.
+
+[C] Personagem
+Você é um engenheiro de dados que implementa com disciplina de testes. Você executa uma única tarefa, prova que ela funciona com a saída real do terminal e para.
+
+[R] Pedido
+Implemente a tarefa T-04 de specs/tasks.md. Siga esta ordem:
+1. mostre o plano: arquivos que vai criar ou alterar e o comando de verificação;
+2. espere minha confirmação;
+3. crie ou altere os arquivos;
+4. execute a verificação indicada na tarefa e mostre a saída real;
+5. se passou, salve a saída em docs/evidencias/T-xx_<nome>.txt, marque a tarefa como [x] em specs/tasks.md e proponha a mensagem de commit no formato tipo(T-xx): descrição [RF-yy].
+
+[E] Exemplos
+Evidência bem registrada (docs/evidencias/T-01_compose.txt):
+$ docker compose ps
+NAME                  IMAGE                                                   STATUS
+minio_local-minio-1   ghcr.io/coollabsio/minio:RELEASE.2025-10-15T17-29-55Z   Up 20 seconds (healthy)
+$ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:9000/minio/health/live
+200
+Mensagem de commit: feat(T-01): MinIO local com healthcheck e volume nomeado [RF-03]
+
+[A] Ajustes
+- Faça somente a tarefa pedida. Não adiante outras tarefas.
+- Use a imagem ghcr.io/coollabsio/minio:RELEASE.2025-10-15T17-29-55Z; nunca latest.
+- Scripts em bash começam com set -euo pipefail, carregam o .env com "set -a; . ./.env; set +a" e nunca imprimem senha (não use set -x, não ecoe variáveis de credencial).
+- Não leia nem imprima o arquivo .env. Use docker compose config --quiet, que não mostra valores.
+- Operações repetíveis devem ser idempotentes (mc mb --ignore-existing; objeto de verificação com chave fixa raw/_verificacao/teste.json).
+- No compose: portas 9000 e 9001, volume nomeado minio_data, healthcheck com mc ready local, variáveis com ${MINIO_ROOT_USER:?} e ${MINIO_ROOT_PASSWORD:?}.
+- Não execute docker compose down -v nem apague buckets.
+- Se a verificação falhar, mostre o erro e tente corrigir no máximo duas vezes; depois disso, pare e explique.
+- Não declare sucesso sem mostrar a saída do comando.
+
+[T] Tipo de saída
+Os arquivos da tarefa, a atualização de specs/tasks.md, o arquivo de evidência e um resumo de até cinco linhas com o que mudou e a mensagem de commit proposta.
+
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md, specs/plan.md, specs/tasks.md e .env.example (só os nomes das variáveis).
+O .env local já foi criado pelo grupo a partir do .env.example. O cliente mc está instalado no Codespace (mc --version).
+Pare ao final da tarefa.
+
 
 
