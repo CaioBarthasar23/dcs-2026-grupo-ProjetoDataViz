@@ -468,8 +468,88 @@ Pare ao final da tarefa.
 
 ## P08: Deploy e Verificação no Railway
 
+Data e hora: 2026-10-31, 22:06 (horário de Brasília, UTC-03:00)
+Quem enviou: CaioBarthasar23
+Agente e modelo usados: GitHub Copilot Chat (modo Agent); modelo não informado nesta sessão
+Arquivos alterados: docs/evidencias/T-06_deploy.txt, docs/evidencias/T-07_persistencia.txt, specs/tasks.md
+Resultado da revisão (“Revise antes de seguir”): parcialmente aceito, com ressalva: T-07 foi marcado como concluído, mas o teste usou uma chave e conteúdo diferentes dos definidos no critério da tarefa.
 
+[C] Personagem
+Você é um engenheiro de plataforma cuidadoso. Você executa comandos que criam recursos pagos um de cada vez, com confirmação, e nunca manipula segredos.
+
+[R] Pedido
+Execute as tarefas T-06 (deploy) e T-07 (persistência) de specs/tasks.md no Railway:
+1. dentro de minio_railway/: railway init --name minio-grupo-projetodataviz; railway add --service minio; railway service link minio; railway volume add --mount-path /data;
+2. PARE e peça ao grupo para cadastrar MINIO_ROOT_USER e MINIO_ROOT_PASSWORD no Railway e no .env, em outro terminal; espere a confirmação;
+3. railway up --detach; acompanhe com railway logs até aparecer a linha de API do MinIO;
+4. railway domain --port 9000 --service minio; PARE e peça ao grupo para copiar o domínio para MINIO_RAILWAY_ENDPOINT no .env;
+5. bash scripts/criar_buckets.sh railway e bash scripts/verificar.sh railway;
+6. teste de persistência: grave raw/_verificacao/teste.json, execute railway redeploy --service minio --yes, espere o deploy e liste raw/_verificacao/;
+7. salve as saídas em docs/evidencias/T-06_deploy.txt e docs/evidencias/T-07_persistencia.txt e marque as tarefas.
+
+[E] Exemplos
+Saída esperada da verificação (sem segredos):
+The cluster 'railway' is ready
+anonimo GET /raw -> 403
+[...] raw/  bronze/  silver/  gold/
+ida e volta raw/_verificacao/teste.json: conteúdo igual
+
+[A] Ajustes
+- Peça confirmação antes de cada comando que cria recurso: init, add, volume add, up, domain, redeploy.
+- Nunca gere senha, nunca execute railway variable set com valor secreto, nunca execute railway variable list nem leia o .env.
+- Nunca crie domínio para a porta 9001.
+- Não execute railway volume delete, railway delete nem railway down.
+- Se um comando receber 502, espere 10 segundos e repita no máximo três vezes; depois disso, pare e mostre railway logs.
+- Não declare sucesso sem a saída real.
+
+[T] Tipo de saída
+Os comandos executados com as saídas, os dois arquivos de evidência, specs/tasks.md atualizado e a mensagem de commit proposta: feat(T-06): MinIO publicado no Railway com volume em /data [RF-01].
+
+[E] Extras
+Leia antes: AGENTS.md, specs/plan.md, specs/tasks.md e minio_railway/Dockerfile.
+A CLI do Railway já está autenticada pelo grupo (railway whoami). Pare ao final.
 
 
 ## P07: Validação ATAM
+
+Data e hora: 2026-10-31, 22:50 (horário de Brasília, UTC-03:00)
+Quem enviou: CaioBarthasar23
+Agente e modelo usados: GitHub Copilot Chat (modo Agent); modelo não informado nesta sessão
+Arquivos alterados: docs/evidencias/T-07_persistencia.txt, docs/evidencias/README.md, specs/tasks.md, docs/atam.md, docs/rastreabilidade.md
+Resultado da revisão (“Revise antes de seguir”): critério de T-07 corrigido e validado com a saída fornecida pelo grupo; RF-06 continua parcial porque a evidência cobre um objeto, não o inventário completo. passou.
+
+[C] Personagem
+Você é um engenheiro de plataforma cuidadoso. Você executa comandos que criam recursos pagos um de cada vez, com confirmação, e nunca manipula segredos.
+
+[R] Pedido
+Execute as tarefas T-06 (deploy) e T-07 (persistência) de specs/tasks.md no Railway:
+1. dentro de minio_railway/: railway init --name minio-grupo-xx; railway add --service minio; railway service link minio; railway volume add --mount-path /data;
+2. PARE e peça ao grupo para cadastrar MINIO_ROOT_USER e MINIO_ROOT_PASSWORD no Railway e no .env, em outro terminal; espere a confirmação;
+3. railway up --detach; acompanhe com railway logs até aparecer a linha de API do MinIO;
+4. railway domain --port 9000 --service minio; PARE e peça ao grupo para copiar o domínio para MINIO_RAILWAY_ENDPOINT no .env;
+5. bash scripts/criar_buckets.sh railway e bash scripts/verificar.sh railway;
+6. teste de persistência: grave raw/_verificacao/teste.json, execute railway redeploy --service minio --yes, espere o deploy e liste raw/_verificacao/;
+7. salve as saídas em docs/evidencias/T-06_deploy.txt e docs/evidencias/T-07_persistencia.txt e marque as tarefas.
+
+[E] Exemplos
+Saída esperada da verificação (sem segredos):
+The cluster 'railway' is ready
+anonimo GET /raw -> 403
+[...] raw/  bronze/  silver/  gold/
+ida e volta raw/_verificacao/teste.json: conteúdo igual
+
+[A] Ajustes
+- Peça confirmação antes de cada comando que cria recurso: init, add, volume add, up, domain, redeploy.
+- Nunca gere senha, nunca execute railway variable set com valor secreto, nunca execute railway variable list nem leia o .env.
+- Nunca crie domínio para a porta 9001.
+- Não execute railway volume delete, railway delete nem railway down.
+- Se um comando receber 502, espere 10 segundos e repita no máximo três vezes; depois disso, pare e mostre railway logs.
+- Não declare sucesso sem a saída real.
+
+[T] Tipo de saída
+Os comandos executados com as saídas, os dois arquivos de evidência, specs/tasks.md atualizado e a mensagem de commit proposta: feat(T-06): MinIO publicado no Railway com volume em /data [RF-01].
+
+[E] Extras
+Leia antes: AGENTS.md, specs/plan.md, specs/tasks.md e minio_railway/Dockerfile.
+A CLI do Railway já está autenticada pelo grupo (railway whoami). Pare ao final.
 

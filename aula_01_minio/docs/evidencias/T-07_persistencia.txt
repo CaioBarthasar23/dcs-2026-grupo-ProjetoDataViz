@@ -1,0 +1,31 @@
+T-07 — persistência após redeploy no Railway
+
+Fonte: saídas do terminal fornecidas pelo grupo. O redeploy após vincular o
+projeto com `railway link` foi confirmado como concluído com sucesso; a saída
+do comando de redeploy não foi compartilhada.
+
+Objeto de teste: `railway/raw/t07-persistencia.txt`
+Conteúdo gravado antes do redeploy: `persistencia-t07`
+
+Saída da gravação informada pelo grupo:
+17 bytes -> `railway/raw/t07-persistencia.txt`
+
+Comando de redeploy: `railway redeploy --service minio --yes`
+Resultado: concluído com sucesso, conforme confirmação do grupo.
+
+Primeira leitura após o redeploy:
+`mc cat railway/raw/t07-persistencia.txt`
+
+Saída:
+`mc: <ERROR> Unable to read from railway/raw/t07-persistencia.txt. {"status":"error","code":502,"message":"Application failed to respond"}.`
+
+Nova leitura após aguardar 10 segundos:
+`sleep 10`
+`mc cat railway/raw/t07-persistencia.txt`
+
+Saída:
+persistencia-t07
+
+Resultado: a leitura após o redeploy retornou o conteúdo esperado. A primeira
+leitura teve falha 502; a confirmação ocorreu após repetição manual com espera
+de 10 segundos. Não foram registrados valores de credenciais.

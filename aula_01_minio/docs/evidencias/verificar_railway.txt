@@ -1,0 +1,11 @@
+Verificando destino: railway
+Saúde HTTP: 200
+Acesso anônimo HTTP: 403
+Buckets listados por mc ls railway:
+[2026-11-01 01:00:26 UTC]     0B bronze/
+[2026-11-01 01:00:27 UTC]     0B gold/
+[2026-11-01 01:00:26 UTC]     0B raw/
+[2026-11-01 01:00:27 UTC]     0B silver/
+23 bytes -> `railway/raw/_verificacao/teste.json`
+Gravação e leitura: conteúdo confirmado em railway/raw/_verificacao/teste.json
+Resultado: T-04 aprovado para railway.

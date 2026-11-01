@@ -1,0 +1,63 @@
+T-06 — deploy do MinIO no Railway
+
+Comando: railway init --name minio-grupo-projetodataviz
+Saída:
+Created project minio-grupo-projetodataviz on caiobarthasar23's Projects
+https://railway.com/project/24f61438-c8d2-4ad6-89a6-91d27d7518bc
+Código de saída: 0
+
+Comando: railway add --service minio
+Saída:
+> What do you need? Empty Service
+> Enter a service name minio
+> Enter a variable
+Código de saída: 0
+
+Comando: railway service link minio
+Saída:
+Linked service minio
+
+Comando: railway volume add --mount-path /data
+Saída:
+Creating volume...
+> Enter the mount path of the volume /data
+Volume "minio-volume" created for service minio in environment production at mount path "/data"
+Código de saída: 0
+
+Comando: railway up --detach
+Saída:
+Indexing...
+Uploading...
+Deployment: https://railway.com/project/24f61438-c8d2-4ad6-89a6-91d27d7518bc/service/9c044ed7-6f34-42b8-b4c3-76a2c00b034b?id=5f03dd44-e78e-47a8-bb14-34c98c534929
+Código de saída: 0
+
+Comando: railway domain --port 9000 --service minio
+Saída:
+Service domain created:
+  URL: https://minio-production-335d.up.railway.app
+  Type: service
+  Target port: 9000
+  Sync status: CREATING
+Código de saída: 0
+
+Logs após o grupo corrigir as variáveis do serviço production:
+API: http://10.227.243.199:9000  http://127.0.0.1:9000
+WebUI: http://10.227.243.199:9001 http://127.0.0.1:9001
+Version: RELEASE.2025-10-15T17-29-55Z (go1.24.9 linux/amd64)
+Mounting volume on: /var/lib/containers/railwayapp/bind-mounts/84d41166-6be5-483f-b38a-8a2c5cd5b6a6/vol_uswxjhjx9wvqf74h
+Starting Container
+Não apareceu aviso de credenciais padrão nesses logs.
+
+Verificação final do Railway — saída compartilhada pelo grupo:
+Acesso anônimo HTTP: 403
+Buckets listados por mc ls railway:
+[2026-11-01 01:00:26 UTC]     0B bronze/
+[2026-11-01 01:00:27 UTC]     0B gold/
+[2026-11-01 01:00:26 UTC]     0B raw/
+[2026-11-01 01:00:27 UTC]     0B silver/
+23 bytes -> `railway/raw/_verificacao/teste.json`
+Gravação e leitura: conteúdo confirmado em railway/raw/_verificacao/teste.json
+Resultado: T-04 aprovado para railway.
+
+O grupo também compartilhou a verificação de saúde HTTP 200 do endpoint.
+Nenhum valor de credencial foi registrado nesta evidência.
