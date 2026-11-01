@@ -2,7 +2,7 @@ T-06 — deploy do MinIO no Railway
 
 Comando: railway init --name minio-grupo-projetodataviz
 Saída:
-Created project minio-grupo-projetodataviz on caiobarthasar23's Projects
+Created project minio-grupo-projetodataviz
 https://railway.com/project/24f61438-c8d2-4ad6-89a6-91d27d7518bc
 Código de saída: 0
 
