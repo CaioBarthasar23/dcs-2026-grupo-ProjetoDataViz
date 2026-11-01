@@ -1,0 +1,11 @@
+T-09 - Acompanhamento do consumo de crédito (RNF-01)
+
+Data e hora da consulta: 2026-11-01 00:10 (horário de Brasília)
+Fonte: painel do Railway (Usage/Billing), consulta manual do grupo
+Crédito restante: US$ 5.00
+Dias restantes do trial: 16
+Limite do trial: US$ 5,00 (RES-01)
+
+Estado: projeto minio-grupo-projetodataviz com 1 serviço (minio) e 1 volume em /data.
+Resultado: consumo dentro do limite de US$ 5,00 nesta data (painel ainda mostra US$ 5.00; o uso recente pode não estar contabilizado, reconsultar).
+Próxima consulta prevista: 2026-11-08 (e semanalmente até o fim do trial)
