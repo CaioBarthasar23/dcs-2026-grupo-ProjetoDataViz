@@ -29,3 +29,31 @@ persistencia-t07
 Resultado: a leitura após o redeploy retornou o conteúdo esperado. A primeira
 leitura teve falha 502; a confirmação ocorreu após repetição manual com espera
 de 10 segundos. Não foram registrados valores de credenciais.
+
+## Verificação adicional após novo redeploy
+
+Comando: `railway redeploy --service minio --yes`
+Saída: sem texto
+Código de saída: 0
+
+Comando: `railway logs`
+Saída:
+API: http://10.208.62.86:9000  http://127.0.0.1:9000
+WebUI: http://10.208.62.86:9001 http://127.0.0.1:9001
+Version: RELEASE.2025-10-15T17-29-55Z (go1.24.9 linux/amd64)
+Código de saída: 0
+
+Comando: `mc ls railway/raw/_verificacao/`
+Saída:
+[2026-11-01 02:50:14 UTC]    23B STANDARD teste.json
+Código de saída: 0
+
+Comando: `mc cat railway/raw/_verificacao/teste.json`
+Saída:
+{"verificacao":"T-04"}
+Código de saída: 0
+
+Resultado: o objeto adicional `raw/_verificacao/teste.json` permaneceu
+acessível após este redeploy, com conteúdo confirmado. Esta verificação
+adicional não substitui o teste da chave e do conteúdo próprios do critério
+T-07, registrado acima. Nenhum valor de credencial ou e-mail foi registrado.

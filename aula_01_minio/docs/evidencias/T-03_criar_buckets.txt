@@ -23,6 +23,32 @@ Código de saída: 0
 [2026-10-31 23:58:02 UTC]     0B raw/
 [2026-10-31 23:58:02 UTC]     0B silver/
 
-Resultado: as duas execuções locais terminaram com sucesso e a listagem contém
-exatamente os quatro buckets esperados. O destino railway não foi executado:
-fica pendente até o prompt 8. Nenhum acesso ao Railway foi feito.
+Resultado local: as duas execuções terminaram com sucesso e a listagem contém
+exatamente os quatro buckets esperados.
+
+## Destino Railway
+
+Comando: `bash scripts/criar_buckets.sh railway`
+Execução 1: código de saída 0
+Bucket created successfully `railway/raw`.
+Bucket created successfully `railway/bronze`.
+Bucket created successfully `railway/silver`.
+Bucket created successfully `railway/gold`.
+
+Comando: `bash scripts/criar_buckets.sh railway`
+Execução 2: código de saída 0
+Bucket created successfully `railway/raw`.
+Bucket created successfully `railway/bronze`.
+Bucket created successfully `railway/silver`.
+Bucket created successfully `railway/gold`.
+
+Comando: `mc ls railway`
+Código de saída: 0
+[2026-11-01 01:00:26 UTC]     0B bronze/
+[2026-11-01 01:00:27 UTC]     0B gold/
+[2026-11-01 01:00:26 UTC]     0B raw/
+[2026-11-01 01:00:27 UTC]     0B silver/
+
+Resultado Railway: as duas execuções terminaram com sucesso e a listagem
+contém exatamente os quatro buckets esperados. Nenhum valor de credencial foi
+registrado.
