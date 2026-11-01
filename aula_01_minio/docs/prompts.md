@@ -466,5 +466,10 @@ Leia antes: AGENTS.md, specs/spec.md, specs/plan.md, specs/tasks.md e .env.examp
 O .env local já foi criado pelo grupo a partir do .env.example. O cliente mc está instalado no Codespace (mc --version).
 Pare ao final da tarefa.
 
+## P08: Deploy e Verificação no Railway
+
+
+
+
 ## P07: Validação ATAM
 
