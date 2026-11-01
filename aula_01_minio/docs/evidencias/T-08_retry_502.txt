@@ -1,0 +1,57 @@
+T-08 — retry idempotente para HTTP 502
+
+## Teste controlado local
+
+Comando: `bash tests/testar_retry_502.sh`
+Código de saída: 0
+
+Saída:
+Caso 1: falhas HTTP 502 e retry idempotente até sucesso
+Limite de tentativas: 3 (hipótese: validação pendente).
+mc simulado: HTTP 502 após aceitar a gravação.
+HTTP 502 na tentativa 1/3; nova tentativa em 1s.
+Espera simulada: 1s
+mc simulado: HTTP 502 após aceitar a gravação.
+HTTP 502 na tentativa 2/3; nova tentativa em 2s.
+Espera simulada: 2s
+21 bytes -> local/raw/_verificacao/teste.json
+Confirmado: 3 tentativas na mesma chave, esperas 1s e 2s, 1 objeto final com conteúdo esperado.
+
+Caso 2: esgotamento do limite
+Limite de tentativas: 2 (hipótese: validação pendente).
+mc simulado: HTTP 502 após aceitar a gravação.
+HTTP 502 na tentativa 1/2; nova tentativa em 1s.
+Espera simulada: 1s
+mc simulado: HTTP 502 após aceitar a gravação.
+Erro: HTTP 502; limite de 2 tentativas esgotado.
+Confirmado: saída não zero após 2 tentativas, sem ultrapassar o limite.
+
+Resultado: T-08 aprovado.
+
+O mock grava a resposta da primeira tentativa antes de devolver 502, simulando
+resultado inicialmente ambíguo. As esperas são controladas pelo teste, que
+confirma os intervalos crescentes de 1s e 2s sem aguardar tempo real. O valor
+padrão de 3 tentativas é provisório: hipótese: validação pendente para o proxy
+real. O segundo caso configura 2 tentativas e comprova encerramento com código
+não zero quando todas falham.
+
+## Caso real separado — T-07 no Railway
+
+Este caso é evidência real anterior do grupo e não faz parte da simulação local
+acima. Objeto: `railway/raw/t07-persistencia.txt`; conteúdo gravado: `persistencia-t07`.
+
+Saída de gravação informada pelo grupo:
+17 bytes -> `railway/raw/t07-persistencia.txt`
+
+Primeira leitura após redeploy:
+`mc cat railway/raw/t07-persistencia.txt`
+mc: <ERROR> Unable to read from railway/raw/t07-persistencia.txt. {"status":"error","code":502,"message":"Application failed to respond"}.
+
+Leitura repetida após aguardar 10 segundos:
+`sleep 10`
+`mc cat railway/raw/t07-persistencia.txt`
+persistencia-t07
+
+O caso real mostra a falha transitória e a leitura posterior bem-sucedida,
+mas não foi produzido pelo teste controlado T-08. Nenhum valor de credencial
+ou e-mail foi registrado.
