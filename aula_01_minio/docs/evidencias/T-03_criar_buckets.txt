@@ -1,0 +1,28 @@
+T-03 — criação de buckets no destino local
+Data/hora: 2026-10-31 (UTC)
+Diretório de execução: aula_01_minio/
+
+Comando: bash scripts/criar_buckets.sh local
+Execução 1: código de saída 0
+Bucket created successfully `local/raw`.
+Bucket created successfully `local/bronze`.
+Bucket created successfully `local/silver`.
+Bucket created successfully `local/gold`.
+
+Comando: bash scripts/criar_buckets.sh local
+Execução 2: código de saída 0
+Bucket created successfully `local/raw`.
+Bucket created successfully `local/bronze`.
+Bucket created successfully `local/silver`.
+Bucket created successfully `local/gold`.
+
+Comando: mc ls local
+Código de saída: 0
+[2026-10-31 23:58:02 UTC]     0B bronze/
+[2026-10-31 23:58:02 UTC]     0B gold/
+[2026-10-31 23:58:02 UTC]     0B raw/
+[2026-10-31 23:58:02 UTC]     0B silver/
+
+Resultado: as duas execuções locais terminaram com sucesso e a listagem contém
+exatamente os quatro buckets esperados. O destino railway não foi executado:
+fica pendente até o prompt 8. Nenhum acesso ao Railway foi feito.
