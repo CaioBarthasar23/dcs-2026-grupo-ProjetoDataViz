@@ -84,6 +84,7 @@ limite de tentativas do retry são hipótese, validação pendente (RNF-01, RNF-
 - Depende de: T-04.
 
 ## T-08 Remover somente após confirmação
+- Status: concluída.
 - Requisitos: RF-07; OBJ-01, OBJ-02.
 - Arquivos: `src/limpeza.py`, `tests/fakes.py`, `tests/test_limpeza.py`.
 - Teste que prova: `test_put_falha_mantem_arquivo_no_pouso`,
