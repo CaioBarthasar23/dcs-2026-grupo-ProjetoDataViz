@@ -95,6 +95,7 @@ limite de tentativas do retry são hipótese, validação pendente (RNF-01, RNF-
 - Depende de: T-05, T-06, T-07.
 
 ## T-09 Gerar manifesto e concluir a execução
+- Status: concluída.
 - Requisitos: RF-01, RF-02, RF-09, RF-10, RF-11; OBJ-01, OBJ-02, OBJ-03.
 - Arquivos: `src/manifesto.py`, `src/coletor.py`, `tests/test_manifesto.py`,
   `tests/test_coletor.py`.
@@ -109,6 +110,7 @@ limite de tentativas do retry são hipótese, validação pendente (RNF-01, RNF-
 - Depende de: T-02, T-04, T-05, T-06, T-07, T-08.
 
 ## T-10 Validar integração contra o MinIO local
+- Status: concluída.
 - Requisitos: RF-01, RF-04, RF-05, RF-07, RF-08, RF-09, RNF-04, RNF-06;
   OBJ-01, OBJ-02, OBJ-03.
 - Arquivos: `tests/test_integracao_minio.py`.
