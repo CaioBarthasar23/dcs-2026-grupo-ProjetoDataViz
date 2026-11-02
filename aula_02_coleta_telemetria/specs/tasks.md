@@ -47,6 +47,7 @@ limite de tentativas do retry são hipótese, validação pendente (RNF-01, RNF-
 - Depende de: T-02, T-03.
 
 ## T-05 Reconhecer retransmissão idêntica
+- Status: concluída.
 - Requisitos: RF-05, RF-07; OBJ-01.
 - Arquivos: `src/gravacao.py`, `src/limpeza.py`, `tests/fakes.py`,
   `tests/test_idempotencia.py`.
