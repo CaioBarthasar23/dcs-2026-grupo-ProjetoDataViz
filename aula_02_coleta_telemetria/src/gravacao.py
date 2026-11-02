@@ -11,7 +11,7 @@ from src.limpeza import remover_confirmado
 from src.metadados import montar_metadados
 
 
-StatusGravacao = Literal["gravado", "ja_existia"]
+StatusGravacao = Literal["gravado", "ja_existia", "conflito_hash"]
 
 
 @dataclass(frozen=True)
@@ -69,9 +69,9 @@ def gravar_lote(
         metadata = existente.get("Metadata")
         if not isinstance(metadata, Mapping) or not metadata.get("sha256"):
             raise ValueError(f"Objeto existente sem metadado sha256: {chave}")
-        if metadata["sha256"] != sha256:
-            raise ValueError(f"SHA-256 existente difere do lote: {chave}")
-        status = "ja_existia"
+        status = (
+            "ja_existia" if metadata["sha256"] == sha256 else "conflito_hash"
+        )
 
     resultado = ResultadoGravacao(
         status=status,

@@ -58,6 +58,7 @@ limite de tentativas do retry são hipótese, validação pendente (RNF-01, RNF-
 - Depende de: T-04.
 
 ## T-06 Detectar retransmissão com conteúdo divergente
+- Status: concluída.
 - Requisitos: RF-06, RF-07; OBJ-01.
 - Arquivos: `src/gravacao.py`, `src/limpeza.py`, `tests/fakes.py`,
   `tests/test_conflito_hash.py`.
