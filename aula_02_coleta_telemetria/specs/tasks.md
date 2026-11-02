@@ -69,6 +69,7 @@ limite de tentativas do retry são hipótese, validação pendente (RNF-01, RNF-
 - Depende de: T-04.
 
 ## T-07 Reconciliar e repetir falhas transitórias
+- Status: concluída.
 - Requisitos: RNF-01, RNF-02, RNF-03, RF-05, RF-06, RF-07; OBJ-01, OBJ-02,
   OBJ-03.
 - Arquivos: `src/gravacao.py`, `tests/fakes.py`, `tests/test_retry.py`.
