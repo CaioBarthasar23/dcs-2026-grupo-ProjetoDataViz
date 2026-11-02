@@ -37,6 +37,7 @@ limite de tentativas do retry são hipótese, validação pendente (RNF-01, RNF-
 - Depende de: T-01.
 
 ## T-04 Gravar bytes e metadados no MinIO
+- Status: concluída.
 - Requisitos: RF-04, RF-08, RNF-06; OBJ-01.
 - Arquivos: `src/gravacao.py`, `tests/fakes.py`, `tests/test_gravacao.py`.
 - Teste que prova: `test_put_preserva_bytes_sha256_e_metadados`.
