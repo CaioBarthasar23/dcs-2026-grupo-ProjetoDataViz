@@ -256,7 +256,7 @@ Leia antes: AGENTS.md, docs/01_objetivos_negocio.md e specs/spec.md. Ao terminar
 - **Quem enviou:** CaioBarthasar23.
 - **Agente e modelo:** Codex, GPT-6.
 - **Arquivos alterados:** `specs/plan.md`.
-- **Confirmação do plano:** (escreva aqui a sua resposta ao Codex, ou "confirmado pelo aluno")
+- **Confirmação do plano:** confirmado pelo aluno.
 
 Prompt 4b: ajuste do plano com as decisões já definidas
 [C] Personagem
@@ -277,3 +277,28 @@ Somente specs/plan.md, em Markdown com blocos mermaid. Mostre em tópicos o que 
 [E] Extras
 Leia antes: AGENTS.md, docs/01_objetivos_negocio.md, specs/spec.md e specs/plan.md. Ao terminar, liste perguntas abertas e pare.
 
+**Data:** 2026-11-11.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `specs/tasks.md`.
+- **Confirmação do plano:** confirmado
+
+Prompt 5b: ajuste das tarefas com as definições do enunciado
+[C] Personagem
+Você é o líder técnico do aluno. Está corrigindo specs/tasks.md depois que docs/01_objetivos_negocio.md, specs/spec.md e specs/plan.md foram ajustados com as definições do enunciado.
+[R] Pedido
+Ajuste specs/tasks.md. Preserve os IDs T-01 a T-28, as duas tabelas e a tabela de cobertura; todas as tarefas continuam [ ]. Mudanças:
+1. Definições já dadas pelo enunciado: remova de T-12 a T-16 as dependências "validar antes a fórmula/critério/definição de OBJ-0x" e use as definições de OBJ-01 a OBJ-05 e RF-10/RF-11 da spec. Em T-10, tire a dependência de T-09 (o teste usa dados fixos) e fixe 09/10 a 13/10/2026 (RF-09).
+2. Dashboard (T-20 a T-24): inclua a chave R$/US$ (alternador da moeda), imagem, link do produto no TCGplayer e product_id. Filtros: P1 acima de US$ 1 no primeiro dia; P5 acima de US$ 5; P2 só cartas Double Rare em diante; P3 e P4 sem filtro de preço. Code Card fora de P1, P3 e P4. P3 mostra a PTAX em base 100 no mesmo gráfico; P4 mostra a participação por raridade e o número de cartas que somam 80%.
+3. Carteiras (T-17, T-18, T-25): as cinco são selado, cesta_raras, propria, dolar e cdi (dólar parado e CDI são duas das cinco). T-18 calcula valor de liquidação com e sem taxa e as métricas retorno acumulado, excesso sobre o CDI, perda máxima e dias com preço carregado, no contrato tcg/gold_turma/carteira/ (data, group_id, carteira, valor_brl, retorno_acumulado, taxa_venda). T-26 (placar): em quantas coleções o selado ganhou do CDI, em quantas a cesta_raras ganhou do dolar, e qual coleção teve a carteira com menor perda máxima.
+4. Tarefas manuais novas, na tabela do aluno: T-29 escrever e commitar o ADR-006 (regra da carteira propria) antes de T-17; T-30 escrever o ADR-007 (taxa de venda, hipótese de 15%) antes de T-18; T-31 escrever o ADR-001 (origem do código de src/collector.py e src/silver.py, escritos antes da spec). Ajuste as dependências de T-17 e T-18.
+5. Código existente, nota "código existente; evidência pendente": mantenha em T-06 e T-08 e acrescente em T-07 (workflow coleta-diaria.yml existente), T-09 (backfill-ptax existente) e T-10 (reconhecimento do rótulo "Fechamento PTAX" existente no coletor; o ASOF JOIN ainda não existe). Em T-02 registre que os três secrets foram criados no repositório do grupo em 11/11/2026, com evidência pendente (gh secret list).
+6. Verificação das tarefas de código existente: use os testes que já existem (tests/test_collector.py para T-06, tests/test_silver.py para T-08; 41 testes passaram em 11/11/2026 numa execução real, a saída entra em docs/evidencias/). Crie arquivos de teste novos só onde falta cobertura; diga qual é qual.
+7. T-08: inclua RF-16 (classificação carta/selado, Code Card como carta) e a coluna extra categoria_selado. T-07: troque "definir quantidade e horários" pelo estado do workflow existente (21:30, 22:30 e 23:30 UTC; ADR-008 confirma). T-27: registre que o comando src.pipeline precisa ser acrescentado à lista de comandos permitidos de AGENTS.md por decisão do aluno.
+8. Atualize a tabela de cobertura com RF-09, RF-16 e as novas tarefas; cada RF e RNF coberto por pelo menos uma tarefa.
+[A] Ajustes
+Cada tarefa cabe num prompt de implementação e toca poucos arquivos. Todas começam [ ]; não declare nada como atendido. Não toque em outros arquivos. Não invente números.
+[T] Tipo de saída
+Somente specs/tasks.md. Mostre em tópicos o que vai mudar e espere minha confirmação antes de editar.
+[E] Extras
+Leia antes: AGENTS.md, docs/01_objetivos_negocio.md, specs/spec.md, specs/plan.md e specs/tasks.md. Ao terminar, liste perguntas abertas e pare.
