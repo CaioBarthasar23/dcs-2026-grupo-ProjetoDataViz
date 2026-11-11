@@ -302,3 +302,29 @@ Cada tarefa cabe num prompt de implementação e toca poucos arquivos. Todas com
 Somente specs/tasks.md. Mostre em tópicos o que vai mudar e espere minha confirmação antes de editar.
 [E] Extras
 Leia antes: AGENTS.md, docs/01_objetivos_negocio.md, specs/spec.md, specs/plan.md e specs/tasks.md. Ao terminar, liste perguntas abertas e pare.
+
+**Data:** 2026-11-11.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `docs/adr/ADR-001-origem-do-codigo-existente.md`.
+- **Confirmação do plano:** confirmado pelo aluno, com ajuste na seção Decisão.
+
+Prompt 6 (T-31): ADR-001, origem do código existente
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano. Hoje é a T-31 (specs/tasks.md): escrever o ADR-001 sobre a origem do código existente. Você só escreve documentação; não altera código, testes, workflow nem outros ADRs.
+[R] Pedido
+Escreva docs/adr/ADR-001-origem-do-codigo-existente.md. Leia a linha da T-31 em specs/tasks.md e siga a verificação dela. Estrutura do ADR: título, status, data, responsável, contexto, decisão, alternativas consideradas e descartadas (pelo menos duas, com motivo), consequências, requisitos relacionados.
+Fatos (origem: histórico real do aluno, não invente nada além deles):
+- O TCGCSV não guarda histórico: cada dia sem coleta é perdido e não pode ser recuperado depois. Por isso a coleta começou antes da persona e da especificação.
+- A primeira coleta está em data=2026-10-31 no bucket tcg, prefixo group_id=23651. A coleta diária roda pelo GitHub Actions desde então, primeiro no repositório individual do aluno e, a partir de 11/11/2026, neste repositório (commit 1c45944).
+- src/collector.py foi escrito a partir de 31/10/2026 e ajustado em 07/11/2026 (correção do filtro da PTAX "Fechamento PTAX", comando backfill-ptax). src/silver.py foi escrito em 10/11/2026. Ambos foram escritos com ajuda do assistente Claude (Anthropic), em conversas fora do fluxo SDD deste repositório.
+- Migração para projeto_final/: commits 4e203be (coletor), 6dc3e03 (silver), b91faed (README) e 1c45944 (workflow), em 11/11/2026, com a evidência pendente. Numa execução real em 11/11/2026, 41 testes passaram (10 do coletor e 31 da silver); a saída ainda precisa ser guardada em docs/evidencias/.
+- A spec descreve o comportamento esperado e não declara nada como atendido; o estado real vai para a rastreabilidade (etapa ATAM).
+- Risco: a disciplina pode exigir especificação antes do código. O aluno perguntou ao professor se o código anterior é aceito quando declarado em ADR; a resposta está pendente (registre como pendente, não como aceita).
+- Responsável: CaioBarthasar23.
+[A] Ajustes
+Não reescreva a cronologia nem esconda que o código veio antes. Não afirme que o código atende a algum requisito. Sem segredos, sem valores de credenciais. Não crie outros arquivos nem altere os existentes.
+[T] Tipo de saída
+Somente docs/adr/ADR-001-origem-do-codigo-existente.md, em Markdown. Mostre em tópicos o que vai escrever e espere minha confirmação antes de criar o arquivo.
+[E] Extras
+Leia antes: AGENTS.md (seção "Estado atual"), specs/tasks.md (T-31) e specs/plan.md (nota sobre ADR-001). Se faltar informação, pergunte. Ao terminar, mostre o resultado da verificação da T-31 e pare.
