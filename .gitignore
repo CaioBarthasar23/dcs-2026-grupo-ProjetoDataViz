@@ -26,3 +26,8 @@ backup_minio/
 # Sistema e editor
 .DS_Store
 .vscode/
+
+# Projeto final: coleta local e artefatos
+data_local/
+artifacts/
+.aws/
