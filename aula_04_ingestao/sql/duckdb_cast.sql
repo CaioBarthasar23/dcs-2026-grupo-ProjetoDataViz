@@ -9,7 +9,7 @@
 
 -- 1. Linhas por domínio e por dia no bronze (gate da Etapa 09).
 SELECT data_tag, data, count(*) AS linhas, count(DISTINCT filename) AS arquivos
-FROM read_parquet('s3://bronze/ingestao/*/*/*.parquet', hive_partitioning = true, filename = true)
+FROM read_parquet('s3://bronze/bronze/ingestao/*/*/*.parquet', hive_partitioning = true, filename = true)
 GROUP BY ALL
 ORDER BY ALL;
 
@@ -18,14 +18,15 @@ SELECT data_tag, count(*) AS envelopes,
        sum(CASE WHEN json_type(envelope -> 'data') = 'ARRAY'
                 THEN json_array_length(envelope -> 'data') ELSE 1 END) AS linhas,
        count(DISTINCT filename) AS arquivos
-FROM read_json('s3://raw/ingestao/*/*/*.jsonl', format = 'newline_delimited', hive_partitioning = true,
+FROM read_json('s3://raw/raw/ingestao/*/*/*.jsonl', format = 'newline_delimited', hive_partitioning = true,
                filename = true, columns = {'recebido_em_ms': 'UBIGINT', 'envelope': 'JSON'})
 GROUP BY ALL
 ORDER BY ALL;
 
 -- 1b. Manifestos: lotes por status, com mensagens e linhas somadas.
-SELECT status, count(*) AS lotes, sum(mensagens) AS mensagens, sum(linhas) AS linhas
-FROM read_json('s3://raw/_manifestos/ingestao/*/*.json')
+SELECT status, count(*) AS lotes, sum(mensagens) AS mensagens,
+       sum((SELECT sum(value::BIGINT) FROM json_each(linhas_por_data_tag))) AS linhas
+FROM read_json('s3://raw/raw/_manifestos/ingestao/*/*.json')
 GROUP BY ALL
 ORDER BY ALL;
 
@@ -33,7 +34,7 @@ ORDER BY ALL;
 SELECT data_json ->> 'categoria'                                   AS categoria,
        count(*)                                                    AS livros,
        round(avg(CAST(data_json ->> 'preco_gbp' AS DECIMAL(10, 2))), 2) AS preco_medio_gbp
-FROM read_parquet('s3://bronze/ingestao/data_tag=livros/*/*.parquet', hive_partitioning = true)
+FROM read_parquet('s3://bronze/bronze/ingestao/data_tag=livros/*/*.parquet', hive_partitioning = true)
 GROUP BY ALL
 ORDER BY livros DESC, categoria
 LIMIT 10;
@@ -41,7 +42,7 @@ LIMIT 10;
 -- 3. A mesma conta com json_extract_string / json_extract (caminho JSONPath).
 SELECT json_extract_string(data_json, '$.categoria')               AS categoria,
        round(avg(json_extract(data_json, '$.preco_gbp')::DOUBLE), 2) AS preco_medio_gbp
-FROM read_parquet('s3://bronze/ingestao/data_tag=livros/*/*.parquet', hive_partitioning = true)
+FROM read_parquet('s3://bronze/bronze/ingestao/data_tag=livros/*/*.parquet', hive_partitioning = true)
 GROUP BY ALL
 ORDER BY categoria
 LIMIT 5;
@@ -50,7 +51,7 @@ LIMIT 5;
 SELECT l.categoria, round(avg(l.preco_gbp), 2) AS preco_medio_gbp, sum(l.qtd_estoque) AS estoque
 FROM (
     SELECT from_json(data_json, '{"categoria":"VARCHAR","preco_gbp":"DECIMAL(10,2)","qtd_estoque":"INTEGER"}') AS l
-    FROM read_parquet('s3://bronze/ingestao/data_tag=livros/*/*.parquet', hive_partitioning = true)
+    FROM read_parquet('s3://bronze/bronze/ingestao/data_tag=livros/*/*.parquet', hive_partitioning = true)
 )
 GROUP BY ALL
 ORDER BY estoque DESC
@@ -60,7 +61,7 @@ LIMIT 5;
 SELECT data_json ->> 'tipoBoletim'                                       AS tipo_boletim,
        count(*)                                                          AS boletins,
        round(avg(CAST(data_json ->> 'cotacaoVenda' AS DECIMAL(12, 5))), 5) AS venda_media
-FROM read_parquet('s3://bronze/ingestao/data_tag=ptax/*/*.parquet', hive_partitioning = true)
+FROM read_parquet('s3://bronze/bronze/ingestao/data_tag=ptax/*/*.parquet', hive_partitioning = true)
 GROUP BY ALL
 ORDER BY ALL;
 
@@ -68,13 +69,13 @@ ORDER BY ALL;
 --    linhas sem caminhão (#RADIO, ERR SAT) ficam com caminhao vazio.
 SELECT nullif(regexp_extract(data_json ->> 'linha', 'CAM-[0-9]{4}'), '') AS caminhao,
        count(*) AS linhas
-FROM read_parquet('s3://bronze/ingestao/data_tag=telemetria/*/*.parquet', hive_partitioning = true)
+FROM read_parquet('s3://bronze/bronze/ingestao/data_tag=telemetria/*/*.parquet', hive_partitioning = true)
 GROUP BY ALL
 ORDER BY linhas DESC
 LIMIT 5;
 
 -- 7. Duplicatas (entrega pelo menos uma vez): o mesmo data_json no mesmo timestamp.
 SELECT data_tag, count(*) AS linhas, count(DISTINCT (timestamp, data_json)) AS distintas
-FROM read_parquet('s3://bronze/ingestao/*/*/*.parquet', hive_partitioning = true)
+FROM read_parquet('s3://bronze/bronze/ingestao/*/*/*.parquet', hive_partitioning = true)
 GROUP BY ALL
 ORDER BY ALL;

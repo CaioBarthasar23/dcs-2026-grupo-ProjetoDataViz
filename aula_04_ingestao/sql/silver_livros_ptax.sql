@@ -22,7 +22,7 @@ COPY (
                                       "avaliacao":"BIGINT","preco_gbp":"DOUBLE","em_estoque":"BOOLEAN",
                                       "qtd_estoque":"BIGINT","coletado_em":"VARCHAR"}') AS l,
                timestamp, filename
-        FROM read_parquet('s3://bronze/ingestao/data_tag=livros/*/*.parquet', hive_partitioning = true, filename = true)
+        FROM read_parquet('s3://bronze/bronze/ingestao/data_tag=livros/*/*.parquet', hive_partitioning = true, filename = true)
     )
     WHERE CAST(CAST(l.coletado_em AS TIMESTAMPTZ) AS DATE) = DATE '{{DATA}}'
     -- reentrega ou recoleta: fica a coleta mais recente; empate, a ingestão mais recente
@@ -44,7 +44,7 @@ COPY (
         SELECT from_json(data_json, '{"moeda":"VARCHAR","dataHoraCotacao":"VARCHAR","tipoBoletim":"VARCHAR",
                                       "cotacaoCompra":"DOUBLE","cotacaoVenda":"DOUBLE"}') AS p,
                timestamp, filename
-        FROM read_parquet('s3://bronze/ingestao/data_tag=ptax/*/*.parquet', hive_partitioning = true, filename = true)
+        FROM read_parquet('s3://bronze/bronze/ingestao/data_tag=ptax/*/*.parquet', hive_partitioning = true, filename = true)
     )
     QUALIFY row_number() OVER (PARTITION BY moeda, data_hora_cotacao, tipo_boletim ORDER BY timestamp DESC) = 1
     ORDER BY data_hora_cotacao

@@ -21,7 +21,6 @@ import pathlib
 import sys
 import time
 
-import pika
 import requests
 
 
@@ -37,6 +36,8 @@ def carregar_env(caminho: pathlib.Path) -> None:
 
 
 def abrir_fila():
+    import pika
+
     cred = pika.PlainCredentials(os.environ.get("RABBITMQ_USER", "ingestao"), os.environ["RABBITMQ_PASSWORD"])
     params = pika.ConnectionParameters(os.environ.get("RABBITMQ_HOST", "localhost"),
                                        int(os.environ.get("RABBITMQ_PORT", "5672")), credentials=cred)
@@ -54,6 +55,8 @@ def abrir_fila():
 
 
 def publicar(canal, fila: str, envelope: dict) -> None:
+    import pika
+
     corpo = json.dumps(envelope, ensure_ascii=False).encode("utf-8")
     props = pika.BasicProperties(delivery_mode=pika.DeliveryMode.Persistent, content_type="application/json")
     canal.basic_publish(exchange="", routing_key=fila, body=corpo, properties=props)
