@@ -1,0 +1,4 @@
+2026-11-11 19:16:42,204 INFO ocupada: raw/tcgplayer/group_id=23651/
+2026-11-11 19:16:42,205 INFO ocupada: raw/tcgplayer/group_id=24269/
+2026-11-11 19:16:42,205 INFO group_id=23651 ja tem dados (confira se foram seus)
+codigo de saida: 0
