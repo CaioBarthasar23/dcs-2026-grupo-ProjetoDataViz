@@ -251,3 +251,29 @@ Todo critério de aceite usa Dado/Quando/Então verificável. Hipótese só onde
 Somente specs/spec.md. Mostre em tópicos o que vai mudar e espere minha confirmação antes de editar.
 [E] Extras
 Leia antes: AGENTS.md, docs/01_objetivos_negocio.md e specs/spec.md. Ao terminar, liste perguntas abertas e pare.
+
+**Data:** 2026-11-11.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `specs/plan.md`.
+- **Confirmação do plano:** (escreva aqui a sua resposta ao Codex, ou "confirmado pelo aluno")
+
+Prompt 4b: ajuste do plano com as decisões já definidas
+[C] Personagem
+Você é um arquiteto de software de dados. Está corrigindo specs/plan.md depois que docs/01_objetivos_negocio.md e specs/spec.md foram ajustados com as definições do enunciado. Você não escreve código.
+[R] Pedido
+Ajuste specs/plan.md. Preserve as seções, os nomes dos elementos nos diagramas, os ADRs previstos (ADR-001 reservado à origem do código; ADR-002 a ADR-008) e os riscos que continuam válidos.
+Mudanças:
+1. C4 nível 2 e fluxo de dados: remova as relações em que o Agendador GitHub Actions dispara a silver e a gold. A decisão do aluno é o agendador disparar a coleta; silver e gold rodam pelo comando único de RF-06. Quando e onde ele roda continua pergunta aberta.
+2. Tentativas de reserva: registre o estado do workflow existente: execuções às 21:30, 22:30 e 23:30 UTC (18:30, 19:30 e 20:30 de Brasília); o coletor é idempotente e recusa gravar preço do TCGCSV e fechamento da PTAX antes das 18h de Brasília; no máximo nove chamadas ao TCGCSV por dia, abaixo do limite de 10.000. Origem: workflow coleta-diaria.yml existente; ADR-008 confirma.
+3. Perguntas abertas já respondidas: tire da lista o ano do teste (2026, RF-09), as cinco carteiras (selado, cesta_raras, propria, dolar, cdi, RF-13), as fórmulas e agregações dos OBJ-01 a OBJ-05 (definidas no enunciado), a quantidade de reservas (item 2) e a classificação no contrato comum (o contrato permite colunas extras; categoria_selado existe em src/silver.py). Mantenha abertas: local e ciclo de vida da gold e como o dashboard a consulta; regra da carteira propria e taxa de 15% (hipóteses); campos exatos da classificação (ADR-005).
+4. Tabela de escolhas: cada decisão relevante com pelo menos duas alternativas reais descartadas e o motivo, em vez de alternativas sem substância. Para DuckDB, Streamlit, Parquet e Pydantic liste alternativas reais (por exemplo: pandas, banco relacional; Dash, Metabase; CSV, JSON; validação manual). Sem requisito que as torne obrigatórias, marque "sem requisito correspondente" e não invente justificativa. Não acrescente componentes que a spec não pede.
+5. Aponte RF-16 (classificação) na escolha de ADR-005 e RF-12 (chave R$/US$) no dashboard.
+6. Riscos: remova "hipóteses de agregação, risco e decomposição não validadas"; mantenha só regra da propria e taxa de venda como hipóteses.
+[A] Ajustes
+Use somente docs/, specs/spec.md e AGENTS.md. Não altere outros arquivos. Os nomes nos diagramas e no texto continuam idênticos.
+[T] Tipo de saída
+Somente specs/plan.md, em Markdown com blocos mermaid. Mostre em tópicos o que vai mudar e espere minha confirmação antes de editar.
+[E] Extras
+Leia antes: AGENTS.md, docs/01_objetivos_negocio.md, specs/spec.md e specs/plan.md. Ao terminar, liste perguntas abertas e pare.
+
