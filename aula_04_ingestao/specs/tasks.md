@@ -16,15 +16,15 @@ Cada tarefa foi dividida para caber em até 30 minutos de trabalho focado. Os te
 | T-10 | Inserir as linhas no ClickHouse | RF-08 | `src/clickhouse.py` | `tests/test_clickhouse.py`, integração T-03 | `pytest -q tests/test_clickhouse.py` e `pytest -q -m integracao` | Uma chamada INSERT com as três colunas, async_insert e inferência desativada. | [x] |
 | T-11 | Gravar manifesto e confirmar após persistência completa | RF-09, RF-10 | `src/consumidor.py`, `src/lake.py` | `test_flush_grava_raw_bronze_clickhouse_manifesto_e_ack_nessa_ordem` | `pytest -q tests/test_consumidor.py` | Manifesto status ok antecede ack multiple da última entrega do lote. | [x] |
 | T-12 | Registrar falha do ClickHouse e deixar lote sem ack | RF-11 | `src/consumidor.py`, `src/lake.py` | `test_falha_clickhouse_grava_manifesto_erro_e_nao_da_ack`, `test_falha_clickhouse_fecha_conexao_para_reentrega` | `pytest -q tests/test_consumidor.py` | Manifesto status `erro_clickhouse`; nenhuma confirmação; conexão fechada para redelivery. | [x] |
-| T-13 | Escrever teste de recuperação e reprocessamento antes da implementação | RNF-02, RNF-04 | `tests/test_integracao.py` | Testes de reinício e replay, a criar | Criar os testes e verificar que falham antes de implementar | Linhas distintas recuperadas e contagem de duplicatas registrada. | [ ] |
+| T-13 | Testar recuperação após interrupção e replay do lake | RNF-02, RNF-04 | `tests/test_integracao.py`, `src/clickhouse.py` | `test_morte_com_kill_9_recupera_10000_mensagens_sem_perda`, `test_reprocessar_bronze_reinsere_linhas_no_clickhouse` | `python -m pytest -q -s -m integracao tests/test_integracao.py` | 10.000 linhas distintas recuperadas; duplicatas contadas; replay reinseriu 30.200 linhas da bronze do dia e confirmou as 20 duplicatas da amostra. | [x] |
 | T-14 | Carregar configurações locais e de serviço sem expor credenciais | RF-01, RF-02, RF-06 a RF-08 | `src/config.py` | Importação e leitura de `config` | `python -c "from src.config import config; assert config.dominios and config.http_max_bytes > 0"` | Configuração carregada; nenhum segredo impresso ou versionado. | [x] |
 
 ## Tarefas manuais
 
 | ID | Ação do aluno | RF/RNF | Arquivo(s) | Verificação/evidência | Status |
 |---|---|---|---|---|---|
-| TM-01 | Iniciar os serviços locais do compose para executar a integração | RF-01, RF-04, RF-06 a RF-08 | `docker-compose.yml` | Serviços RustFS, RabbitMQ e ClickHouse saudáveis; integração usa somente fila `ingestao_teste` e bucket `teste`. | [ ] |
-| TM-02 | Disponibilizar as variáveis de conexão no ambiente local sem versionar segredos | RF-01, RF-06 a RF-08 | `.env` local | Verificar nomes conforme `.env.example`; nunca adicionar `.env` ao Git. | [ ] |
+| TM-01 | Iniciar os serviços locais do compose para executar a integração | RF-01, RF-04, RF-06 a RF-08 | `docker-compose.yml` | `docker compose up -d --wait rustfs rabbitmq clickhouse`; três serviços reportados `Healthy`. | [x] |
+| TM-02 | Disponibilizar as variáveis de conexão no ambiente local sem versionar segredos | RF-01, RF-06 a RF-08 | `.env` local | `cp -n .env.example .env` e `test -f .env`; Compose iniciou os serviços com as variáveis locais. O `.env` permanece fora do Git. | [x] |
 
 ## Cobertura ainda pendente
 
@@ -32,5 +32,5 @@ Cada tarefa foi dividida para caber em até 30 minutos de trabalho focado. Os te
 |---|---|
 | RF-09 e RF-10 | Cobertos por T-11: teste confirma manifesto após ClickHouse e ack multiple por último. |
 | RF-11 | Coberto por T-12: falha gera manifesto `erro_clickhouse`, não confirma e fecha a conexão para redelivery. |
-| RNF-02 e RNF-04 | T-13 permanece pendente: teste de interrupção no meio do lote e replay completo ainda não criado. |
+| RNF-02 e RNF-04 | T-13 concluída: testes de interrupção no meio do lote e replay da bronze passam na integração. |
 | RNF-01 e RNF-03 | Fora do conjunto de testes desta etapa; definir medição e teste antes da implementação correspondente. |

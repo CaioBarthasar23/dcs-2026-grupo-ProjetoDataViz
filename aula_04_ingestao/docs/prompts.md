@@ -610,3 +610,13 @@ e em docs/prompts.md, junto do prompt.
 Leia AGENTS.md, specs/03_modelo_de_dados.md e o contrato silver no
 README do laboratório. Registre o prompt e pare.
 ```
+
+## T-13 · Recuperação após interrupção e replay
+
+- **Data:** 2026-11-11.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos criados ou alterados:** `tests/test_integracao.py`, `src/clickhouse.py`, `specs/tasks.md`, `docs/prompts.md`.
+- **Prompt literal recebido:** `fazer a T-13`
+- **Verificação:** `python -m pytest -q -s -m integracao tests/test_integracao.py` — 3 testes passaram. O teste de recuperação comprovou 10.000 linhas distintas após `kill -9` (0 duplicatas nesta execução). O replay inseriu 30.200 linhas da bronze diária; a amostra nova apareceu duas vezes no ClickHouse, conforme a semântica sem deduplicação.
+- **Implementação:** comando `python -m src.clickhouse reprocessar --data-tag <data_tag> --data <AAAA-MM-DD>` lê os Parquets do bucket bronze e os reinsere no ClickHouse. Os testes usam fila e bucket `teste` isolados.
