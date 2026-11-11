@@ -100,33 +100,33 @@ A conversão de preço para reais deve associar a cada preço a última PTAX de 
 - **Quando** o preço for convertido para reais,
 - **Então** é usada a PTAX de fechamento mais recente cuja data seja igual ou anterior à data do preço, e nenhuma cotação posterior é associada.
 
-### RF-09 — Verificar a conversão PTAX na semana de 09/10 a 13/10
+### RF-09 — Verificar a conversão PTAX na semana de 09/10 a 13/10/2026
 
-A conversão deve ter um teste de unidade para a semana de 09/10 a 13/10, verificando a associação da cotação válida a cada data de preço e evitando cotação posterior. O ano dessa semana não foi informado e é **hipótese: validação pendente**; deve ser confirmado antes de fixar os dados esperados do teste.
+A conversão deve ter um teste de unidade para a semana de 09/10 a 13/10/2026, verificando a associação da cotação válida a cada data de preço e evitando cotação posterior. O ano de 2026 foi definido pelo aluno em 11/11/2026; 12/10/2026 é segunda-feira e feriado nacional, então a semana testa fim de semana e feriado.
 
-**Origem:** OBJ-07; fato adicional do enunciado sobre a execução real em 07/11/2026 e o filtro de fechamento PTAX.
+**Origem:** OBJ-01 a OBJ-06; RF-08; decisão do aluno em 11/11/2026 sobre o ano da semana de teste.
 
 **Critério de aceite:**
 
-- **Dado** o conjunto de preços e fechamentos PTAX da semana de 09/10 a 13/10, com o ano confirmado,
+- **Dado** o conjunto de preços e fechamentos PTAX de 09/10 a 13/10/2026,
 - **Quando** o teste de unidade de conversão for executado,
 - **Então** todas as datas usam a última PTAX de fechamento disponível até a data do preço, e o teste passa sem associar cotação futura.
 
 ### RF-10 — Decompor a variação em efeito da carta, do câmbio e cruzado
 
-Para cada carta elegível comparável entre o início e o fim do período, o resultado deve apresentar variação em reais e suas parcelas atribuídas ao efeito do preço da carta, ao efeito do câmbio e ao efeito cruzado. A fórmula de decomposição e o tratamento de preços ausentes são **hipótese: validação pendente**, conforme OBJ-01; devem ser confirmados e registrados antes de interpretar os componentes.
+Para cada carta elegível comparável entre o início e o fim do período, o resultado deve apresentar variação percentual em reais e suas parcelas atribuídas ao efeito do preço da carta, ao efeito do câmbio e ao efeito cruzado, usando `(1+r_brl) = (1+r_usd) × (1+r_cambio)`. Preços ausentes permanecem nulos e não são tratados como zero.
 
 **Origem:** OBJ-01; pergunta 1; persona, dor atual.
 
 **Critério de aceite:**
 
 - **Dado** um preço em dólar e uma PTAX válidos no início e no fim do período para uma carta,
-- **Quando** a variação em reais for calculada com a fórmula de decomposição validada,
+- **Quando** a variação em reais for calculada pela fórmula `(1+r_brl) = (1+r_usd) × (1+r_cambio)`,
 - **Então** o resultado apresenta a variação total e os três componentes; a soma dos componentes corresponde à variação total dentro da precisão monetária documentada.
 
 ### RF-11 — Apresentar no dashboard as cinco perguntas em reais
 
-O dashboard deve apresentar evidências em reais para: (1) maiores valorizações e desvalorizações de cartas, com decomposição dos efeitos; (2) comparação entre produto selado e cartas avulsas; (3) comparação da coleção com as demais coleções da turma; (4) distribuição do valor em cada coleção; e (5) retorno em relação ao risco para cartas da turma. Períodos, coberturas e quantidades de observações devem ser visíveis para contextualizar comparações. Definições de agregação para OBJ-02 e OBJ-03 e definições de retorno e risco para OBJ-05 permanecem **hipóteses: validação pendente**, como registrado em `docs/01_objetivos_negocio.md`.
+O dashboard deve apresentar: (1) variação percentual em reais entre o primeiro e o último dia por carta e acabamento, para cartas acima de US$ 1 no primeiro dia, com decomposição dos efeitos; (2) índice base 100 no primeiro dia, comparando a média dos selados com a soma dos preços das cartas de raridade Double Rare em diante; (3) valor diário da coleção em reais, calculado pela soma de `market_price_brl` de um exemplar de cada carta, com índice base 100 por coleção e PTAX em base 100 no mesmo gráfico; (4) participação de cada raridade no valor total no último dia e número de cartas que somam 80% do valor; e (5) retorno no período contra desvio-padrão dos retornos diários para cartas acima de US$ 5. Períodos, coberturas e quantidades de observações devem ser visíveis para contextualizar comparações.
 
 **Origem:** OBJ-01, OBJ-02, OBJ-03, OBJ-04 e OBJ-05; perguntas 1 a 5 do enunciado; persona.
 
@@ -134,31 +134,33 @@ O dashboard deve apresentar evidências em reais para: (1) maiores valorizaçõe
 
 - **Dado** silver das coleções disponíveis e dados suficientes para as perguntas,
 - **Quando** o dashboard for consultado,
-- **Então** o dashboard apresenta em reais (1) as cartas ordenadas por maior valorização e desvalorização, com decomposição dos efeitos; (2) a comparação de variação entre selados e cartas avulsas; (3) a comparação da coleção SSP com cada coleção disponível no intervalo comum; (4) a participação de cada produto no valor de cada coleção, ordenada por participação; e (5) retorno e risco das cartas da turma para o mesmo período. Cada comparação informa período e cobertura, e os indicadores que dependem de hipóteses exibem as definições validadas utilizadas.
+- **Então** o dashboard apresenta em reais (1) a variação percentual por carta e acabamento para cartas acima de US$ 1 no primeiro dia, com decomposição; (2) os índices base 100 do selado e das cartas Double Rare em diante, agregados conforme definido; (3) o valor diário da coleção e os índices base 100 por coleção e da PTAX no mesmo gráfico; (4) a participação por raridade no último dia e o número de cartas que somam 80% do valor; e (5) retorno e desvio-padrão dos retornos diários para cartas acima de US$ 5. Os períodos e coberturas correspondentes são visíveis.
 
 ### RF-12 — Expor chave, imagem e link do produto e aplicar filtros e exclusões definidos
 
-Para cada produto exibido, o dashboard deve oferecer sua chave identificadora, imagem e link do produto quando esses dados estiverem disponíveis na fonte. Deve permitir filtro por preço mínimo em dólar. Code Card fica fora das perguntas 1, 3 e 4.
+O dashboard deve apresentar valores em reais e oferecer a chave R$/US$ para alternar a exibição dos valores para dólar. `product_id` identifica o produto; imagem da carta e link do produto no TCGplayer devem ser apresentados quando disponíveis. Deve permitir filtros de preço mínimo em dólar, incluindo acima de US$ 1 no primeiro dia para P1 e acima de US$ 5 para P5. Code Card, identificado pela raridade, fica fora das perguntas 1, 3 e 4.
 
-**Origem:** OBJ-01, OBJ-03 e OBJ-04; restrição de filtros de preço mínimo em dólar e exclusão de Code Card em `projeto_final/AGENTS.md`.
+**Origem:** OBJ-01 a OBJ-05; requisito de dashboard do enunciado; restrição de filtros de preço mínimo em dólar e exclusão de Code Card em `projeto_final/AGENTS.md`.
 
 **Critério de aceite:**
 
-- **Dado** produtos com chave, imagem, link e preço em dólar disponíveis,
-- **Quando** o usuário aplicar um preço mínimo em dólar e consultar as perguntas 1, 3 ou 4,
-- **Então** o dashboard mantém visíveis chave, imagem e link disponíveis, exclui preços abaixo do mínimo e não inclui Code Card nessas três perguntas.
+- **Dado** produtos com `product_id`, imagem, link do TCGplayer e preços em dólar disponíveis,
+- **Quando** o usuário alternar a chave R$/US$, aplicar os filtros mínimos de preço e consultar as perguntas 1 a 5,
+- **Então** os valores são exibidos na moeda selecionada, `product_id` identifica cada produto, imagem e link disponíveis são apresentados, P1 considera cartas acima de US$ 1 no primeiro dia, P5 considera cartas acima de US$ 5, e Code Card não aparece em P1, P3 ou P4.
 
 ### RF-13 — Calcular as cinco carteiras e apresentar resultados no contrato comum
 
-O desafio deve calcular cinco carteiras e compará-las com dólar parado e CDI em reais, com o mesmo período de referência. A composição específica das cinco carteiras é **hipótese: validação pendente**. As compras usam PTAX de venda, as vendas usam PTAX de compra, as unidades compradas são inteiras e a sobra em caixa rende CDI. A taxa de venda é um parâmetro; 15% permanece hipótese a declarar em ADR. O último preço observado deve ser marcado como tal. CDI deve ser aplicado apenas a dias úteis, respeitando sua disponibilidade na manhã seguinte. Os resultados devem seguir o contrato comum da turma.
+O desafio deve calcular cinco carteiras: `selado`, `cesta_raras`, `propria`, `dolar` e `cdi`. `selado` compra unidades inteiras do booster box; se o box não tiver preço no primeiro dia, usa o selado de maior preço, com a escolha detalhada em ADR. `cesta_raras` investe R$ 100 em cada uma das dez cartas com maior `market_price` no primeiro dia, em unidades inteiras. A regra da carteira `propria` será definida pelo aluno em ADR e registrada em commit anterior ao primeiro cálculo (**hipótese: validação pendente**). `dolar` converte R$ 1.000 pela PTAX de venda do primeiro dia. `cdi` corrige R$ 1.000 pelo CDI de cada dia útil, com juros compostos.
+
+O valor de liquidação é unidades × `market_price` × (1 − taxa de venda) × PTAX de compra, mais sobra em caixa rendendo CDI. A taxa de venda é parâmetro; 15% permanece hipótese a declarar em ADR. Produto sem preço no dia usa o último preço observado; o painel marca esses dias e nenhum valor inventado é gravado na silver. As métricas são retorno acumulado, excesso sobre o CDI, perda máxima e dias com preço carregado. O dashboard mostra resultados com e sem a taxa. Os resultados seguem o contrato comum `tcg/gold_turma/carteira/`: `data DATE`, `group_id INTEGER`, `carteira VARCHAR`, `valor_brl DOUBLE`, `retorno_acumulado DOUBLE`, `taxa_venda DOUBLE`.
 
 **Origem:** OBJ-06; RES-03 e RES-05; desafio da carteira e contrato comum do enunciado; invariantes de carteira em `projeto_final/AGENTS.md`.
 
 **Critério de aceite:**
 
-- **Dado** os critérios das cinco carteiras confirmados, R$ 1.000 iniciais, PTAX disponível, preços observados e CDI publicado para o período,
-- **Quando** o cálculo da carteira for executado com a taxa de venda configurada,
-- **Então** são produzidos resultados para cinco carteiras e as referências dólar parado e CDI, as compras usam PTAX de venda, as vendas usam PTAX de compra, as quantidades são inteiras, a sobra rende CDI apenas em dia útil, preços finais não atualizados são marcados como último preço observado, e os resultados respeitam o contrato comum.
+- **Dado** preços, PTAX e CDI disponíveis para o período e a regra da carteira `propria` registrada em ADR,
+- **Quando** as cinco carteiras forem calculadas com uma taxa de venda configurada,
+- **Então** `selado`, `cesta_raras`, `propria`, `dolar` e `cdi` seguem as regras descritas, as compras e liquidações usam respectivamente PTAX de venda e de compra, as unidades são inteiras, o CDI é composto em dias úteis, preços carregados são identificados no painel sem gravar valores inventados na silver, as métricas são produzidas, o dashboard mostra resultados com e sem taxa e os registros seguem o caminho e esquema definidos.
 
 ### RF-14 — Manter estável a composição da cesta de raras com dados posteriores
 
@@ -183,6 +185,18 @@ O README deve informar o comando que executa o pipeline de reconstrução e como
 - **Dado** o README e o ambiente de execução documentado para o projeto,
 - **Quando** uma pessoa seguir o comando documentado para executar o pipeline e os testes,
 - **Então** o pipeline inicia conforme documentado e os testes terminam com código zero, com a saída real registrada como evidência antes de declarar sucesso.
+
+### RF-16 — Classificar produtos da silver como carta ou selado
+
+A silver deve classificar cada produto como carta ou selado a partir dos campos da fonte: produto com número de carta é carta; produto sem número de carta é selado. Code Card, que tem raridade Code Card, é classificado como carta e excluído das perguntas 1, 3 e 4 pela raridade. O método exato de classificação será confirmado no ADR-005.
+
+**Origem:** decisão do aluno no plano; comportamento do código existente em `src/silver.py`; regra de exclusão de Code Card em `projeto_final/AGENTS.md`. O método exato será confirmado no ADR-005.
+
+**Critério de aceite:**
+
+- **Dado** produtos da fonte com e sem número de carta, incluindo um produto de raridade Code Card,
+- **Quando** a silver classificar os produtos,
+- **Então** produtos com número de carta são classificados como carta, produtos sem número são classificados como selado, Code Card é classificado como carta, e Code Card é excluído das perguntas 1, 3 e 4 pela raridade.
 
 ## Requisitos não funcionais
 

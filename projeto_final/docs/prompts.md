@@ -227,3 +227,27 @@ Somente docs/01_objetivos_negocio.md. Mostre em tópicos o que vai mudar e esper
 [E] Extras
 Leia antes: AGENTS.md e docs/01_objetivos_negocio.md. Ao terminar, liste perguntas abertas e pare.
 
+**Data:** 2026-11-11.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `specs/spec.md`.
+- **Confirmação do plano:** "Confirmado. Pode editar. Escreva a chave como R$/US$. Em RF-11, a P3 deve citar a PTAX em base 100 no mesmo gráfico e a P4 o número de cartas que somam 80% do valor."
+
+Prompt 3b: ajuste da especificação com as definições do enunciado
+[C] Personagem
+Você é um engenheiro de requisitos de dados. Está corrigindo specs/spec.md, que tratou como hipótese definições que o enunciado já traz e leu "chave para dólar" como identificador do produto.
+[R] Pedido
+Ajuste specs/spec.md com os fatos abaixo (origem: enunciado do projeto final e docs/01_objetivos_negocio.md já corrigido). Preserve os IDs RF-01 a RF-15 e RNF-01 a RNF-05; novos requisitos entram no fim, como RF-16.
+Mudanças:
+1. RF-11: reescreva as cinco perguntas com as definições de OBJ-01 a OBJ-05 (P1 variação percentual em reais por carta e acabamento, cartas acima de US$ 1 no primeiro dia; P2 índice base 100, média dos selados contra soma das cartas Double Rare em diante; P3 valor da coleção em reais, índice base 100 por coleção, com a PTAX em base 100 no mesmo gráfico; P4 participação de cada raridade no último dia e número de cartas que somam 80% do valor; P5 retorno contra desvio-padrão dos retornos diários, cartas acima de US$ 5). Remova as hipóteses de agregação, retorno e risco.
+2. RF-10: a fórmula é (1+r_brl) = (1+r_usd) × (1+r_cambio): efeito da carta, do câmbio e cruzado. Remova a hipótese da fórmula; o tratamento de preço ausente segue a regra nulo não é zero.
+3. RF-12: "chave" é o alternador para ver os valores em dólar, não identificador. O dashboard tem valores em reais e a chave R$/US$; imagem da carta e link do produto no TCGplayer; product_id como identificador. Filtros de preço mínimo em dólar: P1 acima de US$ 1 no primeiro dia e P5 acima de US$ 5. Code Card fica fora das perguntas 1, 3 e 4. Reescreva o critério de aceite.
+4. RF-13: as cinco carteiras são selado, cesta_raras, propria, dolar e cdi (dólar parado e CDI são duas das cinco, não referências extras). Regras: selado = unidades inteiras do booster box, ou o selado de maior preço se o box não tiver preço no primeiro dia (escolha em ADR); cesta_raras = R$ 100 em cada uma das dez cartas de maior market_price no primeiro dia, em unidades inteiras; propria = regra do aluno em ADR com commit anterior ao primeiro cálculo (hipótese: validação pendente); dolar = R$ 1.000 pela PTAX de venda do primeiro dia; cdi = R$ 1.000 corrigidos pelo CDI de cada dia útil, juros compostos. Valor de liquidação = unidades × market_price × (1 − taxa de venda) × PTAX de compra + sobra em caixa rendendo CDI. Produto sem preço no dia usa o último preço observado; o painel marca esses dias e nada inventado é gravado na silver. Métricas: retorno acumulado, excesso sobre o CDI, perda máxima, dias com preço carregado. O dashboard mostra o resultado com e sem a taxa. Resultado no contrato comum tcg/gold_turma/carteira/: data DATE, group_id INTEGER, carteira VARCHAR, valor_brl DOUBLE, retorno_acumulado DOUBLE, taxa_venda DOUBLE. A taxa de 15% continua hipótese a declarar em ADR.
+5. RF-09: o ano da semana de 09/10 a 13/10 é 2026 (decisão do aluno em 11/11/2026; 12/10/2026 é segunda-feira e feriado nacional, então a semana testa fim de semana e feriado). Remova a hipótese do ano e ajuste a origem para OBJ-01 a OBJ-06 e RF-08.
+6. RF-16 (novo): a silver classifica cada produto como carta ou selado a partir dos campos da fonte; produto com número de carta é carta e sem número é selado; Code Card (raridade) é carta e fica excluído das perguntas 1, 3 e 4 pela raridade. Origem: decisão do aluno no plano, comportamento do código existente em src/silver.py; o método exato será confirmado no ADR-005. Escreva Dado/Quando/Então.
+[A] Ajustes
+Todo critério de aceite usa Dado/Quando/Então verificável. Hipótese só onde falta origem. Não toque em docs/ nem em outros arquivos. Não declare nada como atendido.
+[T] Tipo de saída
+Somente specs/spec.md. Mostre em tópicos o que vai mudar e espere minha confirmação antes de editar.
+[E] Extras
+Leia antes: AGENTS.md, docs/01_objetivos_negocio.md e specs/spec.md. Ao terminar, liste perguntas abertas e pare.
