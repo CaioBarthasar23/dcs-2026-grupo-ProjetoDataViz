@@ -199,3 +199,31 @@ Somente specs/tasks.md, em Markdown, com a tabela do modelo. Mostre a lista de t
 [E] Extras
 Leia antes: AGENTS.md, specs/spec.md, specs/plan.md, specs/tasks.md.
 Os scripts leem S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY e S3_BUCKET do .env, conforme .env.example. Pare ao final.
+
+**Data:** 2026-11-11.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `docs/01_objetivos_negocio.md`.
+- **Confirmação do plano:** confirmado pelo aluno.
+
+Prompt 2b: ajuste dos objetivos com as definições do enunciado
+
+[C] Personagem
+Você é um product owner técnico. Está corrigindo docs/01_objetivos_negocio.md, que marcou como "hipótese" definições que o enunciado já traz.
+[R] Pedido
+Atualize os objetivos OBJ-01 a OBJ-06 com as definições abaixo (origem: enunciado do projeto final, seção das cinco perguntas e do desafio da carteira). Troque "hipótese: validação pendente" por essas definições, com origem, e mantenha a marca de hipótese só no que continuar sem origem (taxa de venda de 15%, regra da carteira propria).
+Fatos:
+- P1: variação percentual em reais entre o primeiro e o último dia, por carta e acabamento, só cartas acima de US$ 1 no primeiro dia; decomposição (1+r_brl) = (1+r_usd) × (1+r_cambio): efeito da carta, do câmbio e cruzado; Code Card fora.
+- P2: índice base 100 no primeiro dia: média dos selados contra a soma do preço das cartas de raridade Double Rare em diante.
+- P3: valor da coleção no dia em reais (soma do market_price_brl de um exemplar de cada carta), índice base 100 por coleção, com a PTAX em base 100 no mesmo gráfico; Code Card fora.
+- P4: participação de cada raridade no valor total no último dia e número de cartas que somam 80% do valor; Code Card fora.
+- P5: retorno no período contra volatilidade (desvio-padrão dos retornos diários), cartas acima de US$ 5.
+- Dashboard: valores em reais e chave para ver em dólar; imagem das cartas e link do produto no TCGplayer; filtros de preço mínimo em dólar.
+- Carteiras (cinco): selado, cesta_raras, propria, dolar, cdi. Métricas: retorno acumulado, excesso sobre o CDI, perda máxima, dias com preço carregado. Valor de liquidação = unidades × market_price × (1 − taxa de venda) × PTAX de compra + sobra em caixa rendendo CDI. O dashboard mostra o resultado com e sem a taxa; a diferença entra no ATAM como ponto de sensibilidade.
+[A] Ajustes
+Preserve os IDs, os drivers, as restrições e o fora do escopo. Não altere outros arquivos.
+[T] Tipo de saída
+Somente docs/01_objetivos_negocio.md. Mostre em tópicos o que vai mudar e espere minha confirmação antes de editar.
+[E] Extras
+Leia antes: AGENTS.md e docs/01_objetivos_negocio.md. Ao terminar, liste perguntas abertas e pare.
+
