@@ -1,0 +1,22 @@
+{
+  "value": [
+    {
+      "cotacaoCompra": 7.2609,
+      "cotacaoVenda": 7.2633,
+      "dataHoraCotacao": "2026-10-29 13:04:18.706316",
+      "tipoBoletim": "Fechamento"
+    },
+    {
+      "cotacaoCompra": 7.2609,
+      "cotacaoVenda": 7.2633,
+      "dataHoraCotacao": "2026-10-30 13:04:18.706316",
+      "tipoBoletim": "Fechamento"
+    },
+    {
+      "cotacaoCompra": 7.5,
+      "cotacaoVenda": 7.6,
+      "dataHoraCotacao": "2026-11-03 13:04:18.706316",
+      "tipoBoletim": "Fechamento"
+    }
+  ]
+}

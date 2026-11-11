@@ -1,0 +1,74 @@
+Table execucao {
+  id varchar [pk, note: 'ID aparece somente na chave do manifesto']
+  inicio datetime [not null]
+  fim datetime [not null]
+  data_ref date [not null, note: 'RN-03; America/Sao_Paulo']
+  robots_url varchar [not null]
+  robots_status_http int
+  robots_chave varchar
+  total_declarado int
+  estado varchar [not null, note: 'sucesso, incompleta ou falha']
+}
+
+Table item_manifesto {
+  item_id int [pk, increment]
+  execucao_id varchar [not null]
+  url text [not null]
+  estado varchar [not null, note: 'pendente, baixando, aguardando, baixado, gravado ou falhou']
+  chave varchar [note: 'Chave raw; nula se nenhum corpo foi preservado']
+  status_http int
+  tentativas int [not null]
+  bytes bigint [not null]
+  sha256 varchar
+  erro text
+}
+
+Table objeto_raw {
+  chave varchar [pk, note: 'Derivada de fonte, data, recurso e SHA-256; sem ID de execução']
+  source_url text [not null]
+  data_ref date [not null]
+  recurso varchar [not null]
+  status_http int
+  content_type varchar
+  bytes bigint [not null]
+  sha256 varchar [not null, note: '64 caracteres hexadecimais']
+  metadados_ascii text [not null, note: 'Todos os nomes e valores x-amz-meta-* são ASCII']
+}
+
+Table livro {
+  data_ref date [not null, note: 'Chave diária, RN-03']
+  upc varchar [not null, note: 'RN-01']
+  execucao_id varchar [not null, note: 'Relação interna; não é campo JSONL']
+  url text [not null]
+  titulo text [not null]
+  categoria varchar [not null]
+  avaliacao varchar [not null, note: 'Rótulo original One a Five']
+  preco_gbp decimal [not null, note: 'Sem conversão para reais']
+  em_estoque boolean [not null]
+  qtd_estoque int
+  coletado_em datetime [not null]
+
+  indexes {
+    (data_ref, upc) [pk]
+  }
+}
+
+Table cotacao {
+  data_ref date [not null, note: 'Data local de referência, RN-03']
+  moeda varchar [not null, note: 'RN-02']
+  execucao_id varchar [not null, note: 'Relação interna; não é campo JSONL']
+  dataHoraCotacao datetime [not null, note: 'Nome preservado do contrato JSONL']
+  tipoBoletim varchar [not null, note: 'Fechamento selecionado, RN-02']
+  cotacaoCompra decimal [not null]
+  cotacaoVenda decimal [not null]
+
+  indexes {
+    (data_ref, moeda) [pk]
+  }
+}
+
+Ref: item_manifesto.execucao_id > execucao.id
+Ref: item_manifesto.chave > objeto_raw.chave
+Ref: execucao.robots_chave > objeto_raw.chave
+Ref: livro.execucao_id > execucao.id
+Ref: cotacao.execucao_id > execucao.id

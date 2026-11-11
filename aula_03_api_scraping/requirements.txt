@@ -1,0 +1,8 @@
+# Requisições HTTP e parsing de HTML para APIs e scraping
+requests>=2.32,<3
+beautifulsoup4>=4.12,<5
+
+# Acesso ao MinIO compatível com S3 e testes
+boto3>=1.35,<2
+python-dotenv>=1.0,<2
+pytest>=8,<10
