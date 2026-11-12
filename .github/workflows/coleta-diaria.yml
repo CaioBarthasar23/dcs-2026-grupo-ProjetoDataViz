@@ -1,14 +1,16 @@
 name: coleta-diaria
 
-# 21:30 UTC = 18:30 em Brasilia (o TCGCSV atualiza por volta de 17h BRT).
-# As duas execucoes seguintes sao tentativas de reserva: o coletor e
+# 21:30 UTC = 18:30 em Brasilia e e a faixa principal (o TCGCSV atualiza por volta de 17h BRT).
+# As faixas de 22:30, 23:30 e 01:30 UTC sao tentativas de reserva; o coletor e
 # idempotente, entao o que ja foi gravado nao e regravado.
-# O GitHub pode atrasar execucoes agendadas; o coletor tolera isso.
+# O GitHub atrasou execucoes agendadas de 36 a 56 minutos em 11/11/2026.
+# timeout-minutes=5 e a quarta faixa sao hipoteses: validacao pendente no ADR-008.
 on:
   schedule:
     - cron: "30 21 * * *"
     - cron: "30 22 * * *"
     - cron: "30 23 * * *"
+    - cron: "30 1 * * *"
   workflow_dispatch: {}   # botao "Run workflow" na aba Actions
 
 concurrency:
@@ -18,7 +20,7 @@ concurrency:
 jobs:
   coletar:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     defaults:
       run:
         working-directory: projeto_final
