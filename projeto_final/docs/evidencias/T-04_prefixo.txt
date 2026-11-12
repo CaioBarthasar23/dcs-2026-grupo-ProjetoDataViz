@@ -1,0 +1,27 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0 -- /home/codespace/.python/current/bin/python
+cachedir: .pytest_cache
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collecting ... collected 7 items
+
+tests/test_prefix_isolation.py::test_chave_do_prefixo_proprio_e_aceita PASSED [ 14%]
+tests/test_prefix_isolation.py::test_local_storage_recusa_chave_fora_do_prefixo[raw/tcgplayer/group_id=24269/data=2026-11-11/prices.json] PASSED [ 28%]
+tests/test_prefix_isolation.py::test_local_storage_recusa_chave_fora_do_prefixo[raw/tcgplayer/data=2026-11-11/prices.json] PASSED [ 42%]
+tests/test_prefix_isolation.py::test_local_storage_recusa_chave_fora_do_prefixo[raw/group_id=23651/tcgplayer/group_id=24269/prices.json] PASSED [ 57%]
+tests/test_prefix_isolation.py::test_s3_storage_recusa_chave_e_nao_chama_cliente PASSED [ 71%]
+tests/test_prefix_isolation.py::test_subir_local_recusa_chave_de_outra_colecao_antes_do_cliente PASSED [ 85%]
+tests/test_prefix_isolation.py::test_group_id_de_outra_colecao_faz_coletor_recusar PASSED [100%]
+
+============================== 7 passed in 0.12s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 48 items
+
+tests/test_collector.py ..........                                       [ 20%]
+tests/test_prefix_isolation.py .......                                   [ 35%]
+tests/test_silver.py ...............................                     [100%]
+
+============================== 48 passed in 0.44s ==============================

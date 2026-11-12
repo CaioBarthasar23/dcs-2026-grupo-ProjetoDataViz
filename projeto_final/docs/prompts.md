@@ -328,3 +328,33 @@ Não reescreva a cronologia nem esconda que o código veio antes. Não afirme qu
 Somente docs/adr/ADR-001-origem-do-codigo-existente.md, em Markdown. Mostre em tópicos o que vai escrever e espere minha confirmação antes de criar o arquivo.
 [E] Extras
 Leia antes: AGENTS.md (seção "Estado atual"), specs/tasks.md (T-31) e specs/plan.md (nota sobre ADR-001). Se faltar informação, pergunte. Ao terminar, mostre o resultado da verificação da T-31 e pare.
+
+**Data:** 2026-11-11.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `src/prefixo.py`, `src/collector.py`, `tests/test_prefix_isolation.py`, `tests/test_collector.py` e `docs/evidencias/T-04_prefixo.txt`.
+- **Confirmação do plano:** confirmado pelo aluno. Depois da implementação, o aluno autorizou ajustar somente as chaves de dois testes antigos (`test_nao_sobrescreve_objeto_existente` e `test_upload_nao_sobrescreve`), que gravavam chaves sem `group_id` e passaram a ser recusadas pela nova regra.
+
+Prompt 7 (T-04): proteger a escrita para aceitar somente o prefixo da coleção SSP
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano. Hoje é a T-04 (specs/tasks.md): proteger a escrita para aceitar somente o prefixo da coleção SSP. Requisitos: RNF-03 e RF-02. Uma tarefa, um prompt: não mexa em mais nada.
+[R] Pedido
+Implemente a proteção e o teste, nesta ordem: primeiro o teste que falha, depois o código que o faz passar.
+1. Crie src/prefixo.py, um módulo pequeno com a constante do prefixo próprio (group_id=23651, fixa no código, independente da variável de ambiente GROUP_ID) e uma função que recebe uma chave de objeto e levanta erro claro se a chave não pertencer a esse prefixo. Regra: a chave precisa conter o segmento group_id=23651 e nenhum outro segmento group_id=<outro número>. Chave sem group_id também é recusada.
+2. Em src/collector.py, aplique a função em todo ponto que grava: LocalStorage.put, S3Storage.put e a rotina que sobe do disco para o bucket (subir_local). A recusa acontece antes de qualquer gravação ou chamada ao bucket. Se GROUP_ID do ambiente for diferente de 23651, o coletor recusa e termina com código diferente de zero, com mensagem clara, sem gravar nada.
+3. Crie tests/test_prefix_isolation.py com, no mínimo: chave própria aceita; chave de outra coleção (por exemplo group_id=24269) recusada em LocalStorage e em S3Storage (com cliente falso, comprovando que o cliente nunca é chamado); subir_local não envia chave de outra coleção; GROUP_ID de outra coleção no ambiente faz o coletor recusar. Use cliente falso e pasta temporária; nenhum teste usa rede nem o bucket real.
+4. Não altere src/silver.py (a proteção da silver entra na T-08, que reutiliza src/prefixo.py). Não altere o workflow nem outros testes.
+[E] Exemplos
+Linha de log ao recusar: ERRO escrita recusada: raw/tcgplayer/group_id=24269/data=2026-11-11/prices.json fora do prefixo group_id=23651
+[A] Ajustes
+Não leia nem imprima .env. Não rode collect, upload, backfill-ptax nem rebuild --destino s3. Comandos permitidos: python -m pytest e python -m src.collector check. Sem segredos em código, testes ou evidências. Todos os 41 testes existentes devem continuar passando. Não faça git commit nem git push: proponha a mensagem de commit no formato tipo(T-xx): descrição [RF-yy].
+[T] Tipo de saída
+Arquivos: src/prefixo.py (novo), src/collector.py (alterado), tests/test_prefix_isolation.py (novo). Mostre o plano em tópicos e espere minha confirmação antes de editar. Depois de implementar, rode python -m pytest tests/test_prefix_isolation.py e python -m pytest, e salve a saída real em docs/evidencias/T-04_prefixo.txt, incluindo o caso que rejeita o prefixo de outra coleção. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RNF-03, RF-02), specs/tasks.md (T-04) e src/collector.py. Ao terminar, liste perguntas abertas e pare.
+
+Resposta do aluno ao plano do Codex:
+Confirmado. Pode seguir. Na mensagem de commit proposta, cite os dois requisitos: feat(T-04): restringe escrita ao prefixo SSP [RNF-03][RF-02].
+
+Resposta do aluno à pergunta do Codex sobre os dois testes antigos que falharam:
+Autorizo ajustar somente esses dois testes antigos, e só o valor das chaves: troque raw/x.json, raw/a.json e raw/b.json por chaves SSP válidas (por exemplo raw/tcgplayer/group_id=23651/data=2026-11-11/x.json). Não altere as verificações nem o comportamento testado, e não toque em nenhum outro teste. Depois refaça a execução completa e regrave docs/evidencias/T-04_prefixo.txt com a saída real (esperado: 48 passed). Na mensagem de commit proposta, mencione o ajuste: feat(T-04): restringe escrita ao prefixo SSP, ajusta chaves de 2 testes [RNF-03][RF-02].
