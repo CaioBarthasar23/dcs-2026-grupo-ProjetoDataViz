@@ -358,3 +358,34 @@ Confirmado. Pode seguir. Na mensagem de commit proposta, cite os dois requisitos
 
 Resposta do aluno à pergunta do Codex sobre os dois testes antigos que falharam:
 Autorizo ajustar somente esses dois testes antigos, e só o valor das chaves: troque raw/x.json, raw/a.json e raw/b.json por chaves SSP válidas (por exemplo raw/tcgplayer/group_id=23651/data=2026-11-11/x.json). Não altere as verificações nem o comportamento testado, e não toque em nenhum outro teste. Depois refaça a execução completa e regrave docs/evidencias/T-04_prefixo.txt com a saída real (esperado: 48 passed). Na mensagem de commit proposta, mencione o ajuste: feat(T-04): restringe escrita ao prefixo SSP, ajusta chaves de 2 testes [RNF-03][RF-02].
+
+**Data:** 2026-11-12.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `tests/test_secrets_not_versioned.py` e `docs/evidencias/T-05_segredos.txt`.
+- **Confirmação do plano:** confirmado pelo aluno. O teste parou duas vezes com achados que o aluno avaliou como falsos positivos e orientou o ajuste do detector: placeholder em pasta de aula fora do escopo e referência a variável de ambiente no workflow; depois, o nome do parâmetro `aws_secret_access_key` recebendo uma variável em `src/collector.py`.
+
+Prompt 8 (T-05): impedir que credenciais ou .env sejam versionados ou impressos
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano. Hoje é a T-05 (specs/tasks.md): impedir que credenciais ou .env sejam versionados ou impressos em evidências e logs. Requisitos: RNF-04 e RES-06. Uma tarefa, um prompt: não mexa em mais nada.
+[R] Pedido
+Crie tests/test_secrets_not_versioned.py. Escreva o teste primeiro e rode-o; se algum caso falhar por um problema real, pare e me mostre o achado: não corrija em silêncio e não altere src/ nem o workflow.
+Casos mínimos:
+1. O .env de projeto_final está ignorado pelo Git (git check-ignore -q projeto_final/.env, que funciona mesmo se o arquivo não existir) e não consta em git ls-files.
+2. Arquivos rastreados (git ls-files, só texto; exclua o próprio arquivo de teste) não contêm credencial: atribuição não vazia a S3_ACCESS_KEY, S3_SECRET_KEY ou nomes com SECRET, PASSWORD ou TOKEN; padrão de chave AWS (AKIA seguido de 16 caracteres); linhas aws_secret_access_key. No workflow, S3_ACCESS_KEY, S3_SECRET_KEY e S3_ENDPOINT só podem aparecer como ${{ secrets.NOME }}.
+3. .env.example só tem nomes: toda variável com KEY, SECRET, PASSWORD ou TOKEN no nome tem valor vazio.
+4. Verificação estática em src/: nenhuma linha com log.*, logging.* ou print( referencia S3_SECRET_KEY, S3_ACCESS_KEY ou as variáveis que guardam esses valores.
+5. docs/evidencias/ (arquivos rastreados e novos) passa na mesma varredura do caso 2.
+Os casos de varredura devem ser testados também contra texto de exemplo com uma credencial falsa embutida no próprio teste (por exemplo SEGREDO-FALSO-123), para provar que o detector detecta; essa credencial falsa não pode ser um valor real.
+[A] Ajustes
+Não leia, não imprima e não abra o .env, nem para comparar valores. Rode os testes com PYTHON_DOTENV_DISABLED=true. Não rode collect, upload, backfill-ptax nem rebuild --destino s3. Comandos permitidos: python -m pytest e git status, git diff, git log, git ls-files, git check-ignore. Não faça git commit nem git push: proponha a mensagem de commit no formato tipo(T-xx): descrição [RF-yy].
+[T] Tipo de saída
+Arquivos: tests/test_secrets_not_versioned.py (novo) e docs/evidencias/T-05_segredos.txt (saída real de python -m pytest tests/test_secrets_not_versioned.py e de python -m pytest, sem nenhum valor secreto). Mostre o plano em tópicos e espere minha confirmação antes de editar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md (seção Segredos), specs/spec.md (RNF-04), specs/tasks.md (T-05) e .env.example. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+1. Confirmado. Pode seguir. Mantenha a credencial falsa claramente fictícia (por exemplo SEGREDO-FALSO-123) e evite que o próprio arquivo de teste dispare a varredura dos outros casos.
+2. Respostas: (1) Não aceite placeholders. Restrinja a varredura de arquivos rastreados a projeto_final/ e ao workflow .github/workflows/coleta-diaria.yml; pastas de aula ficam fora do escopo (AGENTS.md proíbe alterá-las). Dentro de projeto_final, o .env.example continua exigindo valores vazios nas variáveis sensíveis. (2) Sim, permita referências ao nome da variável após a atribuição, como $S3_ENDPOINT no shell, mas toda atribuição de S3_ENDPOINT, S3_ACCESS_KEY e S3_SECRET_KEY no workflow deve ser exatamente ${{ secrets.NOME }}; um valor literal reprova. Ajuste só o teste, sem alterar src/ nem o workflow, rode de novo o teste dedicado e, se passar, rode a suíte completa e grave docs/evidencias/T-05_segredos.txt. Mantenha a prova de detecção com credencial falsa: ela deve mostrar que um valor literal no workflow reprova. Mensagem de commit: feat(T-05): teste impede segredos versionados ou impressos [RNF-04].
+3. O achado em src/collector.py:97 (aws_secret_access_key=secret_key) é falso positivo: o argumento
+
