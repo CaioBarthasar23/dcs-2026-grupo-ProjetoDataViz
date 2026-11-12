@@ -1,0 +1,19 @@
+Nota de execução: antes de obter acesso de rede, uma tentativa terminou com código 1 por falha de resolução DNS nas fontes. As URLs presentes naquela saída foram removidas; nenhuma credencial foi detectada. Nenhuma escrita ocorreu nessa tentativa. Com a rede autorizada, as duas execuções consecutivas abaixo terminaram com código zero.
+
+Execução 1
+Comando: python -m src.collector collect
+Código de saída: 0
+2026-11-12 21:50:53,456 INFO raw/tcgplayer/group_id=23651/data=2026-11-12/products.json             gravado
+2026-11-12 21:50:53,456 INFO raw/tcgplayer/group_id=23651/data=2026-11-12/prices.json               gravado
+2026-11-12 21:50:53,456 INFO raw/bcb_ptax/group_id=23651/data=2026-11-12/cotacao.json               gravado
+2026-11-12 21:50:53,456 INFO raw/bcb_cdi/group_id=23651/data=2026-11-12/cdi.json                    gravado
+
+Execução 2
+Comando: python -m src.collector collect
+Código de saída: 0
+2026-11-12 21:51:00,918 INFO raw/tcgplayer/group_id=23651/data=2026-11-12/products.json             ja existia
+2026-11-12 21:51:00,918 INFO raw/tcgplayer/group_id=23651/data=2026-11-12/prices.json               ja existia
+2026-11-12 21:51:00,919 INFO raw/bcb_ptax/group_id=23651/data=2026-11-12/cotacao.json               ja existia
+2026-11-12 21:51:00,919 INFO raw/bcb_cdi/group_id=23651/data=2026-11-12/cdi.json                    ja existia
+
+As oito linhas de log mostram exclusivamente chaves em group_id=23651; a segunda execução confirmou "ja existia" para todos os quatro objetos. Não houve endpoints nem credenciais nas saídas dessas duas execuções.

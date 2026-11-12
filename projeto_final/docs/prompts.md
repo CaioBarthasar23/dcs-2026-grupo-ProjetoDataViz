@@ -389,3 +389,26 @@ Respostas do aluno ao Codex:
 2. Respostas: (1) Não aceite placeholders. Restrinja a varredura de arquivos rastreados a projeto_final/ e ao workflow .github/workflows/coleta-diaria.yml; pastas de aula ficam fora do escopo (AGENTS.md proíbe alterá-las). Dentro de projeto_final, o .env.example continua exigindo valores vazios nas variáveis sensíveis. (2) Sim, permita referências ao nome da variável após a atribuição, como $S3_ENDPOINT no shell, mas toda atribuição de S3_ENDPOINT, S3_ACCESS_KEY e S3_SECRET_KEY no workflow deve ser exatamente ${{ secrets.NOME }}; um valor literal reprova. Ajuste só o teste, sem alterar src/ nem o workflow, rode de novo o teste dedicado e, se passar, rode a suíte completa e grave docs/evidencias/T-05_segredos.txt. Mantenha a prova de detecção com credencial falsa: ela deve mostrar que um valor literal no workflow reprova. Mensagem de commit: feat(T-05): teste impede segredos versionados ou impressos [RNF-04].
 3. O achado em src/collector.py:97 (aws_secret_access_key=secret_key) é falso positivo: o argumento
 
+**Data:** 2026-11-12.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `tests/test_tcgcsv_limits.py`, `docs/evidencias/T-06_testes.txt` e `docs/evidencias/T-06_coleta_duas_execucoes.txt`.
+- **Confirmação do plano:** confirmado pelo aluno, incluindo as duas execuções reais de `collect` no prefixo `group_id=23651`, sem `--forcar`, conforme a autorização expressa do próprio prompt. A primeira tentativa de execução falhou por DNS antes de a rede ser liberada e não escreveu nada; foi refeita com rede.
+
+Prompt 9 (T-06): evidência do coletor diário existente
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano. Hoje é a T-06 (specs/tasks.md): dar evidência ao coletor diário existente (código existente; evidência pendente): idempotência, bruto preservado e regras de uso do TCGCSV. Requisitos: RF-01, RF-02, RF-03 e RNF-03. Uma tarefa, um prompt.
+[R] Pedido
+Não altere src/. Se algo reprovar por problema real do coletor, pare e me mostre o achado.
+1. Rode PYTHON_DOTENV_DISABLED=true python -m pytest tests/test_collector.py e mapeie, na evidência, qual teste existente cobre qual critério de aceite de RF-01 e RF-02, apontando lacunas.
+2. Crie tests/test_tcgcsv_limits.py (RF-03): toda chamada leva User-Agent próprio (diferente do padrão da biblioteca requests); a pausa mínima entre chamadas é de pelo menos 100 ms; uma execução de coletar faz no máximo 3 chamadas ao TCGCSV (registre a contagem real, que deve ser 2: products e prices); o pior caso diário com as três tentativas do workflow fica abaixo de 10.000. Use cliente falso e relógio simulado; sem rede.
+3. AUTORIZAÇÃO EXPRESSA: autorizo executar python -m src.collector collect duas vezes seguidas, gravando no bucket compartilhado SOMENTE no prefixo group_id=23651, sem --forcar. Não rode upload, backfill-ptax nem rebuild. Para estas duas execuções NÃO use PYTHON_DOTENV_DISABLED (o coletor lê o .env sozinho); você não deve ler, abrir nem imprimir o .env. Confirme: código de saída zero nas duas, nenhuma chave de outra coleção, e na segunda execução todos os objetos com o log "ja existia".
+[A] Ajustes
+Sem segredos em testes ou evidências; não imprima endpoints nem credenciais, e se um log os contiver, remova-os da evidência e me avise. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy].
+[T] Tipo de saída
+Arquivos: tests/test_tcgcsv_limits.py (novo), docs/evidencias/T-06_testes.txt (saída real dos testes e o mapa de cobertura) e docs/evidencias/T-06_coleta_duas_execucoes.txt (logs reais das duas execuções e os códigos de saída). Mostre o plano em tópicos e espere minha confirmação antes de editar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-01, RF-02, RF-03, RNF-03), specs/tasks.md (T-06) e src/collector.py. Ao terminar, liste perguntas abertas e pare.
+
+Resposta do aluno ao plano do Codex:
+Confirmado. Pode seguir, incluindo as duas execuções reais de collect, conforme a autorização expressa do prompt (somente prefixo group_id=23651, sem --forcar). Se algum log contiver endpoint ou credencial, remova da evidência e me avise.
