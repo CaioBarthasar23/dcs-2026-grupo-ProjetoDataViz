@@ -44,6 +44,10 @@ PTAX_HORA_CORTE = 15
 # arquivo ainda tem os precos do dia anterior, e grava-los com a data de hoje
 # poluiria a serie (e a coleta correta cairia em "ja existia").
 TCGCSV_HORA_MIN_BRT = 18
+# Hipóteses de timeout e tentativas; validação pendente no ADR-008.
+S3_CONNECT_TIMEOUT_SECONDS = 5
+S3_READ_TIMEOUT_SECONDS = 15
+S3_MAX_ATTEMPTS = 2
 
 TCGCSV_BASE = f"https://tcgcsv.com/tcgplayer/{CATEGORY_ID}"
 PTAX_URL = (
@@ -97,7 +101,13 @@ class S3Storage:
             aws_secret_access_key=secret_key,
             region_name=os.getenv("S3_REGION", "us-east-1"),
             # RustFS/MinIO: endereco em estilo path (https://host/bucket/chave)
-            config=Config(signature_version="s3v4", s3={"addressing_style": "path"}),
+            config=Config(
+                connect_timeout=S3_CONNECT_TIMEOUT_SECONDS,
+                read_timeout=S3_READ_TIMEOUT_SECONDS,
+                retries={"max_attempts": S3_MAX_ATTEMPTS, "mode": "standard"},
+                signature_version="s3v4",
+                s3={"addressing_style": "path"},
+            ),
         )
 
     def exists(self, key: str) -> bool:
