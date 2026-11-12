@@ -7,11 +7,13 @@ from src import collector as c
 
 
 def test_cliente_s3_define_timeouts_e_tentativas():
+    valor_falso_a = "valor_falso_a"
+    valor_falso_b = "valor_falso_b"
     storage = c.S3Storage(
-        endpoint="https://s3.fake.invalid",
-        access_key="FAKE_ACCESS_KEY_FOR_TESTS",
-        secret_key="FAKE_SECRET_KEY_FOR_TESTS",
-        bucket="fake-bucket",
+        "https://s3.fake.invalid",
+        valor_falso_a,
+        valor_falso_b,
+        "fake-bucket",
     )
 
     config = storage.client.meta.config
@@ -25,11 +27,13 @@ def test_cliente_s3_define_timeouts_e_tentativas():
 
 
 def test_timeout_em_exists_e_registrado_pela_coleta_sem_gravar(monkeypatch):
+    valor_falso_a = "valor_falso_a"
+    valor_falso_b = "valor_falso_b"
     storage = c.S3Storage(
-        endpoint="https://s3.fake.invalid",
-        access_key="FAKE_ACCESS_KEY_FOR_TESTS",
-        secret_key="FAKE_SECRET_KEY_FOR_TESTS",
-        bucket="fake-bucket",
+        "https://s3.fake.invalid",
+        valor_falso_a,
+        valor_falso_b,
+        "fake-bucket",
     )
     put_calls = []
 
