@@ -21,6 +21,7 @@ from typing import Protocol
 from zoneinfo import ZoneInfo
 
 import requests
+from src.prefixo import PREFIXO_PROPRIO, validar_chave
 
 try:
     from dotenv import load_dotenv
@@ -72,9 +73,11 @@ class LocalStorage:
         self.root = Path(root)
 
     def exists(self, key: str) -> bool:
+        validar_chave(key)
         return (self.root / key).exists()
 
     def put(self, key: str, data: bytes) -> None:
+        validar_chave(key)
         path = self.root / key
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "xb") as f:  # "x": falha se o arquivo ja existir
@@ -98,6 +101,7 @@ class S3Storage:
         )
 
     def exists(self, key: str) -> bool:
+        validar_chave(key)
         from botocore.exceptions import ClientError
 
         try:
@@ -109,6 +113,7 @@ class S3Storage:
             raise
 
     def put(self, key: str, data: bytes) -> None:
+        validar_chave(key)
         self.client.put_object(
             Bucket=self.bucket, Key=key, Body=data, ContentType="application/json"
         )
@@ -221,6 +226,7 @@ def cdi_ok(resp: requests.Response) -> bool:
 # --------------------------------------------------------------------------
 def gravar(storage: Storage, key: str, resp: requests.Response) -> str:
     """Grava o corpo original da resposta, sem alteracao, se a chave nao existir."""
+    validar_chave(key)
     if storage.exists(key):
         return "ja existia"
     storage.put(key, resp.content)
@@ -236,6 +242,7 @@ def coletar_ptax(storage: Storage, dia: date, apos_corte: bool) -> str:
     """
     key = key_ptax(dia)
     try:
+        validar_chave(key)
         if storage.exists(key):
             return "ja existia"
         resp = http_get(PTAX_URL.format(mdY=dia.strftime("%m-%d-%Y")))
@@ -272,6 +279,7 @@ def coletar(
     for nome in ("products", "prices"):
         key = key_tcg(hoje, nome)
         try:
+            validar_chave(key)
             if storage.exists(key):
                 resultado[key] = "ja existia"
                 continue
@@ -294,6 +302,7 @@ def coletar(
     # 3) CDI: janela dos ultimos dias (a taxa de um dia util sai na manha seguinte)
     key = key_cdi(hoje)
     try:
+        validar_chave(key)
         if storage.exists(key):
             resultado[key] = "ja existia"
         else:
@@ -321,6 +330,7 @@ def subir_local(local: LocalStorage, s3: Storage) -> dict[str, int]:
         return contagem
     for arq in sorted(p for p in raiz.rglob("*") if p.is_file()):
         key = arq.relative_to(local.root).as_posix()
+        validar_chave(key)
         if s3.exists(key):
             contagem["ja_existiam"] += 1
             continue
@@ -353,6 +363,24 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = ap.parse_args(argv)
 
+    group_id_configurado = os.getenv("GROUP_ID", "23651")
+    try:
+        group_id_numerico = int(group_id_configurado)
+    except ValueError:
+        log.error(
+            "ERRO escrita recusada: GROUP_ID=%s inválido; prefixo permitido %s",
+            group_id_configurado,
+            PREFIXO_PROPRIO,
+        )
+        return 1
+    if group_id_numerico != 23651 or GROUP_ID != 23651:
+        log.error(
+            "ERRO escrita recusada: GROUP_ID=%s fora do prefixo %s",
+            group_id_configurado,
+            PREFIXO_PROPRIO,
+        )
+        return 1
+
     if args.comando == "collect":
         res = coletar(get_storage(), forcar=args.forcar)
         for k, v in res.items():
@@ -376,7 +404,11 @@ def main(argv: list[str] | None = None) -> int:
         if not (origem / "raw").exists():
             raise SystemExit(f"nao existe a pasta 'raw' em {origem}")
         log.info("subindo de %s", origem)
-        c = subir_local(LocalStorage(origem), get_s3())
+        try:
+            c = subir_local(LocalStorage(origem), get_s3())
+        except ValueError as e:
+            log.error("%s", e)
+            return 1
         log.info("enviados=%d ja_existiam=%d", c["enviados"], c["ja_existiam"])
         return 0
 

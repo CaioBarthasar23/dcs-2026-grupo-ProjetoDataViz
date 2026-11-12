@@ -99,10 +99,10 @@ def test_backfill_ptax_grava_e_nao_duplica(tmp_path, monkeypatch):
 
 def test_nao_sobrescreve_objeto_existente(tmp_path):
     st = c.LocalStorage(tmp_path)
-    st.put("raw/x.json", b"original")
+    st.put("raw/tcgplayer/group_id=23651/data=2026-11-11/x.json", b"original")
     with pytest.raises(FileExistsError):
-        st.put("raw/x.json", b"novo")
-    assert (tmp_path / "raw/x.json").read_bytes() == b"original"
+        st.put("raw/tcgplayer/group_id=23651/data=2026-11-11/x.json", b"novo")
+    assert (tmp_path / "raw/tcgplayer/group_id=23651/data=2026-11-11/x.json").read_bytes() == b"original"
 
 
 def test_ptax_sem_fechamento_de_manha_nao_grava(tmp_path, monkeypatch):
@@ -138,9 +138,11 @@ def test_falha_de_uma_fonte_nao_derruba_as_outras(tmp_path, monkeypatch):
 def test_upload_nao_sobrescreve(tmp_path):
     local = c.LocalStorage(tmp_path / "local")
     destino = c.LocalStorage(tmp_path / "destino")
-    local.put("raw/a.json", b"1")
-    local.put("raw/b.json", b"2")
-    destino.put("raw/a.json", b"ja estava la")
+    local.put("raw/tcgplayer/group_id=23651/data=2026-11-11/a.json", b"1")
+    local.put("raw/tcgplayer/group_id=23651/data=2026-11-11/b.json", b"2")
+    destino.put("raw/tcgplayer/group_id=23651/data=2026-11-11/a.json", b"ja estava la")
     cont = c.subir_local(local, destino)
     assert cont == {"enviados": 1, "ja_existiam": 1}
-    assert (tmp_path / "destino/raw/a.json").read_bytes() == b"ja estava la"
+    assert (
+        tmp_path / "destino/raw/tcgplayer/group_id=23651/data=2026-11-11/a.json"
+    ).read_bytes() == b"ja estava la"
