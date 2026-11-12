@@ -434,3 +434,28 @@ Todas as tarefas continuam [ ]; não declare nada como atendido. Não invente n�
 Somente specs/tasks.md e specs/plan.md. Mostre em tópicos o que vai mudar e espere minha confirmação antes de editar.
 [E] Extras
 Leia antes: AGENTS.md, specs/spec.md (RF-01), specs/tasks.md e specs/plan.md. Ao terminar, liste perguntas abertas e pare.
+
+**Data:** 2026-11-12.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `src/collector.py`, `tests/test_s3_timeouts.py` e `docs/evidencias/T-32_timeouts.txt`.
+- **Confirmação do plano:** "Confirmado. Pode seguir. Mantenha os valores (5 s, 15 s e 2 tentativas) como hipótese: validação pendente nas constantes, com um comentário curto que aponte para o ADR-008."
+
+Prompt 11 (T-32): tempos limite e tentativas do cliente S3
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano. Hoje é a T-32 (specs/tasks.md): definir tempos limite curtos e número limitado de tentativas no cliente S3 do coletor. Requisito: RF-01 (coleta diária confiável). Origem: execução #4 do workflow em 11/11/2026, cancelada após 10 minutos sem log. Uma tarefa, um prompt.
+[R] Pedido
+Implemente o teste e o ajuste, nesta ordem: primeiro o teste que falha, depois o código.
+1. Crie tests/test_s3_timeouts.py: construa o S3Storage do coletor com endpoint e credenciais falsos (sem rede; o cliente boto3 não conecta ao ser criado) e confira na configuração do cliente: tempo de conexão 5 s, tempo de leitura 15 s e 2 tentativas máximas no modo standard. Acrescente um teste de que um erro de tempo limite do cliente (por exemplo, ReadTimeoutError simulado) em exists() não é tratado como "objeto não existe": o erro sobe, e o coletor existente já o registra como falha da fonte sem gravar nada.
+2. Em src/collector.py, ajuste somente a criação do cliente em S3Storage, mantendo as opções atuais (signature_version s3v4, addressing_style path): acrescente connect_timeout=5, read_timeout=15 e retries com max_attempts=2 e mode standard. Não altere mais nada no coletor.
+3. Os valores são hipótese: validação pendente, a confirmar no ADR-008. Deixe-os em constantes nomeadas no topo de src/collector.py, para o ADR poder citá-las.
+[A] Ajustes
+Não altere o workflow, src/silver.py, src/prefixo.py nem outros testes. Todos os 59 testes existentes devem continuar passando. Não leia nem imprima o .env. Rode os testes com PYTHON_DOTENV_DISABLED=true. Não rode collect, upload, backfill-ptax nem rebuild. Comandos permitidos: python -m pytest e git status, git diff, git log. Não faça git commit nem git push: proponha a mensagem de commit no formato tipo(T-xx): descrição [RF-yy].
+[T] Tipo de saída
+Arquivos: tests/test_s3_timeouts.py (novo), src/collector.py (alterado) e docs/evidencias/T-32_timeouts.txt (saída real de python -m pytest tests/test_s3_timeouts.py e de python -m pytest). Mostre o plano em tópicos e espere minha confirmação antes de editar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-01), specs/tasks.md (T-32) e src/collector.py. Ao terminar, liste perguntas abertas e pare.
+
+Resposta do aluno ao plano do Codex:
+Confirmado. Pode seguir. Mantenha os valores (5 s, 15 s e 2 tentativas) como hipótese: validação pendente nas constantes, com um comentário curto que aponte para o ADR-008.
+
