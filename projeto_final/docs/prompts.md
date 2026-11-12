@@ -412,3 +412,25 @@ Leia antes: AGENTS.md, specs/spec.md (RF-01, RF-02, RF-03, RNF-03), specs/tasks.
 
 Resposta do aluno ao plano do Codex:
 Confirmado. Pode seguir, incluindo as duas execuções reais de collect, conforme a autorização expressa do prompt (somente prefixo group_id=23651, sem --forcar). Se algum log contiver endpoint ou credencial, remova da evidência e me avise.
+
+**Data:** 2026-11-12.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `specs/tasks.md` e `specs/plan.md`.
+- **Confirmação do plano:** "Confirmado. Pode editar. Mantenha todas as tarefas como [ ] e os valores dos tempos limite como hipótese: validação pendente."
+
+Prompt 10: registrar o achado do tempo limite do cliente S3 como T-32 e risco
+[C] Personagem
+Você é o líder técnico do aluno. Está registrando nos documentos um achado de operação observado em 11/11/2026, antes de qualquer código. Você só edita documentação.
+[R] Pedido
+Ajuste specs/tasks.md e specs/plan.md, nada mais.
+Fato (origem: execução real #4 do workflow coleta-diaria, 11/11/2026): o passo Coletar ficou 10 minutos sem nenhum log do coletor e foi cancelado pelo timeout-minutes do workflow. As execuções normais levam entre 17 e 25 segundos. Causa provável, a confirmar: o cliente S3 do coletor (boto3) sem tempos limite explícitos aguardou o RustFS. Não houve perda de dado, porque a coleta do dia já estava completa.
+1. specs/tasks.md: acrescente a tarefa T-32, com ID, tarefa, requisitos, dependências, verificação executável, evidência esperada e status [ ]. Conteúdo: definir tempos limite curtos e número limitado de tentativas no cliente S3 do coletor. Requisito: RF-01 (coleta diária confiável). Dependência: T-06. Verificação: python -m pytest tests/test_s3_timeouts.py, que confere a configuração do cliente S3 (tempo de conexão, tempo de leitura e tentativas). Os valores exatos são hipótese: validação pendente, a decidir pelo aluno no ADR-008. Evidência: saída real do teste em docs/evidencias/. Nota: código existente; mudança pequena em src/collector.py.
+2. specs/tasks.md: em T-07, acrescente que revisa também o timeout-minutes do workflow (valor hipótese: validação pendente) e registre o fato de que as execuções agendadas tiveram atrasos de 36 a 56 minutos em 11/11/2026, a considerar na decisão sobre as tentativas de reserva. Inclua T-32 como dependência de T-07 quando fizer sentido. Atualize a tabela de cobertura (RF-01 passa a incluir T-32).
+3. specs/plan.md: acrescente em Riscos técnicos a linha "Cliente S3 sem tempo limite pode travar a coleta", com o fato acima como origem, requisito RF-01 e mitigação T-32/T-07. Em ADR-008, acrescente a observação dos atrasos do agendador.
+[A] Ajustes
+Todas as tarefas continuam [ ]; não declare nada como atendido. Não invente números além dos fatos acima. Não toque em outros arquivos.
+[T] Tipo de saída
+Somente specs/tasks.md e specs/plan.md. Mostre em tópicos o que vai mudar e espere minha confirmação antes de editar.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-01), specs/tasks.md e specs/plan.md. Ao terminar, liste perguntas abertas e pare.
