@@ -459,3 +459,28 @@ Leia antes: AGENTS.md, specs/spec.md (RF-01), specs/tasks.md (T-32) e src/collec
 Resposta do aluno ao plano do Codex:
 Confirmado. Pode seguir. Mantenha os valores (5 s, 15 s e 2 tentativas) como hipótese: validação pendente nas constantes, com um comentário curto que aponte para o ADR-008.
 
+**Data:** 2026-11-12.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `.github/workflows/coleta-diaria.yml`, `tests/test_workflow_schedule.py`, `tests/test_s3_timeouts.py` (correção de regressão autorizada pelo aluno) e `docs/evidencias/T-07_agenda.txt`.
+- **Confirmação do plano:** confirmado pelo aluno, com a edição autorizada do workflow. Valores `timeout-minutes` 5 e a faixa 01:30 UTC como hipótese: validação pendente. Na suíte completa, o teste de segredos reprovou `tests/test_s3_timeouts.py` (valores fictícios atribuídos a `access_key` e `secret_key`); o aluno autorizou corrigir só esse teste passando os valores de forma posicional a partir de variáveis neutras, sem afrouxar o detector.
+
+Prompt 12 (T-07): agenda do workflow com faixa de reserva e timeout de 5 minutos
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano. Hoje é a T-07 (specs/tasks.md): registrar e verificar o agendamento diário do workflow coleta-diaria.yml (código existente; evidência pendente), com tentativas de reserva, e revisar o timeout-minutes. Requisitos: RF-01 e RF-03. Uma tarefa, um prompt.
+[R] Pedido
+Escreva o teste primeiro e rode-o para falhar; depois ajuste o workflow.
+1. Crie tests/test_workflow_schedule.py, que lê .github/workflows/coleta-diaria.yml (na raiz do repositório) como TEXTO, sem biblioteca nova de YAML, e verifica: as faixas de cron são exatamente "30 21 * * *", "30 22 * * *", "30 23 * * *" e "30 1 * * *" (21:30, 22:30, 23:30 e 01:30 UTC, ou seja 18:30, 19:30, 20:30 e 22:30 de Brasília, todas no mesmo dia de Brasília, depois das 18h); workflow_dispatch presente; concurrency com cancel-in-progress falso; timeout-minutes igual a 5; S3_ENDPOINT, S3_ACCESS_KEY e S3_SECRET_KEY atribuídos somente via ${{ secrets.NOME }}; o pior caso diário de chamadas ao TCGCSV (4 execuções × 2 chamadas = 8) fica abaixo de 10.000.
+2. AUTORIZAÇÃO DE ESCOPO: você pode editar .github/workflows/coleta-diaria.yml, e somente ele fora de projeto_final/. Acrescente a faixa "30 1 * * *", ajuste timeout-minutes de 10 para 5 e atualize os comentários: a faixa das 18h30 é a principal; as outras três são reservas; o GitHub atrasou execuções agendadas de 36 a 56 minutos em 11/11/2026; os valores timeout-minutes 5 e a quarta faixa são hipótese: validação pendente, a confirmar no ADR-008. Não altere mais nada no workflow.
+[A] Ajustes
+Não altere src/, outros testes nem outros arquivos. Todos os 61 testes existentes devem continuar passando. Não leia nem imprima o .env. Rode os testes com PYTHON_DOTENV_DISABLED=true. Não rode collect, upload, backfill-ptax nem rebuild. Comandos permitidos: python -m pytest e git status, git diff, git log. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy].
+[T] Tipo de saída
+Arquivos: tests/test_workflow_schedule.py (novo), .github/workflows/coleta-diaria.yml (alterado) e docs/evidencias/T-07_agenda.txt (saída real de python -m pytest tests/test_workflow_schedule.py e de python -m pytest). Mostre o plano em tópicos e espere minha confirmação antes de editar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-01, RF-03), specs/tasks.md (T-07) e o workflow atual. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+1. Confirmado. Pode seguir, com a edição autorizada do workflow coleta-diaria.yml. Mantenha os valores timeout-minutes 5 e a faixa 01:30 UTC como hipótese: validação pendente nos comentários.
+2. Autorizo alterar somente tests/test_s3_timeouts.py para corrigir a regressão: os valores fictícios devem ser passados com nomes neutros (por exemplo, valor_falso_a e valor_falso_b), sem atribuição a nomes com SECRET, KEY ou TOKEN e sem formato de credencial real. Mantenha as verificações do teste exatamente como estão. Não afrouxe o detector em tests/test_secrets_not_versioned.py. Depois: (1) rode a suíte completa e confirme que fica toda verde (esperado: 64 passed); (2) regrave docs/evidencias/T-07_agenda.txt com a saída COMPLETA, sem resumir nem omitir linhas; (3) proponha duas mensagens de commit separadas: uma para a correção do teste (fix(T-32): ...) e outra para a T-07.
+Observação: access_key e secret_key são nomes da assinatura do S3Storage, então passe os valores fictícios de forma posicional, a partir de variáveis neutras, e não como argumentos nomeados.
+
