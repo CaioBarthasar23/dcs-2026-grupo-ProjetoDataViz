@@ -1,0 +1,28 @@
+T-06 — Tentativas de coleta no bucket (2026-11-13)
+
+Execução 1
+Comando: STORAGE=s3 python -m src.collector collect
+Código de saída: 1
+Logs (host/endpoint removido da mensagem de erro):
+2026-11-13 21:13:50,655 INFO raw/tcgplayer/group_id=23651/data=2026-11-13/products.json ERRO: falha de conexão ao endpoint S3 (NameResolutionError / falha de resolução DNS)
+2026-11-13 21:13:50,655 INFO raw/tcgplayer/group_id=23651/data=2026-11-13/prices.json ERRO: falha de conexão ao endpoint S3 (NameResolutionError / falha de resolução DNS)
+2026-11-13 21:13:50,656 INFO raw/bcb_ptax/group_id=23651/data=2026-11-13/cotacao.json ERRO: falha de conexão ao endpoint S3 (NameResolutionError / falha de resolução DNS)
+2026-11-13 21:13:50,656 INFO raw/bcb_cdi/group_id=23651/data=2026-11-13/cdi.json ERRO: falha de conexão ao endpoint S3 (NameResolutionError / falha de resolução DNS)
+
+Execução 2 (imediatamente após a execução 1)
+Comando: STORAGE=s3 python -m src.collector collect
+Código de saída: 1
+Logs (host/endpoint removido da mensagem de erro):
+2026-11-13 21:14:00,940 INFO raw/tcgplayer/group_id=23651/data=2026-11-13/products.json ERRO: falha de conexão ao endpoint S3 (NameResolutionError / falha de resolução DNS)
+2026-11-13 21:14:00,940 INFO raw/tcgplayer/group_id=23651/data=2026-11-13/prices.json ERRO: falha de conexão ao endpoint S3 (NameResolutionError / falha de resolução DNS)
+2026-11-13 21:14:00,940 INFO raw/bcb_ptax/group_id=23651/data=2026-11-13/cotacao.json ERRO: falha de conexão ao endpoint S3 (NameResolutionError / falha de resolução DNS)
+2026-11-13 21:14:00,940 INFO raw/bcb_cdi/group_id=23651/data=2026-11-13/cdi.json ERRO: falha de conexão ao endpoint S3 (NameResolutionError / falha de resolução DNS)
+
+As quatro chaves tentadas em cada execução estão sob `group_id=23651`; contudo, como as tentativas falharam, não há confirmação de que tenham sido gravadas no bucket. Nenhum status "gravado" ou "ja existia" foi obtido.
+
+Verificação somente leitura
+Comando: python -m src.collector check
+Código de saída: 1
+Saída (host/endpoint removido): a consulta ao armazenamento falhou com `EndpointConnectionError`, causado por `NameResolutionError` / falha de resolução DNS. O comando terminou com traceback; detalhes de host/endpoint foram omitidos.
+
+Nenhuma credencial foi exibida. Os logs originais continham o host do endpoint S3, removido desta evidência.

@@ -17,3 +17,5 @@ Código de saída: 0
 2026-11-12 21:51:00,919 INFO raw/bcb_cdi/group_id=23651/data=2026-11-12/cdi.json                    ja existia
 
 As oito linhas de log mostram exclusivamente chaves em group_id=23651; a segunda execução confirmou "ja existia" para todos os quatro objetos. Não houve endpoints nem credenciais nas saídas dessas duas execuções.
+
+Correção (2026-11-13): as duas execuções descritas acima foram realizadas com armazenamento local (`STORAGE=local`, valor do `.env` do Codespace) e gravaram em `data_local/`. Portanto, não comprovam a idempotência no bucket. A evidência de tentativa de coleta no bucket está em `docs/evidencias/T-06_coleta_bucket_real.txt`.

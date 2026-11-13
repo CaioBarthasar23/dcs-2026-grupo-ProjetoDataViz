@@ -510,3 +510,24 @@ Respostas do aluno ao Codex:
 1. Confirmado. Pode executar, incluindo as duas reconstruções autorizadas (--fonte s3 --destino local, sem escrever no bucket). Acréscimo: confirme que a pasta local de destino não existia antes da primeira execução (registre isso) e remova SOMENTE essa pasta local de destino entre as duas execuções, para provar que a silver se reconstrói do bruto sem depender de camada anterior. Não apague nada fora dela.
 2. Não apague nada. Use um destino novo e vazio por execução, via variável LOCAL_ROOT: primeira reconstrução com LOCAL_ROOT=data_local/silver_t08_a e segunda com LOCAL_ROOT=data_local/silver_t08_b (ambas dentro de data_local/, que o Git ignora). Antes de cada execução, confirme e registre que a pasta ainda não existe. Não toque em nada que já esteja em data_local/. Mantenha o restante da autorização: python -m src.silver rebuild --fonte s3 --destino local, duas vezes, sem escrever no bucket, sem PYTHON_DOTENV_DISABLED nas reconstruções. Compare os resultados das pastas a e b (arquivos, somas de verificação e, se os bytes diferirem, o conteúdo das tabelas). Ajuste o texto da evidência: a pré-condição agora é "a pasta de destino de cada execução não existia".
 3. Use silver_t08_a_retry e silver_t08_b_retry.
+
+D*Data:** 2026-11-12.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+Arquivos alterados: docs/evidencias/T-06_coleta_duas_execucoes.txt (nota ao final) e docs/evidencias/T-06_coleta_bucket_real.txt (novo)
+Confirmação do plano: “Confirmado. Execute o plano.”
+Resultado: as duas coletas e o check falharam por NameResolutionError; a idempotência no bucket não foi comprovada
+
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: corrigir a evidência da T-06 (specs/tasks.md). Requisitos: RF-02 e RNF-03.
+[R] Pedido
+Não altere src/. Fato: as duas execuções de collect da T-06 foram feitas com STORAGE=local (valor do .env do Codespace) e gravaram em data_local/, não no bucket. Prova: a execução agendada de 12/11 às 22:15 UTC registrou "gravado" para as mesmas quatro chaves, que não existiam no bucket.
+1. Acrescente ao FINAL de docs/evidencias/T-06_coleta_duas_execucoes.txt, sem apagar nem reescrever o que já está lá, uma nota de correção datada: as duas execuções acima foram em armazenamento local (STORAGE=local); não comprovam a idempotência no bucket; a evidência no bucket está em docs/evidencias/T-06_coleta_bucket_real.txt.
+2. AUTORIZAÇÃO EXPRESSA: autorizo executar duas vezes seguidas STORAGE=s3 python -m src.collector collect (a variável na linha de comando prevalece sobre o .env), gravando no bucket compartilhado SOMENTE no prefixo group_id=23651, sem --forcar. Não rode upload, backfill-ptax nem rebuild. Não use PYTHON_DOTENV_DISABLED nessas execuções (precisam das credenciais). Você não deve ler, abrir nem imprimir o .env.
+3. Grave em docs/evidencias/T-06_coleta_bucket_real.txt: o comando de cada execução (com STORAGE=s3), o código de saída, os logs com o status por chave, a confirmação de que todas as chaves estão em group_id=23651 e, depois, a saída de python -m src.collector check (somente leitura).
+[A] Ajustes
+Sem segredos em evidências: não imprima endpoints nem credenciais; se um log os contiver, remova da evidência e me avise. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy].
+[T] Tipo de saída
+Arquivos: docs/evidencias/T-06_coleta_duas_execucoes.txt (nota ao final) e docs/evidencias/T-06_coleta_bucket_real.txt (novo). Mostre o plano em tópicos e espere minha confirmação antes de executar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-02, RNF-03), specs/tasks.md (T-06) e docs/evidencias/T-06_coleta_duas_execucoes.txt. Ao terminar, liste perguntas abertas e pare.
