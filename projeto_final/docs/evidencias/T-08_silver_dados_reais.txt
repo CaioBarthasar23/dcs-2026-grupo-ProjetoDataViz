@@ -1,0 +1,111 @@
+T-08, parte 1 — evidência de silver com dados reais
+
+Teste existente
+Comando: PYTHON_DOTENV_DISABLED=true python -m pytest tests/test_silver.py
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 31 items
+
+tests/test_silver.py ...............................                     [100%]
+
+============================== 31 passed in 0.42s ==============================
+
+Mapa de cobertura dos testes existentes
+
+RF-05 / RNF-05 — contrato, quarentena, motivos e contagens
+- test_parquet_tipos_do_contrato verifica tipos Arrow de product_id, data e market_price.
+- test_quarentena_orfao_duplicado_e_texto cria três inválidos, verifica a contagem e motivos de duplicidade, produto ausente e market_price textual.
+- test_cambio_sem_fechamento_vai_para_quarentena verifica que PTAX sem fechamento é rejeitada.
+- Lacuna: fixtures locais; não verifica contagens e motivos do bruto real do bucket nem todos os tipos do contrato.
+
+RF-16 — carta, selado, Code Card e categoria_selado
+- test_classificacao cobre carta com número, produto sem número classificado como selado e Code Card sem número classificado como carta.
+- test_rebuild_basico verifica categoria_selado="booster_box" para um produto selado.
+- test_categoria_selado cobre categorias de produtos selados a partir do nome.
+- Lacuna: os testes não validam a classificação dos produtos reais do bucket.
+
+RNF-01 — nulo não é zero
+- test_nulo_nao_e_zero confirma market_price=None no modelo.
+- test_rebuild_basico confirma que um preço nulo permanece None após rebuild com fixture.
+- test_parquet_tipos_do_contrato confirma null_count=1 no Parquet de fixture.
+- Lacuna: os testes não confrontam os nulos com os registros brutos reais do bucket.
+
+RF-06 — reconstrução
+- test_rebuild_e_reproduzivel chama rebuild duas vezes com fixture local e compara o FakeWriter.
+- test_parquet_tipos_do_contrato exercita escrita Parquet real com fixture.
+- Lacuna: os testes não executam o CLI com fonte S3 nem reconstruem dados reais.
+
+Tentativa inicial e precondições
+- A pasta preexistente data_local/ já existia; nenhum conteúdo anterior foi removido ou alterado.
+- Foi confirmada ausente antes da tentativa inicial: data_local/silver_t08_a (exists=False). Essa tentativa terminou com código 1 por erro de resolução DNS antes de listar o bruto no bucket. O rebuild já havia criado uma saída local parcial em silver_t08_a; ela foi preservada e não foi removida.
+- O traceback dessa tentativa continha URL e hostname do endpoint S3. Esses detalhes foram removidos desta evidência. Nenhuma credencial foi detectada.
+- Após confirmação do aluno, os destinos limpos foram alterados para silver_t08_a_retry e silver_t08_b_retry, sem tocar no conteúdo anterior de data_local/.
+- Imediatamente antes da reconstrução 1: data_local/silver_t08_a_retry exists=False.
+- Imediatamente antes da reconstrução 2: data_local/silver_t08_b_retry exists=False.
+- Ambos os comandos de reconstrução foram executados sem PYTHON_DOTENV_DISABLED, com LOCAL_ROOT definido somente para o respectivo destino e com --fonte s3 --destino local. Nenhum comando escreveu no bucket.
+
+Reconstrução 1
+Comando: LOCAL_ROOT=data_local/silver_t08_a_retry python -m src.silver rebuild --fonte s3 --destino local
+Código de saída: 0
+2026-11-12 22:26:12,848 INFO rebuild: fonte=s3 destino=local group_id=23651
+2026-11-12 22:26:21,251 INFO colecao        lidos=1 validos=1 quarentena=0
+2026-11-12 22:26:21,251 INFO produto        lidos=3757 validos=3757 quarentena=0
+2026-11-12 22:26:21,251 INFO preco_diario   lidos=5886 validos=5886 quarentena=0
+2026-11-12 22:26:21,251 INFO cambio_diario  lidos=8 validos=8 quarentena=0
+2026-11-12 22:26:21,251 INFO cdi_diario     lidos=77 validos=77 quarentena=0
+
+Reconstrução 2
+Comando: LOCAL_ROOT=data_local/silver_t08_b_retry python -m src.silver rebuild --fonte s3 --destino local
+Código de saída: 0
+2026-11-12 22:27:38,310 INFO rebuild: fonte=s3 destino=local group_id=23651
+2026-11-12 22:27:46,373 INFO colecao        lidos=1 validos=1 quarentena=0
+2026-11-12 22:27:46,374 INFO produto        lidos=3757 validos=3757 quarentena=0
+2026-11-12 22:27:46,374 INFO preco_diario   lidos=5886 validos=5886 quarentena=0
+2026-11-12 22:27:46,374 INFO cambio_diario  lidos=8 validos=8 quarentena=0
+2026-11-12 22:27:46,374 INFO cdi_diario     lidos=77 validos=77 quarentena=0
+
+Contagem dos arquivos Parquet derivados em cada destino
+Tabela          Arquivos  Linhas por destino  lidos/validos por execução  quarentena
+colecao         1         1                   1/1                         0
+produto         1         289                 3757/3757                   0
+preco_diario    13        5886                5886/5886                   0
+cambio_diario   1         8                   8/8                         0
+cdi_diario      1         15                  77/77                       0
+
+produto contém 289 product_id distintos na tabela consolidada; os 3757 registros válidos lidos ao longo dos dias são reduzidos ao produto mais recente por product_id. CDI consolida as janelas sobrepostas em 15 datas distintas a partir de 77 registros lidos.
+
+Quarentena real
+- Nenhum arquivo de quarentena foi gerado; todas as cinco tabelas tiveram quarentena=0 nas duas execuções.
+- Motivos: nenhum.
+- Em particular, PTAX e CDI não foram para quarentena por incompatibilidade de nome de campo.
+
+Verificações nos dados reais consolidados (iguais nos dois destinos)
+- cambio_diario: 8 linhas; 0 linhas em fim de semana; 0 boletins diferentes de Fechamento.
+- cdi_diario: 15 linhas; 0 datas duplicadas.
+- preco_diario: market_price nulo em 21 linhas; zeros: 0 em market_price, low_price, mid_price e high_price. Os valores nulos permaneceram nulos; nenhum zero aparece nesses campos.
+- produto: coluna categoria_selado presente; 10 produtos Code Card; 0 classificados como algo diferente de carta.
+
+Comparação e SHA-256 dos arquivos gerados
+Os dois destinos contêm os mesmos 17 arquivos. Os SHA-256 byte a byte são idênticos em cada par; portanto os bytes e o conteúdo derivado coincidem, sem diferença de metadados Parquet. A comparação canônica das linhas Parquet também não encontrou divergências. As colunas SHA-256 A e SHA-256 B abaixo são iguais.
+
+Arquivo relativo ao destino                                           Linhas  SHA-256 A e B
+silver/cambio_diario/group_id=23651/cambio.parquet                    8       58cb7b2ce20e71613ca5fd94d4decec9cf0b1af7c4e6fc968c56ffef23228c22
+silver/cdi_diario/group_id=23651/cdi.parquet                          15      62571bf77c4cc1c5af8127b6d98305387e8db3171192d92ec59a85a4c1dd8e74
+silver/colecao/group_id=23651/colecao.parquet                         1       54616394aecf5d91803947fb81615599275974f6845bfacc63387ca35d54be67
+silver/preco_diario/group_id=23651/data=2026-10-31/preco.parquet      453     68852f47f94791d1946367ea0121789802eaf3b631632a04326fe999a1f557df
+silver/preco_diario/group_id=23651/data=2026-11-01/preco.parquet      453     9ddc1d197a66fb1e3520a3224cede9b8fefbd708a8802b2c29b5327caadd82df
+silver/preco_diario/group_id=23651/data=2026-11-02/preco.parquet      453     c25be961c2934d384c3a4bf6481672737c248f017c1a700849c5afb2487aee7b
+silver/preco_diario/group_id=23651/data=2026-11-03/preco.parquet      453     458d4a8ec8d136d91a1614ba8bcfdd50a721668e6117b59800e709c2582929c6
+silver/preco_diario/group_id=23651/data=2026-11-04/preco.parquet      453     53cd3b80c442df5c6007a899fc5957f84e26cae16226641e56bd32188ce59f7e
+silver/preco_diario/group_id=23651/data=2026-11-05/preco.parquet      453     96ee0ac7a68e051f978dbfd3a50a3f0ef8ff0be0d81f89ac45b585ef3dabe37a
+silver/preco_diario/group_id=23651/data=2026-11-06/preco.parquet      453     9d0d3c93ab2051b6cf3ee2788aaf3ccff1c3eb81d11df38671196f25bde3a877
+silver/preco_diario/group_id=23651/data=2026-11-07/preco.parquet      453     1027dd0fa46b49b4f1fe9d753a8344b6f18f14439e92edd0d4183f21aed40213
+silver/preco_diario/group_id=23651/data=2026-11-08/preco.parquet      453     8fd53650c238e0df72c927acb37aafefbcabe95985e22637ca44b69df7d4939d
+silver/preco_diario/group_id=23651/data=2026-11-09/preco.parquet      453     8950b07efa8fce5bf8eacfba4a26f6e4cd93b03591029a757c5333d8dec4296c
+silver/preco_diario/group_id=23651/data=2026-11-10/preco.parquet      452     c63440989d90eb6717405620ca4d789f4638d34a624bc45ccf0f73f8b931090c
+silver/preco_diario/group_id=23651/data=2026-11-11/preco.parquet      452     9bc4c97eeb99b2b8cdda1b61758a1363f2900a75b21a8f089bbff747eb6630b6
+silver/preco_diario/group_id=23651/data=2026-11-12/preco.parquet      452     22f1bdc1ab2081215ff035fcccdb950f977fd04722d7e2b771f567611cee6f61
+silver/produto/group_id=23651/produto.parquet                         289     08bf12f2a6e25d77fa2d2bfd475053ad56e2765c50d468afeb61dd6234fbccf5
+

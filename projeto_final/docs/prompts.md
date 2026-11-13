@@ -484,3 +484,29 @@ Respostas do aluno ao Codex:
 2. Autorizo alterar somente tests/test_s3_timeouts.py para corrigir a regressão: os valores fictícios devem ser passados com nomes neutros (por exemplo, valor_falso_a e valor_falso_b), sem atribuição a nomes com SECRET, KEY ou TOKEN e sem formato de credencial real. Mantenha as verificações do teste exatamente como estão. Não afrouxe o detector em tests/test_secrets_not_versioned.py. Depois: (1) rode a suíte completa e confirme que fica toda verde (esperado: 64 passed); (2) regrave docs/evidencias/T-07_agenda.txt com a saída COMPLETA, sem resumir nem omitir linhas; (3) proponha duas mensagens de commit separadas: uma para a correção do teste (fix(T-32): ...) e outra para a T-07.
 Observação: access_key e secret_key são nomes da assinatura do S3Storage, então passe os valores fictícios de forma posicional, a partir de variáveis neutras, e não como argumentos nomeados.
 
+**Data:** 2026-11-12.
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `docs/evidencias/T-08_silver_dados_reais.txt`.
+- **Confirmação do plano:** confirmado pelo aluno, com a autorização expressa de `rebuild --fonte s3 --destino local` (lê o bucket, não escreve nele). O Codex parou ao encontrar `data_local/` já existente; o aluno orientou usar destinos novos por execução via `LOCAL_ROOT`. A primeira resposta do aluno foi recusada pelo agente por um filtro de segurança indevido e foi reenviada em versão curta. Uma tentativa terminou por erro de DNS e deixou saída parcial em `data_local/silver_t08_a`; o aluno autorizou os destinos `silver_t08_a_retry` e `silver_t08_b_retry`.
+
+Prompt 13 (T-08, parte 1): evidência da silver existente sobre dados reais
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano. Hoje é a T-08, parte 1 (specs/tasks.md): dar evidência à silver existente (código existente; evidência pendente) no contrato comum, com quarentena, motivo e contagem. Requisitos: RF-05, RF-06, RF-16, RNF-01 e RNF-05. Uma tarefa, um prompt.
+[R] Pedido
+Não altere src/. Se algo reprovar por problema real da silver, pare e me mostre o achado, sem corrigir.
+1. Rode PYTHON_DOTENV_DISABLED=true python -m pytest tests/test_silver.py e mapeie, na evidência, qual teste existente cobre qual critério de aceite de RF-05, RF-16 (carta, selado, Code Card como carta, coluna extra categoria_selado) e RNF-01 (nulo não é zero), apontando as lacunas.
+2. AUTORIZAÇÃO EXPRESSA: autorizo executar python -m src.silver rebuild --fonte s3 --destino local duas vezes. Isso LÊ o bucket compartilhado (raw, prefixo group_id=23651) e grava somente em disco local (data_local/, ignorada pelo Git). NÃO grave no bucket: não use --destino s3 e não rode collect, upload nem backfill-ptax. Para estas execuções NÃO use PYTHON_DOTENV_DISABLED (a leitura do bucket precisa das credenciais); você não deve ler, abrir nem imprimir o .env.
+3. Registre, para cada execução: código de saída, contagem por tabela (colecao, produto, preco_diario, cambio_diario, cdi_diario), contagem em quarentena com os motivos, e a soma de verificação (sha256) de cada arquivo gerado. Compare as duas execuções: os mesmos arquivos e o mesmo conteúdo derivado. Se os bytes dos Parquets diferirem só por metadados, compare o conteúdo das tabelas (por exemplo, com pyarrow) e explique.
+4. Confira com dados reais: cambio_diario só tem dia útil com PTAX de fechamento; cdi_diario sem duplicata por data; preços nulos continuam nulos (nenhum zero inventado); Code Card classificado como carta. Se PTAX ou CDI forem para a quarentena por nome de campo diferente do esperado, esse é um achado: pare e mostre o motivo.
+[A] Ajustes
+Sem segredos em evidências: não imprima endpoints nem credenciais, e se um log os contiver, remova da evidência e me avise. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy].
+[T] Tipo de saída
+Arquivo: docs/evidencias/T-08_silver_dados_reais.txt (saídas reais dos testes, do mapa de cobertura e das duas reconstruções, com contagens, quarentena, somas de verificação e a comparação). Mostre o plano em tópicos e espere minha confirmação antes de executar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-05, RF-06, RF-16, RNF-01, RNF-05), specs/tasks.md (T-08) e src/silver.py. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+1. Confirmado. Pode executar, incluindo as duas reconstruções autorizadas (--fonte s3 --destino local, sem escrever no bucket). Acréscimo: confirme que a pasta local de destino não existia antes da primeira execução (registre isso) e remova SOMENTE essa pasta local de destino entre as duas execuções, para provar que a silver se reconstrói do bruto sem depender de camada anterior. Não apague nada fora dela.
+2. Não apague nada. Use um destino novo e vazio por execução, via variável LOCAL_ROOT: primeira reconstrução com LOCAL_ROOT=data_local/silver_t08_a e segunda com LOCAL_ROOT=data_local/silver_t08_b (ambas dentro de data_local/, que o Git ignora). Antes de cada execução, confirme e registre que a pasta ainda não existe. Não toque em nada que já esteja em data_local/. Mantenha o restante da autorização: python -m src.silver rebuild --fonte s3 --destino local, duas vezes, sem escrever no bucket, sem PYTHON_DOTENV_DISABLED nas reconstruções. Compare os resultados das pastas a e b (arquivos, somas de verificação e, se os bytes diferirem, o conteúdo das tabelas). Ajuste o texto da evidência: a pré-condição agora é "a pasta de destino de cada execução não existia".
+3. Use silver_t08_a_retry e silver_t08_b_retry.
