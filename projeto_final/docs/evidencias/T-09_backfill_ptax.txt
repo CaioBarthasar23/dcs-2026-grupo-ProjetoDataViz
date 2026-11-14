@@ -1,0 +1,148 @@
+T-09 — backfill histórico PTAX
+
+Testes sem rede
+Comando: python -m pytest tests/test_ptax_backfill.py
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.1
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 7 items
+
+tests/test_ptax_backfill.py .......                                      [100%]
+
+============================== 7 passed in 0.23s ===============================
+
+Comando: python -m pytest
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.1
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 79 items
+
+tests/test_collector.py ..........                                       [ 12%]
+tests/test_prefix_isolation.py .......                                   [ 21%]
+tests/test_ptax_backfill.py .......                                      [ 30%]
+tests/test_s3_timeouts.py ..                                             [ 32%]
+tests/test_secrets_not_versioned.py ..........                           [ 45%]
+tests/test_silver.py ...............................                     [ 84%]
+tests/test_silver_prefix.py ........                                     [ 94%]
+tests/test_tcgcsv_limits.py .                                            [ 96%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================== 79 passed in 0.77s ===============================
+
+Consulta local solicitada — somente leitura
+Caminho: data_local/silver_t08_b_retry/silver/cambio_diario/group_id=23651/cambio.parquet
+Comando: python -c 'import pyarrow.parquet as pq; p="data_local/silver_t08_b_retry/silver/cambio_diario/group_id=23651/cambio.parquet"; t=pq.read_table(p); ds=sorted({x.isoformat() for x in t.column("data").to_pylist() if x is not None}); print("cambio_diario_datas=", ds); print("contem_2026-10-30=", "2026-10-30" in ds)'
+Saída:
+cambio_diario_datas= ['2026-11-03', '2026-11-04', '2026-11-05', '2026-11-06', '2026-11-09', '2026-11-10', '2026-11-11', '2026-11-12']
+contem_2026-10-30= False
+
+Consulta do objeto PTAX solicitada — somente leitura
+Chave: raw/bcb_ptax/group_id=23651/data=2026-10-31/cotacao.json
+Saída da leitura limitada aos dados de cotação:
+datas_cotacao= []
+boletins= []
+Interpretação: o objeto tem resposta vazia; não contém data de cotação nem boletim.
+
+Listagem S3 — comando somente leitura usado antes/depois de cada execução
+python -c 'from src.collector import get_s3; s=get_s3(); p="raw/bcb_ptax/group_id=23651/"; pages=s.client.get_paginator("list_objects_v2").paginate(Bucket=s.bucket, Prefix=p); [print(o["Key"], o["Size"], o["ETag"]) for page in pages for o in page.get("Contents", [])]'
+A listagem prévia à primeira execução mostrou 14 objetos:
+raw/bcb_ptax/group_id=23651/data=2026-10-31/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-01/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-02/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-03/cotacao.json 997 "79d9fa04f2f3eb4558db271e0cfe331c"
+raw/bcb_ptax/group_id=23651/data=2026-11-04/cotacao.json 998 "b9491b033f8f5700889f7906bfbf6b22"
+raw/bcb_ptax/group_id=23651/data=2026-11-05/cotacao.json 998 "5c657f88b68c61b5e3220b9a5b4365f2"
+raw/bcb_ptax/group_id=23651/data=2026-11-06/cotacao.json 996 "219e263e511c5d8c6b61b476810c6d7e"
+raw/bcb_ptax/group_id=23651/data=2026-11-07/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-08/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-09/cotacao.json 997 "b5e5a66f8c3b838683de0821b5d90090"
+raw/bcb_ptax/group_id=23651/data=2026-11-10/cotacao.json 998 "3645419dd1bf5a0dc13d84ea0a7c53ab"
+raw/bcb_ptax/group_id=23651/data=2026-11-11/cotacao.json 998 "e2e8abffb1130cb6100672273aa96404"
+raw/bcb_ptax/group_id=23651/data=2026-11-12/cotacao.json 998 "6b3bb57cbffe9756392f375316206ad0"
+raw/bcb_ptax/group_id=23651/data=2026-11-13/cotacao.json 998 "a014899e1e2e4d893a17c9db75f3275b"
+
+Primeira execução autorizada
+Comando: python -m src.collector backfill-ptax --de 2026-10-24 --ate 2026-10-30
+Log real:
+2026-11-14 03:29:01,455 INFO raw/bcb_ptax/group_id=23651/data=2026-10-24/cotacao.json               gravado (sem boletim no dia)
+2026-11-14 03:29:01,455 INFO raw/bcb_ptax/group_id=23651/data=2026-10-25/cotacao.json               gravado (sem boletim no dia)
+2026-11-14 03:29:01,455 INFO raw/bcb_ptax/group_id=23651/data=2026-10-26/cotacao.json               gravado
+2026-11-14 03:29:01,455 INFO raw/bcb_ptax/group_id=23651/data=2026-10-27/cotacao.json               gravado
+2026-11-14 03:29:01,455 INFO raw/bcb_ptax/group_id=23651/data=2026-10-28/cotacao.json               gravado
+2026-11-14 03:29:01,455 INFO raw/bcb_ptax/group_id=23651/data=2026-10-29/cotacao.json               gravado
+2026-11-14 03:29:01,455 INFO raw/bcb_ptax/group_id=23651/data=2026-10-30/cotacao.json               gravado
+
+Listagem após a primeira execução — 21 objetos
+raw/bcb_ptax/group_id=23651/data=2026-10-24/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-10-25/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-10-26/cotacao.json 998 "b6a15da44c8b926a4a8cf695879dbb6a"
+raw/bcb_ptax/group_id=23651/data=2026-10-27/cotacao.json 997 "430d446e4ecf859e360b8390dca99e39"
+raw/bcb_ptax/group_id=23651/data=2026-10-28/cotacao.json 996 "86f0774a2c8e8da7a1561c66473b0b33"
+raw/bcb_ptax/group_id=23651/data=2026-10-29/cotacao.json 993 "304594e78e1ead38d80ca18a5f402d33"
+raw/bcb_ptax/group_id=23651/data=2026-10-30/cotacao.json 998 "070920c5e58184140ebcbbf2acd4d12e"
+raw/bcb_ptax/group_id=23651/data=2026-10-31/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-01/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-02/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-03/cotacao.json 997 "79d9fa04f2f3eb4558db271e0cfe331c"
+raw/bcb_ptax/group_id=23651/data=2026-11-04/cotacao.json 998 "b9491b033f8f5700889f7906bfbf6b22"
+raw/bcb_ptax/group_id=23651/data=2026-11-05/cotacao.json 998 "5c657f88b68c61b5b3220b9a5b4365f2"
+raw/bcb_ptax/group_id=23651/data=2026-11-06/cotacao.json 996 "219e263e511c5d8c6b61b476810c6d7e"
+raw/bcb_ptax/group_id=23651/data=2026-11-07/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-08/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567"
+raw/bcb_ptax/group_id=23651/data=2026-11-09/cotacao.json 997 "b5e5a66f8c3b838683de0821b5d90090"
+raw/bcb_ptax/group_id=23651/data=2026-11-10/cotacao.json 998 "3645419dd1bf5a0dc13d84ea0a7c53ab"
+raw/bcb_ptax/group_id=23651/data=2026-11-11/cotacao.json 998 "e2e8abffb1130cb6100672273aa96404"
+raw/bcb_ptax/group_id=23651/data=2026-11-12/cotacao.json 998 "6b3bb57cbffe9756392f375316206ad0"
+raw/bcb_ptax/group_id=23651/data=2026-11-13/cotacao.json 998 "a014899e1e2e4d893a17c9db75f3275b"
+
+Listagem antes da segunda execução (21 objetos): idêntica, linha a linha, à listagem de 21 objetos acima.
+
+Segunda execução autorizada
+Comando: python -m src.collector backfill-ptax --de 2026-10-24 --ate 2026-10-30
+Log real:
+2026-11-14 03:29:35,068 INFO raw/bcb_ptax/group_id=23651/data=2026-10-24/cotacao.json               ja existia
+2026-11-14 03:29:35,068 INFO raw/bcb_ptax/group_id=23651/data=2026-10-25/cotacao.json               ja existia
+2026-11-14 03:29:35,069 INFO raw/bcb_ptax/group_id=23651/data=2026-10-26/cotacao.json               ja existia
+2026-11-14 03:29:35,069 INFO raw/bcb_ptax/group_id=23651/data=2026-10-27/cotacao.json               ja existia
+2026-11-14 03:29:35,069 INFO raw/bcb_ptax/group_id=23651/data=2026-10-28/cotacao.json               ja existia
+2026-11-14 03:29:35,069 INFO raw/bcb_ptax/group_id=23651/data=2026-10-29/cotacao.json               ja existia
+2026-11-14 03:29:35,069 INFO raw/bcb_ptax/group_id=23651/data=2026-10-30/cotacao.json               ja existia
+
+Listagem após a segunda execução (21 objetos): idêntica, linha a linha, à listagem de 21 objetos acima.
+
+Verificação de preservação e prefixo
+A listagem inicial tinha 14 objetos. Após a primeira execução há 21: 7 chaves adicionadas, todas dentro de raw/bcb_ptax/group_id=23651/. Para as 14 chaves preexistentes, tamanhos e ETags permaneceram iguais. As listagens após a primeira execução, antes da segunda e após a segunda são idênticas: 21 chaves, mesmos tamanhos e ETags. A segunda execução retornou “ja existia” para todas as sete chaves do intervalo. Nenhum objeto preexistente foi alterado.
+
+Silver: resultado do teste com raw PTAX vazio
+O teste test_silver_ignora_objeto_ptax_vazio_sem_criar_cambio_ou_zero passou. A silver não emite linha em cambio_diario para o payload {"value": []}; não cria cotação zero.
+
+Lacuna de especificação
+RF-01, RF-02 e RF-08 não especificam o intervalo do backfill, o tratamento de feriados nem como as lacunas do backfill devem ser registradas. T-09 pede backfill por data, mas isso não preenche essa lacuna. Ela permanece aberta; não foi alterada a especificação.
+
+
+Conferência na revisão (2026-11-14, depois das execuções acima)
+Divergência de transcrição encontrada na revisão: na listagem "após a primeira execução", o ETag da chave data=2026-11-05 aparece como "5c657f88b68c61b5b3220b9a5b4365f2". O valor correto, igual ao da listagem prévia, é "5c657f88b68c61b5e3220b9a5b4365f2". Foi erro de transcrição neste arquivo, não alteração do objeto. A listagem abaixo é a saída real de uma nova consulta somente leitura, com a data de modificação em UTC. Os 14 objetos preexistentes têm data de modificação anterior a 2026-11-14 03:28:57, portanto nenhum foi alterado pelo backfill; os 7 novos foram gravados entre 03:28:57 e 03:29:01.
+
+data=2026-10-24/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567" 2026-11-14 03:28:57
+data=2026-10-25/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567" 2026-11-14 03:28:58
+data=2026-10-26/cotacao.json 998 "b6a15da44c8b926a4a8cf695879dbb6a" 2026-11-14 03:28:58
+data=2026-10-27/cotacao.json 997 "430d446e4ecf859e360b8390dca99e39" 2026-11-14 03:28:59
+data=2026-10-28/cotacao.json 996 "86f0774a2c8e8da7a1561c66473b0b33" 2026-11-14 03:29:00
+data=2026-10-29/cotacao.json 993 "304594e78e1ead38d80ca18a5f402d33" 2026-11-14 03:29:00
+data=2026-10-30/cotacao.json 998 "070920c5e58184140ebcbbf2acd4d12e" 2026-11-14 03:29:01
+data=2026-10-31/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567" 2026-11-07 14:35:01
+data=2026-11-01/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567" 2026-11-07 15:14:23
+data=2026-11-02/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567" 2026-11-07 15:14:25
+data=2026-11-03/cotacao.json 997 "79d9fa04f2f3eb4558db271e0cfe331c" 2026-11-07 15:19:31
+data=2026-11-04/cotacao.json 998 "b9491b033f8f5700889f7906bfbf6b22" 2026-11-07 15:19:31
+data=2026-11-05/cotacao.json 998 "5c657f88b68c61b5e3220b9a5b4365f2" 2026-11-07 15:19:31
+data=2026-11-06/cotacao.json 996 "219e263e511c5d8c6b61b476810c6d7e" 2026-11-07 15:19:31
+data=2026-11-07/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567" 2026-11-07 22:00:47
+data=2026-11-08/cotacao.json 124 "b5bc2b759290e6dd7492f79e662c5567" 2026-11-08 22:01:13
+data=2026-11-09/cotacao.json 997 "b5e5a66f8c3b838683de0821b5d90090" 2026-11-09 22:13:54
+data=2026-11-10/cotacao.json 998 "3645419dd1bf5a0dc13d84ea0a7c53ab" 2026-11-10 22:08:04
+data=2026-11-11/cotacao.json 998 "e2e8abffb1130cb6100672273aa96404" 2026-11-11 22:25:28
+data=2026-11-12/cotacao.json 998 "6b3bb57cbffe9756392f375316206ad0" 2026-11-12 22:15:40
+data=2026-11-13/cotacao.json 998 "a014899e1e2e4d893a17c9db75f3275b" 2026-11-13 21:33:52

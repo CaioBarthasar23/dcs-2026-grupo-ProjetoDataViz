@@ -565,3 +565,33 @@ Leia antes: AGENTS.md, specs/spec.md (RNF-03, RF-05, RF-06), specs/tasks.md (T-0
 Respostas do aluno ao Codex:
 1. Confirmado. Pode editar. Acréscimos:Ordem: escreva primeiro tests/test_silver_prefix.py e rode-o ANTES de alterar src/silver.py; os testes de recusa devem falhar nessa execução. Só depois aplique a proteção e rode de novo. Registre as duas saídas em docs/evidencias/T-08_prefixo_silver.txt (antes: falhando; depois: passando). Depois, rode python -m pytest completo e mostre a contagem; os 64 testes existentes devem continuar passando.Proponha commits separados: código e testes juntos, evidência à parte.
 2. Continue de onde parou. Grave docs/evidencias/T-08_prefixo_silver.txt com as três saídas reais: testes novos antes da alteração, depois da alteração, e a suíte completa. Depois entregue o relatório do item 4. Não altere mais nada.
+
+**Data:** 2026-11-14, 00h20 (Brasília).
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `tests/test_ptax_backfill.py` e `docs/evidencias/T-09_backfill_ptax.txt`.
+- **Confirmação do plano:** confirmado pelo aluno, com a autorização expressa de `backfill-ptax --de 2026-10-24 --ate 2026-10-30`, executado duas vezes, gravando só no prefixo `raw/bcb_ptax/group_id=23651/`. O intervalo foi escolhido pelo aluno depois de uma listagem somente leitura que mostrou o primeiro dia de preço em 2026-10-31 e nenhuma PTAX anterior no bucket.
+- **Resultado:** 7 testes novos e 79 na suíte completa. O backfill gravou 7 chaves (duas com "sem boletim no dia", cinco com fechamento); a segunda execução retornou "ja existia" nas sete. Os 14 objetos preexistentes não foram alterados, o que foi confirmado pela data de modificação. A revisão encontrou um ETag transcrito errado na evidência (data=2026-11-05), corrigido por nota datada. A especificação não cobre intervalo, feriados nem lacunas do backfill; lacuna aberta, decisão do aluno.
+
+Prompt 16 (T-09): teste e evidência do backfill de PTAX histórica
+
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: T-09 (specs/tasks.md), backfill de PTAX histórica sem alterar objetos brutos existentes. Requisitos: RF-01, RF-02, RF-08 e RNF-03.
+[R] Pedido
+O comando python -m src.collector backfill-ptax já existe. Falta teste e evidência.
+1. Escreva tests/test_ptax_backfill.py, sem rede (armazenamento local em tmp_path e resposta do BCB simulada): grava a cotação de uma data que ainda não existe; não sobrescreve nem altera objeto bruto existente (compare bytes antes e depois); data sem boletim de fechamento NÃO gera objeto e fica registrada como lacuna, sem valor inventado; toda chave gravada está em group_id=23651; GROUP_ID alheio é recusado.
+2. Rode python -m pytest tests/test_ptax_backfill.py e depois python -m pytest.
+3. NÃO execute backfill-ptax real nesta etapa. No plano, mostre: o comportamento do código (de onde vem o intervalo de datas, o que ele faz com feriado e fim de semana), o intervalo exato que seria consultado, quantas chaves seriam criadas e quantas já existem, e o comando SOMENTE LEITURA que você usará para listar, antes e depois, as chaves de raw/bcb_ptax/group_id=23651/ com tamanho e ETag. Diga também se a especificação (RF-01, RF-02, RF-08) cobre o backfill e, se não cobrir, aponte a lacuna sem preenchê-la.
+[A] Ajustes
+Nenhuma gravação no bucket até eu autorizar de forma expressa na minha confirmação do plano. Não rode collect, upload nem rebuild. Não leia nem imprima .env. Sem segredos nas evidências. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy], com código e evidência em commits separados.
+[T] Tipo de saída
+Arquivos: tests/test_ptax_backfill.py (novo) e docs/evidencias/T-09_backfill_ptax.txt (saída do teste, listagem antes e depois, log do backfill, confirmação de prefixo e de imutabilidade). Mostre o plano em tópicos e espere minha confirmação antes de editar ou executar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-01, RF-02, RF-08, RNF-03), specs/tasks.md (T-09), src/collector.py e tests/test_collector.py. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+Confirmado. Ajustes ao plano:
+1. O teste de dia sem boletim deve descrever o comportamento real: resposta vazia em data histórica grava objeto com a marca "sem boletim no dia" e nenhum valor; resposta não vazia sem fechamento é ignorada. Acrescente um teste de que a silver ignora esse objeto, sem criar linha de câmbio nem valor zero; se falhar, reporte, não altere src/.
+2. Registre na evidência que a especificação (RF-01, RF-02, RF-08) não cobre intervalo, feriados nem lacunas do backfill; não preencha a lacuna.
+3. Somente leitura, sem rede: liste as datas de cambio_diario na silver local em data_local/silver_t08_b_retry e diga se a data de cotação 2026-10-30 já aparece. Somente leitura no bucket: leia o objeto raw/bcb_ptax/group_id=23651/data=2026-10-31/cotacao.json e informe qual data de cotação ele contém, sem imprimir endpoint nem credenciais. Registre as duas respostas na evidência.
+4. AUTORIZAÇÃO EXPRESSA: autorizo executar python -m src.collector backfill-ptax --de 2026-10-24 --ate 2026-10-30, uma vez, gravando no bucket compartilhado SOMENTE no prefixo raw/bcb_ptax/group_id=23651/. Depois autorizo repetir o mesmo comando uma segunda vez para provar "ja existia". Antes e depois de cada execução, rode o comando somente leitura de listagem (chave, tamanho e ETag) e prove que nenhum objeto existente mudou. Se o comando precisar de permissão de rede fora do sandbox, solicite-a. Não rode collect, upload nem rebuild. Não leia nem imprima .env. Sem segredos, sem host de endpoint na evidência.
