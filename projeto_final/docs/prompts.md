@@ -536,3 +536,4 @@ Leia antes: AGENTS.md, specs/spec.md (RF-02, RNF-03), specs/tasks.md (T-06) e do
 
 Respostas do aluno ao Codex:
 1. Confirmado. Execute o plano.
+2. (Sem mensagem nova. O aluno aprovou, na tela do Codex, o pedido de permissão de acesso à rede para executar fora do sandbox, e a repetição das duas coletas ficou dentro da autorização do Prompt 14.)

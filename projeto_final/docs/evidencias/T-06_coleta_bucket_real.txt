@@ -26,3 +26,37 @@ Código de saída: 1
 Saída (host/endpoint removido): a consulta ao armazenamento falhou com `EndpointConnectionError`, causado por `NameResolutionError` / falha de resolução DNS. O comando terminou com traceback; detalhes de host/endpoint foram omitidos.
 
 Nenhuma credencial foi exibida. Os logs originais continham o host do endpoint S3, removido desta evidência.
+
+Repetição após indicação de DNS disponível (2026-11-13)
+
+No sandbox, foram feitas duas tentativas sequenciais; ambas terminaram com código 1 devido a falha de resolução DNS ao conectar ao endpoint S3. Os logs continham o host do endpoint, removido aqui. Nenhuma gravação foi confirmada nessas tentativas.
+
+Execução 1 (fora do sandbox, após autorização para acesso à rede)
+Comando: STORAGE=s3 python -m src.collector collect
+Código de saída: 0
+2026-11-13 21:33:53,380 INFO raw/tcgplayer/group_id=23651/data=2026-11-13/products.json             gravado
+2026-11-13 21:33:53,381 INFO raw/tcgplayer/group_id=23651/data=2026-11-13/prices.json               gravado
+2026-11-13 21:33:53,381 INFO raw/bcb_ptax/group_id=23651/data=2026-11-13/cotacao.json               gravado
+2026-11-13 21:33:53,381 INFO raw/bcb_cdi/group_id=23651/data=2026-11-13/cdi.json                    gravado
+
+Execução 2 (imediatamente após a execução 1, fora do sandbox)
+Comando: STORAGE=s3 python -m src.collector collect
+Código de saída: 0
+2026-11-13 21:34:09,728 INFO raw/tcgplayer/group_id=23651/data=2026-11-13/products.json             ja existia
+2026-11-13 21:34:09,728 INFO raw/tcgplayer/group_id=23651/data=2026-11-13/prices.json               ja existia
+2026-11-13 21:34:09,728 INFO raw/bcb_ptax/group_id=23651/data=2026-11-13/cotacao.json               ja existia
+2026-11-13 21:34:09,728 INFO raw/bcb_cdi/group_id=23651/data=2026-11-13/cdi.json                    ja existia
+
+As oito linhas de sucesso acima correspondem somente a chaves sob `group_id=23651`. A segunda execução registrou `ja existia` para as quatro chaves; não houve sobrescrita.
+
+Verificação somente leitura após as duas execuções bem-sucedidas
+Comando: python -m src.collector check
+Código de saída: 0
+2026-11-13 21:34:17,527 INFO ocupada: raw/tcgplayer/group_id=23651/
+2026-11-13 21:34:17,527 INFO ocupada: raw/tcgplayer/group_id=24269/
+2026-11-13 21:34:17,528 INFO ocupada: raw/tcgplayer/group_id=24541/
+2026-11-13 21:34:17,528 INFO group_id=23651 ja tem dados (confira se foram seus)
+
+O `check` confirmou que o prefixo `group_id=23651` contém dados. Ele também listou outros prefixos compartilhados; as chaves desta coleta, conforme os logs acima, permaneceram exclusivamente em `group_id=23651`. Nenhuma credencial apareceu nas saídas. O host do endpoint que apareceu nos logs das tentativas falhas foi omitido.
+
+Nota (2026-11-13): as falhas de DNS acima ocorreram no sandbox do Codex, sem acesso à rede. Fora do sandbox, com acesso liberado, a conexao ao bucket funcionou (codigo de saida 0). Nao ha indicio de indisponibilidade do servidor nesse horario.
