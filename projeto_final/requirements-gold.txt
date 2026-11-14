@@ -1,0 +1,3 @@
+# Camada gold e dashboard. A coleta diaria instala so requirements.txt.
+-r requirements.txt
+duckdb==1.5.6
