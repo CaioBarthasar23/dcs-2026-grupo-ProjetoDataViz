@@ -661,3 +661,32 @@ Não altere src/collector.py, src/silver.py nem src/fx_asof.py. Não grave no bu
 (2) Rode python -m pytest tests/test_gold_schema.py e a suíte completa; os resultados devem continuar 8 passed e 92 passed.
 (3) Acrescente ao FINAL de docs/evidencias/T-11_gold.txt (com tee -a, sem reescrever) uma seção datada com o texto exato da consulta DuckDB e do comando que produziu as linhas por tabela, as cinco contagens de chaves órfãs e o resultado do ASOF, e a saída real de rodá-los de novo sobre uma gold construída em pasta local temporária.
 Não altere src/collector.py, src/silver.py nem src/fx_asof.py. Não grave no bucket.
+
+**Data:** 2026-11-14, 11h21 (Brasília).
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `src/decomposicao.py`, `tests/test_decomposition.py` e `docs/evidencias/T-12_decomposicao.txt`.
+- **Confirmação do plano:** o Codex perguntou se podia obter a taxa pela razão `market_price_brl / market_price` e se a contagem de exclusões deveria incluir os casos de preço em reais nulo e de linha ausente. O aluno confirmou a taxa implícita e mandou separar as exclusões por cinco motivos (decisão do aluno, porque o RF-10 não a define; ADR pendente).
+- **Resultado:** testes escritos antes da implementação (erro de coleta por módulo inexistente); depois 8 passed e 1 failed, e o teste com expectativa errada (limite igual ao preço, quando a regra é estritamente maior) foi corrigido; 9 passed e 101 passed na suíte. Exemplo numérico: efeito da carta 20%, do câmbio 20%, cruzado 4%, variação em reais 44%.
+
+Prompt 19 (T-12): decomposição da variação em reais
+
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: T-12 (specs/tasks.md), decomposição da variação em reais em efeito da carta, efeito do câmbio e efeito cruzado. Requisitos: RF-10 e RNF-01; objetivo OBJ-01.
+[R] Pedido
+1. Crie em src/ um módulo novo (por exemplo src/decomposicao.py) com uma função que, para cada carta e acabamento, calcula a variação percentual em reais entre duas datas e a decompõe conforme o OBJ-01: (1 + r_brl) = (1 + r_usd) × (1 + r_cambio), ou seja, efeito da carta = r_usd, efeito do câmbio = r_cambio e efeito cruzado = r_usd × r_cambio, de modo que r_brl = r_usd + r_cambio + r_usd × r_cambio. A entrada são as linhas de fato_preco_diario e dim_produto da gold (src/gold.py); o r_cambio vem da PTAX efetivamente usada em cada ponta (data_ptax_usada, já resolvida pelo ASOF de src/fx_asof.py). Não duplique a lógica do ASOF.
+2. Regras do enunciado: só entram cartas (não selados) com market_price acima de US$ 1 no primeiro dia do período; Code Card fica fora (veja em src/silver.py como ele é identificado); preço nulo em qualquer ponta exclui a carta do resultado, que registra quantas foram excluídas por esse motivo, nunca vira zero. O limiar de US$ 1 é parâmetro, com 1,00 como padrão.
+3. O período (primeiro e último dia, ou duas datas escolhidas) e o tratamento de qualquer caso que a especificação ou o OBJ-01 não definam: leia specs/spec.md (RF-10) e docs/01_objetivos_negocio.md (OBJ-01) e, se houver lacuna, pergunte; não escolha.
+4. Escreva tests/test_decomposition.py com dados fixos, sem rede e sem bucket: a identidade (1 + r_brl) = (1 + r_usd)(1 + r_cambio) vale com tolerância de 1e-12 para cada carta; os três efeitos somam r_brl; carta com market_price igual ou abaixo de US$ 1 no primeiro dia fica fora; Code Card fica fora; selado fica fora; preço nulo em uma ponta exclui a carta e entra na contagem de excluídas; câmbio estável gera efeito do câmbio zero e cruzado zero; carta estável com câmbio em alta gera só efeito do câmbio.
+[A] Ajustes
+Não rode collect, upload, backfill-ptax, rebuild nem gold build; não toque no bucket. Não leia nem imprima .env. Sem segredos em evidências. Não altere src/collector.py, src/silver.py, src/fx_asof.py nem src/gold.py; se achar que precisa, pergunte. Escreva e execute os testes novos antes de implementar, mostrando a falha. Grave as saídas com redirecionamento (comando 2>&1 | tee -a arquivo), sem retranscrever. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy], com código e testes juntos e a evidência em outro commit.
+[T] Tipo de saída
+Arquivos: src/decomposicao.py (novo), tests/test_decomposition.py (novo) e docs/evidencias/T-12_decomposicao.txt (saída real dos testes e da suíte completa; um exemplo numérico com os três efeitos de uma carta de dados fixos). Mostre o plano em tópicos e espere minha confirmação antes de editar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-10, RNF-01), docs/01_objetivos_negocio.md (OBJ-01), specs/tasks.md (T-12), specs/plan.md, src/gold.py, src/fx_asof.py e src/silver.py. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+1. Respostas:
+(1) Sim: use a taxa implícita market_price_brl / market_price em cada ponta, identificando a PTAX pela data_ptax_usada. Se market_price for exatamente 0 em qualquer ponta, exclua a carta e conte num motivo próprio; não divida por zero.
+(2) Sim, mas separe a contagem por motivo, sem somar num número só: (a) abaixo do limiar no primeiro dia; (b) sem linha de fato ou preço nulo no primeiro dia; (c) sem linha de fato ou preço nulo no último dia; (d) market_price presente e market_price_brl nulo por falta de PTAX; (e) market_price igual a zero. Combinação sem linha de fato numa das datas entra no motivo (b) ou (c) da data correspondente. Selados e Code Card ficam fora por definição de escopo e não entram nessa contagem. Registre na evidência que a separação por motivo é decisão do aluno em 2026-11-14, porque o RF-10 não a define, com ADR pendente.
+O período padrão é o primeiro e o último dia presentes no fato, como o OBJ-01 define, com datas explícitas como parâmetros. Siga o plano: testes primeiro, executados e falhando, depois a implementação.

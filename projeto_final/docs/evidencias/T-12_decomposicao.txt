@@ -1,0 +1,108 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_decomposition.py _________________
+ImportError while importing test module '/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/tests/test_decomposition.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.14.2/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_decomposition.py:5: in <module>
+    from src.decomposicao import decompor_variacao
+E   ModuleNotFoundError: No module named 'src.decomposicao'
+=========================== short test summary info ============================
+ERROR tests/test_decomposition.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+=============================== 1 error in 0.23s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 9 items
+
+tests/test_decomposition.py .......F.                                    [100%]
+
+=================================== FAILURES ===================================
+_______________ test_usa_datas_explicitas_e_limite_parametrizado _______________
+
+    def test_usa_datas_explicitas_e_limite_parametrizado():
+        rows = [
+            preco(1, "Normal", INICIO, 1.5, 7.5, INICIO),
+            preco(1, "Normal", FIM, 2.0, 10.0, FIM),
+        ]
+    
+        result = decompor_variacao(
+            rows,
+            [produto(1)],
+            data_inicio=INICIO,
+            data_fim=FIM,
+            limite_usd=1.5,
+        )
+    
+>       assert result["resultados"][0]["product_id"] == 1
+               ^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests/test_decomposition.py:171: IndexError
+=========================== short test summary info ============================
+FAILED tests/test_decomposition.py::test_usa_datas_explicitas_e_limite_parametrizado
+========================= 1 failed, 8 passed in 0.06s ==========================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 9 items
+
+tests/test_decomposition.py .........                                    [100%]
+
+============================== 9 passed in 0.05s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 101 items
+
+tests/test_collector.py ..........                                       [  9%]
+tests/test_decomposition.py .........                                    [ 18%]
+tests/test_fx_asof.py .....                                              [ 23%]
+tests/test_gold_schema.py ........                                       [ 31%]
+tests/test_prefix_isolation.py .......                                   [ 38%]
+tests/test_ptax_backfill.py .......                                      [ 45%]
+tests/test_s3_timeouts.py ..                                             [ 47%]
+tests/test_secrets_not_versioned.py ..........                           [ 57%]
+tests/test_silver.py ...............................                     [ 88%]
+tests/test_silver_prefix.py ........                                     [ 96%]
+tests/test_tcgcsv_limits.py .                                            [ 97%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 101 passed in 1.39s ==============================
+r_usd=0.200000000000 (20.000000%)
+r_cambio=0.200000000000 (20.000000%)
+efeito_cruzado=0.040000000000 (4.000000%)
+r_brl=0.440000000000 (44.000000%)
+checagem_identidade= 1.440000000000 = 1.440000000000
+
+## T-12 — Decomposição da variação — 2026-11-14
+
+A decisão de separar as exclusões por motivo (abaixo do limiar no início; ausência de linha ou preço nulo no início; ausência de linha ou preço nulo no fim; preço BRL nulo por falta de PTAX; preço USD zero) é do aluno em 2026-11-14. O RF-10 não define essa separação; ADR pendente. Selados e Code Card ficam fora do escopo e não entram nos contadores. Preço USD zero tem contador próprio e não é dividido.
+
+Período padrão: menor e maior data presentes no fato; `data_inicio` e `data_fim` explícitas permitem escolher outro intervalo. Os retornos são frações decimais. A taxa usada em cada ponta é `market_price_brl / market_price`, e `data_ptax_usada` é retornada para identificar a PTAX previamente associada pelo ASOF.
+
+### Exemplo numérico real
+
+Dados fixos: preço da carta de USD 10 para USD 12; preço em BRL de R$ 50 para R$ 72; taxa implícita de 5 para 6 BRL/USD.
+
+```text
+r_usd=0.200000000000 (20.000000%)
+r_cambio=0.200000000000 (20.000000%)
+efeito_cruzado=0.040000000000 (4.000000%)
+r_brl=0.440000000000 (44.000000%)
+checagem_identidade= 1.440000000000 = 1.440000000000
+```
+
+Nota de revisão (2026-11-14): no primeiro ciclo após a implementação, o teste test_usa_datas_explicitas_e_limite_parametrizado falhou. Ele usava limite_usd=1.5 com preço de 1.5 e esperava incluir a carta, mas a regra do enunciado é "acima de" (estritamente maior), e o código exclui preço igual ao limite. O teste estava errado e foi corrigido para limite_usd=1.49. A igualdade ao limite continua coberta por test_limite_padrao_exclui_preco_igual_ou_abaixo_de_um_dolar.
