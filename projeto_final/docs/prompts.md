@@ -511,12 +511,14 @@ Respostas do aluno ao Codex:
 2. Não apague nada. Use um destino novo e vazio por execução, via variável LOCAL_ROOT: primeira reconstrução com LOCAL_ROOT=data_local/silver_t08_a e segunda com LOCAL_ROOT=data_local/silver_t08_b (ambas dentro de data_local/, que o Git ignora). Antes de cada execução, confirme e registre que a pasta ainda não existe. Não toque em nada que já esteja em data_local/. Mantenha o restante da autorização: python -m src.silver rebuild --fonte s3 --destino local, duas vezes, sem escrever no bucket, sem PYTHON_DOTENV_DISABLED nas reconstruções. Compare os resultados das pastas a e b (arquivos, somas de verificação e, se os bytes diferirem, o conteúdo das tabelas). Ajuste o texto da evidência: a pré-condição agora é "a pasta de destino de cada execução não existia".
 3. Use silver_t08_a_retry e silver_t08_b_retry.
 
-D*Data:** 2026-11-12.
+**Data:** 2026-11-13, 18h11 (Brasília).
 - **Quem enviou:** CaioBarthasar23.
 - **Agente e modelo:** Codex, GPT-6.
-Arquivos alterados: docs/evidencias/T-06_coleta_duas_execucoes.txt (nota ao final) e docs/evidencias/T-06_coleta_bucket_real.txt (novo)
-Confirmação do plano: “Confirmado. Execute o plano.”
-Resultado: as duas coletas e o check falharam por NameResolutionError; a idempotência no bucket não foi comprovada
+- **Arquivos alterados:** `docs/evidencias/T-06_coleta_duas_execucoes.txt` (nota ao final) e `docs/evidencias/T-06_coleta_bucket_real.txt` (novo, atualizado depois com a repetição).
+- **Confirmação do plano:** confirmado pelo aluno, com a autorização expressa de duas execuções de `collect` com `STORAGE=s3`, só no prefixo `group_id=23651`, sem `--forcar`.
+- **Resultado:** as duas primeiras coletas e o `check` falharam por `NameResolutionError` dentro do sandbox do Codex, que estava sem rede. Repetidas fora do sandbox, com a permissão de rede aprovada pelo aluno, a primeira gravou as quatro chaves (`gravado`), a segunda mostrou `ja existia` nas quatro e o `check` terminou com código 0. Idempotência no bucket comprovada.
+
+Prompt 14 (T-06): corrigir a evidência da coleta, repetindo no bucket real com STORAGE=s3
 
 [C] Personagem
 Você é o engenheiro que executa uma única tarefa do plano: corrigir a evidência da T-06 (specs/tasks.md). Requisitos: RF-02 e RNF-03.
@@ -531,3 +533,6 @@ Sem segredos em evidências: não imprima endpoints nem credenciais; se um log o
 Arquivos: docs/evidencias/T-06_coleta_duas_execucoes.txt (nota ao final) e docs/evidencias/T-06_coleta_bucket_real.txt (novo). Mostre o plano em tópicos e espere minha confirmação antes de executar. Não declare sucesso sem mostrar a saída.
 [E] Extras
 Leia antes: AGENTS.md, specs/spec.md (RF-02, RNF-03), specs/tasks.md (T-06) e docs/evidencias/T-06_coleta_duas_execucoes.txt. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+1. Confirmado. Execute o plano.
