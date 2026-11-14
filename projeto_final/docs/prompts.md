@@ -723,3 +723,55 @@ Respostas do aluno ao Codex:
 3. A série contém apenas as datas presentes no fato. Não crie datas ausentes nem carregue preços para uma data inteira que não existe. O preço carregado vale só para um item sem preço numa data que existe no fato.
 4. Mais de uma linha para o mesmo par (product_id, acabamento) e data: levante ValueError.
 Registre na evidência que as respostas 1 e 2 são decisão do aluno em 2026-11-14 (o enunciado não as define; ADR pendente) e que a resposta 3 vem da regra do AGENTS.md ("dia sem coleta é lacuna declarada, nunca preenchida"). Registre também o resultado da quantificação (79 pares, 0 produtos com mais de um acabamento). Siga o plano: testes primeiro, executados e falhando, depois a implementação.
+
+**Data:** 2026-11-14, 11h56 (Brasília).
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `src/comparacao_colecoes.py`, `tests/test_collection_comparison.py` e `docs/evidencias/T-14_comparacao_colecoes.txt`.
+- **Confirmação do plano:** o Codex apresentou o plano sem perguntas e o aluno confirmou. Em duas tentativas na sessão antiga o Codex recusou a tarefa dizendo ser assistente de pesquisa sobre sistemas eleitorais e de votação, sem ler arquivos nem acessar o bucket; o prompt só foi aceito numa sessão nova.
+- **Resultado:** testes escritos antes da implementação (erro de coleta por módulo inexistente); depois 9 passed e 121 na suíte. A leitura autorizada do item 3 (outros grupos) falhou com InvalidAccessKeyId no endpoint antigo e ficou pendente. A revisão do aluno encontrou lacunas de regra e de teste, corrigidas no Prompt 22.
+
+Prompt 21 (T-14): comparação do valor das coleções em reais e índices base 100
+
+Contexto: projeto acadêmico de engenharia de dados sobre preços de cartas Pokémon colecionáveis (TCGplayer, PTAX, CDI). Não envolve eleições, votação nem dados pessoais.
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: T-14 (specs/tasks.md), valor diário da coleção em reais e índices base 100 por coleção e da PTAX, comparando as coleções da turma. Requisitos: RF-11 (pergunta 3) e RNF-01; objetivo OBJ-03.
+[R] Pedido
+Decisões do aluno em 2026-11-14 (hipóteses com validação pendente, ADR pendente): (1) o exemplar de cada carta é o acabamento de menor market_price_brl no primeiro dia do período comum, entre os acabamentos com preço nesse dia (empate: ordem alfabética do acabamento), e esse acabamento fica fixo no resto do período; (2) o período comum é formado pelas datas presentes em todas as coleções disponíveis, e a cobertura de cada coleção fica registrada; (3) a conversão para reais de todas as coleções usa a PTAX do projeto e a cotação padrão compra, reaproveitando src/fx_asof.py.
+1. Crie em src/ um módulo novo (por exemplo src/comparacao_colecoes.py) com uma função que recebe, para cada coleção (group_id), as linhas de preco_diario e de produto no contrato da silver, mais as linhas de cambio_diario, e devolve: o período comum; as coleções disponíveis e as excluídas, cada uma com o motivo; a cobertura de cada coleção; a série diária do valor da coleção em reais (soma dos preços do exemplar escolhido de cada carta); o índice base 100 de cada coleção no primeiro dia do período comum; e o índice base 100 da PTAX no mesmo período, derivado da mesma PTAX usada na conversão. Não duplique a lógica do ASOF.
+2. Regras do enunciado: só entram cartas (tipo_produto "carta"); Code Card fica fora, pela raridade "Code Card"; selados ficam fora. Preço nulo não vale como preço (nulo não é zero). Item sem preço num dia presente no período comum usa o último preço observado, contado como carregado, como na T-13 (src/selado_vs_cartas.py é o padrão de estilo); a carta que não tem preço em reais no primeiro dia do período comum não entra na coleção. Coleção sem nenhuma carta elegível no primeiro dia sai da comparação, registrada com o motivo. A moeda é parâmetro ("brl" padrão, "usd"), e o filtro de preço mínimo em dólar é parâmetro opcional (padrão desligado), estritamente maior que o limite, aplicado no primeiro dia.
+3. Leitura somente leitura dos outros grupos. AUTORIZAÇÃO EXPRESSA, SOMENTE LEITURA: leia no bucket compartilhado os objetos silver/colecao, silver/produto, silver/cambio_diario e silver/preco_diario dos outros group_id que existirem, apenas para (a) listar as coleções e o período de datas de cada uma, (b) comparar os nomes e tipos das colunas com o nosso contrato da silver, (c) listar, em contagens agregadas por grupo, os valores distintos de tipo_produto e de raridade (o filtro da carta e do Code Card depende desses textos). Não imprima linhas individuais de preço, nome de aluno nem credenciais, e não escreva nada em nenhum prefixo. Solicite a permissão de rede fora do sandbox se precisar. Registre o resultado na evidência e sinalize qualquer divergência de contrato ou de valor; não altere nada por causa dela, a decisão é minha.
+4. Escreva tests/test_collection_comparison.py com dados fixos de pelo menos três coleções, sem rede e sem bucket: o período comum é a interseção das datas das coleções disponíveis; os índices valem 100 no primeiro dia comum, inclusive o da PTAX; o valor diário é a soma do exemplar de cada carta; o acabamento de menor preço no primeiro dia é escolhido e permanece fixo mesmo que outro fique mais barato depois; empate de preço desempata pela ordem do acabamento; Code Card e selado ficam fora; preço carregado é contado; coleção sem carta elegível no primeiro dia é excluída com motivo; a cobertura é calculada; o resultado não depende da ordem em que as coleções são fornecidas; moeda "usd" e "brl" dão índices diferentes quando o câmbio muda; filtro de preço mínimo em dólar estrito aplicado só no primeiro dia; linha duplicada para (coleção, produto, acabamento, data) levanta ValueError.
+[A] Ajustes
+A única leitura no bucket autorizada é a do item 3. Não rode collect, upload, backfill-ptax, rebuild nem gold build e não grave nada no bucket. Não leia nem imprima .env. Sem segredos em evidências. Não altere src/collector.py, src/silver.py, src/fx_asof.py, src/gold.py, src/decomposicao.py nem src/selado_vs_cartas.py; se achar que precisa, pergunte. Escreva e execute os testes novos antes de implementar, mostrando a falha. Grave as saídas com redirecionamento (comando 2>&1 | tee -a arquivo), sem retranscrever. Se um teste falhar depois da implementação, ou se acrescentar teste depois, explique na evidência, sem afrouxar a verificação. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy], com código e testes juntos e a evidência em outro commit.
+[T] Tipo de saída
+Arquivos: src/comparacao_colecoes.py (novo), tests/test_collection_comparison.py (novo) e docs/evidencias/T-14_comparacao_colecoes.txt (saída real dos testes e da suíte completa; um exemplo numérico com três coleções de dados fixos; o resultado da leitura do item 3; as três decisões do aluno registradas como hipótese com validação pendente). Mostre o plano em tópicos e espere minha confirmação antes de editar ou ler o bucket. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-11, RNF-01), docs/01_objetivos_negocio.md (OBJ-03), specs/tasks.md (T-14), specs/plan.md, src/fx_asof.py, src/selado_vs_cartas.py, src/silver.py e src/gold.py. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+1. Confirmação do plano (sessão nova do Codex): "Confirmado. Execute o plano da T-14 como descrito, incluindo a leitura somente leitura autorizada no item 3. Não grave nada no bucket."
+
+**Data:** 2026-11-14, 16h21 (Brasília).
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `src/comparacao_colecoes.py`, `tests/test_collection_comparison.py` e `docs/evidencias/T-14_comparacao_colecoes.txt`.
+- **Confirmação do plano:** o Codex apresentou o plano em quatro itens, sem perguntas, e o aluno confirmou.
+- **Resultado:** quatro testes de regressão escritos antes da correção; dois falharam (preço nulo contado como dia com preço e coleção excluída restringindo o período) e dois já passavam (acabamento fixo e carta que cai abaixo do limite em dólar). Depois da correção, 13 passed no arquivo e 125 na suíte. Ao aplicar a correção o Codex sobrescreveu o arquivo de evidência inteiro, e não só o exemplo numérico; o aluno recompôs a Parte 1 a partir da saída da primeira revisão e registrou isso no próprio arquivo.
+
+Prompt 22 (T-14): correção do período comum e testes de regressão
+
+[C] Personagem
+Você é o engenheiro que corrige a T-14 (specs/tasks.md) após revisão. Requisitos: RF-11 e RNF-01.
+[R] Pedido
+Corrija src/comparacao_colecoes.py e tests/test_collection_comparison.py:
+1. (a) Linha com market_price nulo não conta como data com preço, nem na cobertura (dias_com_preco) nem no período comum. (b) Coleção sem nenhuma data com preço não nulo é excluída com motivo. (c) Coleção sem carta elegível no primeiro dia sai e deixa de restringir o período; recalcule o período com as que sobram e repita até estabilizar; cada exclusão registra o motivo. Decisão do aluno em 2026-11-14 (hipótese, validação pendente, ADR pendente).
+2. Testes novos, escritos e executados antes da correção, mostrando a falha: (a) o acabamento escolhido no primeiro dia permanece mesmo quando outro fica mais barato num dia que pertence ao período comum; (b) uma carta escolhida cai abaixo do limite em dólar depois do primeiro dia e continua na série; (c) linha com preço nulo não conta como dia com preço na cobertura; (d) coleção excluída não encolhe o período das demais.
+3. Na evidência, substitua o exemplo numérico por saída real: chame calcular_comparacao_colecoes com as fixtures do teste, grave a saída com tee, sem reformatar. Acrescente nota: o exemplo anterior tinha formato diferente da função. Detalhe na nota qual fixture foi ajustada.
+[A] Ajustes
+Não toque em nenhum outro módulo. Não leia o bucket. Sem commit nem push. Nenhum teste existente é afrouxado; explique na evidência qualquer teste alterado.
+[T] Tipo de saída
+Arquivos alterados e saída real dos testes (novos e suíte). Mostre o plano e espere confirmação antes de editar.
+[E] Extras
+Pare ao terminar e liste perguntas abertas.
+
+Respostas do aluno ao Codex:
+1. Confirmação do plano: "Confirmado. Execute o plano de correção da T-14 como descrito. Não acesse o bucket e não faça commit nem push."

@@ -1,0 +1,52 @@
+T-14 — Parte 1: execução original (2026-11-14)
+Nota: o Codex sobrescreveu este arquivo ao aplicar a correção (Prompt 22). Esta parte foi recomposta pelo aluno a partir da saída da primeira revisão, colada em 2026-11-14. O exemplo numérico original foi descartado de propósito: tinha formato diferente da função e foi substituído na Parte 2.
+
+Estado inicial: testes de contrato executados antes da implementação.
+==================================== ERRORS ====================================
+_____________ ERROR collecting tests/test_collection_comparison.py _____________
+E   ModuleNotFoundError: No module named 'src.comparacao_colecoes'
+=========================== short test summary info ============================
+ERROR tests/test_collection_comparison.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.14s
+
+Depois da implementação: 9 passed in 0.89s. Suíte completa: 121 passed.
+
+Revisão do teste: fixture ajustada ao contrato de entrada preco_diario; market_price_brl é calculado pelo ASOF do módulo, não fornecido pela fixture.
+
+Decisões do aluno em 2026-11-14 (hipóteses com validação pendente; ADR pendente):
+1. Exemplar: menor market_price_brl no primeiro dia comum, entre acabamentos cotados; empate por ordem alfabética; acabamento fixo no período.
+2. Período comum: interseção das datas das coleções disponíveis; cobertura de cada coleção registrada.
+3. Conversão: PTAX do projeto, cotação compra; ASOF reutilizado de src/fx_asof.py.
+
+Leitura do item 3 (outros grupos, somente leitura): tentativa autorizada falhou antes de ler objetos, com botocore ClientError InvalidAccessKeyId em ListObjectsV2 (endpoint antigo). Nenhuma gravação foi feita. Informado pelo aluno em 2026-11-14: o professor trocou o endpoint após a queda do cluster antigo; com o endpoint novo, `python -m src.collector check` retorna código 0 e informa que o prefixo group_id=23651 está livre. A leitura do item 3 permanece PENDENTE (não foi refeita) e não há resultado sobre períodos, contratos ou valores de tipo_produto e raridade das outras coleções.
+
+==================== Parte 2: correção após revisão ====================
+T-14 — correção após revisão (2026-11-14)
+
+Testes regressivos novos executados antes da correção:
+Comando: python -m pytest -q tests/test_collection_comparison.py -k 'acabamento_escolhido_no_inicio or cai_abaixo or preco_nulo_nao or excluida_nao_restringe'
+Saída real:
+..FF                                                                     [100%]
+=================================== FAILURES ===================================
+_____ test_preco_nulo_nao_conta_como_dia_com_preco_nem_periodo ___________
+E       assert [datetime.date(2026, 10, 9), datetime.date(2026, 10, 10)] == [datetime.date(2026, 10, 9)]
+
+______________ test_colecao_excluida_nao_restringe_periodo_comum ______________
+E       assert [datetime.date(2026, 10, 9), datetime.date(2026, 10, 11)] == [datetime.date(2026, 10, 9), datetime.date(2026, 10, 10), datetime.date(2026, 10, 11)]
+
+2 failed, 2 passed, 9 deselected
+
+Depois da correção:
+....                                                                     [100%]
+4 passed, 9 deselected in 0.57s
+.............                                                            [100%]
+13 passed in 2.26s
+........................................................................ [ 57%]
+.....................................................                    [100%]
+125 passed in 3.70s
+{'periodo_comum': [datetime.date(2026, 10, 9), datetime.date(2026, 10, 11)], 'disponiveis': {101: {'motivo': 'possui cartas elegíveis com preço em reais no primeiro dia comum', 'quantidade_cartas': 2, 'acabamentos_escolhidos': {1: 'Alpha', 2: 'Normal'}}, 202: {'motivo': 'possui cartas elegíveis com preço em reais no primeiro dia comum', 'quantidade_cartas': 1, 'acabamentos_escolhidos': {20: 'Foil'}}, 303: {'motivo': 'possui cartas elegíveis com preço em reais no primeiro dia comum', 'quantidade_cartas': 1, 'acabamentos_escolhidos': {30: 'Normal'}}}, 'excluidas': {}, 'cobertura': {101: {'dias_com_preco': 2, 'dias_periodo_comum': 2, 'proporcao_dias': 1.0, 'linhas_preco_periodo': 6}, 202: {'dias_com_preco': 2, 'dias_periodo_comum': 2, 'proporcao_dias': 1.0, 'linhas_preco_periodo': 2}, 303: {'dias_com_preco': 2, 'dias_periodo_comum': 2, 'proporcao_dias': 1.0, 'linhas_preco_periodo': 2}}, 'series': {101: [{'data': datetime.date(2026, 10, 9), 'valor': 30.0, 'valor_brl': 30.0, 'valor_usd': 6.0, 'indice_colecao': 100.0, 'quantidade_cartas': 2, 'quantidade_carregados': 0}, {'data': datetime.date(2026, 10, 11), 'valor': 32.0, 'valor_brl': 32.0, 'valor_usd': 6.0, 'indice_colecao': 106.66666666666667, 'quantidade_cartas': 2, 'quantidade_carregados': 1}], 202: [{'data': datetime.date(2026, 10, 9), 'valor': 5.0, 'valor_brl': 5.0, 'valor_usd': 1.0, 'indice_colecao': 100.0, 'quantidade_cartas': 1, 'quantidade_carregados': 0}, {'data': datetime.date(2026, 10, 11), 'valor': 18.0, 'valor_brl': 18.0, 'valor_usd': 3.0, 'indice_colecao': 360.0, 'quantidade_cartas': 1, 'quantidade_carregados': 0}], 303: [{'data': datetime.date(2026, 10, 9), 'valor': 10.0, 'valor_brl': 10.0, 'valor_usd': 2.0, 'indice_colecao': 100.0, 'quantidade_cartas': 1, 'quantidade_carregados': 0}, {'data': datetime.date(2026, 10, 11), 'valor': 18.0, 'valor_brl': 18.0, 'valor_usd': 3.0, 'indice_colecao': 180.0, 'quantidade_cartas': 1, 'quantidade_carregados': 0}]}, 'indice_ptax': [{'data': datetime.date(2026, 10, 9), 'valor_ptax': 5.0, 'indice': 100.0}, {'data': datetime.date(2026, 10, 11), 'valor_ptax': 6.0, 'indice': 120.0}], 'moeda': 'brl'}
+
+Nota sobre a evidência anterior: o exemplo anterior tinha formato diferente da função. O exemplo foi substituído pela saída direta da função acima. A fixture ajustada foi a da coleção 404 no teste de exclusão: agora contém preço não nulo e produto selado, isolando a exclusão por ausência de carta elegível; o caso de preço nulo ficou coberto pelo novo teste específico. Nenhum teste teve uma asserção removida ou enfraquecida.
+
+Decisão do aluno em 2026-11-14: hipótese, validação pendente, ADR pendente.
