@@ -1,0 +1,382 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 8 items
+
+tests/test_gold_schema.py FFFFFFFF                                       [100%]
+
+=================================== FAILURES ===================================
+______________ test_gold_tem_tabelas_colunas_e_preserva_code_card ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-11/test_gold_tem_tabelas_colunas_0')
+
+    def test_gold_tem_tabelas_colunas_e_preserva_code_card(tmp_path):
+>       _, _, destination = build_fixture(tmp_path)
+                            ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_gold_schema.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_gold_schema.py:177: in build_fixture
+    gold = gold_module()
+           ^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def gold_module():
+>       from src import gold
+E       ImportError: cannot import name 'gold' from 'src' (/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/__init__.py)
+
+tests/test_gold_schema.py:169: ImportError
+___________________ test_fatos_tem_relacoes_sem_chaves_orfas ___________________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-11/test_fatos_tem_relacoes_sem_ch0')
+
+    def test_fatos_tem_relacoes_sem_chaves_orfas(tmp_path):
+>       _, _, destination = build_fixture(tmp_path)
+                            ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_gold_schema.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_gold_schema.py:177: in build_fixture
+    gold = gold_module()
+           ^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def gold_module():
+>       from src import gold
+E       ImportError: cannot import name 'gold' from 'src' (/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/__init__.py)
+
+tests/test_gold_schema.py:169: ImportError
+____________ test_reconstruir_duas_vezes_produz_parquets_identicos _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-11/test_reconstruir_duas_vezes_pr0')
+
+    def test_reconstruir_duas_vezes_produz_parquets_identicos(tmp_path):
+>       gold, source, destination = build_fixture(tmp_path)
+                                    ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_gold_schema.py:261: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_gold_schema.py:177: in build_fixture
+    gold = gold_module()
+           ^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def gold_module():
+>       from src import gold
+E       ImportError: cannot import name 'gold' from 'src' (/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/__init__.py)
+
+tests/test_gold_schema.py:169: ImportError
+_____________ test_todas_as_chaves_gravadas_usam_group_id_proprio ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-11/test_todas_as_chaves_gravadas_0')
+
+    def test_todas_as_chaves_gravadas_usam_group_id_proprio(tmp_path):
+>       gold = gold_module()
+               ^^^^^^^^^^^^^
+
+tests/test_gold_schema.py:277: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def gold_module():
+>       from src import gold
+E       ImportError: cannot import name 'gold' from 'src' (/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/__init__.py)
+
+tests/test_gold_schema.py:169: ImportError
+__________ test_group_id_alheio_e_recusado_antes_de_qualquer_escrita ___________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-11/test_group_id_alheio_e_recusad0')
+
+    def test_group_id_alheio_e_recusado_antes_de_qualquer_escrita(tmp_path):
+>       gold = gold_module()
+               ^^^^^^^^^^^^^
+
+tests/test_gold_schema.py:302: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def gold_module():
+>       from src import gold
+E       ImportError: cannot import name 'gold' from 'src' (/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/__init__.py)
+
+tests/test_gold_schema.py:169: ImportError
+____________ test_main_recusa_group_id_alheio_antes_de_criar_lakes _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x74368b70c2b0>
+caplog = <_pytest.logging.LogCaptureFixture object at 0x74368bad3b60>
+
+    def test_main_recusa_group_id_alheio_antes_de_criar_lakes(monkeypatch, caplog):
+>       gold = gold_module()
+               ^^^^^^^^^^^^^
+
+tests/test_gold_schema.py:313: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def gold_module():
+>       from src import gold
+E       ImportError: cannot import name 'gold' from 'src' (/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/__init__.py)
+
+tests/test_gold_schema.py:169: ImportError
+_______ test_preco_brl_usa_ultima_ptax_ate_data_sem_usar_cotacao_futura ________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-11/test_preco_brl_usa_ultima_ptax0')
+
+    def test_preco_brl_usa_ultima_ptax_ate_data_sem_usar_cotacao_futura(tmp_path):
+>       _, _, destination = build_fixture(tmp_path)
+                            ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_gold_schema.py:330: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_gold_schema.py:177: in build_fixture
+    gold = gold_module()
+           ^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def gold_module():
+>       from src import gold
+E       ImportError: cannot import name 'gold' from 'src' (/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/__init__.py)
+
+tests/test_gold_schema.py:169: ImportError
+____________________ test_market_price_nulo_permanece_nulo _____________________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-11/test_market_price_nulo_permane0')
+
+    def test_market_price_nulo_permanece_nulo(tmp_path):
+>       _, _, destination = build_fixture(tmp_path)
+                            ^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_gold_schema.py:343: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_gold_schema.py:177: in build_fixture
+    gold = gold_module()
+           ^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def gold_module():
+>       from src import gold
+E       ImportError: cannot import name 'gold' from 'src' (/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/__init__.py)
+
+tests/test_gold_schema.py:169: ImportError
+=========================== short test summary info ============================
+FAILED tests/test_gold_schema.py::test_gold_tem_tabelas_colunas_e_preserva_code_card
+FAILED tests/test_gold_schema.py::test_fatos_tem_relacoes_sem_chaves_orfas - ...
+FAILED tests/test_gold_schema.py::test_reconstruir_duas_vezes_produz_parquets_identicos
+FAILED tests/test_gold_schema.py::test_todas_as_chaves_gravadas_usam_group_id_proprio
+FAILED tests/test_gold_schema.py::test_group_id_alheio_e_recusado_antes_de_qualquer_escrita
+FAILED tests/test_gold_schema.py::test_main_recusa_group_id_alheio_antes_de_criar_lakes
+FAILED tests/test_gold_schema.py::test_preco_brl_usa_ultima_ptax_ate_data_sem_usar_cotacao_futura
+FAILED tests/test_gold_schema.py::test_market_price_nulo_permanece_nulo - Imp...
+============================== 8 failed in 0.60s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 8 items
+
+tests/test_gold_schema.py F.......                                       [100%]
+
+=================================== FAILURES ===================================
+______________ test_gold_tem_tabelas_colunas_e_preserva_code_card ______________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-12/test_gold_tem_tabelas_colunas_0')
+
+    def test_gold_tem_tabelas_colunas_e_preserva_code_card(tmp_path):
+        _, _, destination = build_fixture(tmp_path)
+    
+        tabelas = {
+>           key.split("/")[1]
+            ^^^^^^^^^
+            for key in destination.root.glob("gold/*/group_id=23651/*.parquet")
+        }
+E       AttributeError: 'PosixPath' object has no attribute 'split'
+
+tests/test_gold_schema.py:193: AttributeError
+=========================== short test summary info ============================
+FAILED tests/test_gold_schema.py::test_gold_tem_tabelas_colunas_e_preserva_code_card
+========================= 1 failed, 7 passed in 0.82s ==========================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 8 items
+
+tests/test_gold_schema.py ........                                       [100%]
+
+============================== 8 passed in 0.85s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 92 items
+
+tests/test_collector.py ..........                                       [ 10%]
+tests/test_fx_asof.py .....                                              [ 16%]
+tests/test_gold_schema.py ........                                       [ 25%]
+tests/test_prefix_isolation.py .......                                   [ 32%]
+tests/test_ptax_backfill.py .......                                      [ 40%]
+tests/test_s3_timeouts.py ..                                             [ 42%]
+tests/test_secrets_not_versioned.py ..........                           [ 53%]
+tests/test_silver.py ...............................                     [ 86%]
+tests/test_silver_prefix.py ........                                     [ 95%]
+tests/test_tcgcsv_limits.py .                                            [ 96%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================== 92 passed in 1.51s ==============================
+dim_acabamento: rows=2
+dim_colecao: rows=1
+dim_data: rows=5
+dim_produto: rows=2
+fato_cambio_diario: rows=3
+fato_preco_diario: rows=4
+preco_asof= [(datetime.date(2026, 10, 8), 1001, None, None), (datetime.date(2026, 10, 9), 1001, 10.0, datetime.date(2026, 10, 9)), (datetime.date(2026, 10, 12), 1001, 15.0, datetime.date(2026, 10, 9)), (datetime.date(2026, 10, 13), 1002, None, datetime.date(2026, 10, 13))]
+chaves_orfas_por_relacao= [0, 0, 0, 0, 0]
+
+## Ajuste do layout das chaves Gold — 2026-11-14
+
+- A chave de cada tabela passou a ser `gold/group_id=23651/<tabela>.parquet`, montada por `_gold_key` em `src/gold.py`. `validar_chave` permanece aplicado à lista de chaves antes de ler a Silver e antes de gravar cada tabela.
+- O teste de inspeção agora percorre `gold/group_id=23651/*.parquet`, compara os caminhos relativos exatos com as seis chaves esperadas e confere os nomes das tabelas. A inspeção anterior tratava `Path` como string via `split("/")`, o que gerou `AttributeError`; a correção usa `relative_to(...).as_posix()` sem retirar verificações.
+- `python -m pytest -q tests/test_gold_schema.py`: 8 passed in 14.46s.
+- `python -m pytest -q`: 92 passed in 4.53s.
+- Nenhum acesso ou gravação no bucket foi realizado.
+
+## Validação final local da T-11 — 2026-11-14
+
+### Comando de construção e consulta
+
+Comando executado a partir de `projeto_final/`; cria a Silver fixture e a Gold em `TemporaryDirectory` local, carrega as seis tabelas Parquet no DuckDB e imprime as linhas por tabela e os resultados das duas consultas:
+
+```bash
+python - <<'PY'
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+import duckdb
+import io
+import pyarrow.parquet as pq
+
+from src.silver import LocalLake
+from tests.test_gold_schema import GOLD_TABLES, gold_module, silver_fixture
+
+sql_orfas = """SELECT 'produto' AS relacao, count(*) AS orfas
+FROM fato_preco_diario f LEFT JOIN dim_produto p USING (group_id, product_id)
+WHERE p.product_id IS NULL
+UNION ALL
+SELECT 'colecao', count(*)
+FROM fato_preco_diario f LEFT JOIN dim_colecao c USING (group_id)
+WHERE c.group_id IS NULL
+UNION ALL
+SELECT 'data_preco', count(*)
+FROM fato_preco_diario f LEFT JOIN dim_data d USING (data)
+WHERE d.data IS NULL
+UNION ALL
+SELECT 'acabamento', count(*)
+FROM fato_preco_diario f LEFT JOIN dim_acabamento a USING (acabamento)
+WHERE a.acabamento IS NULL
+UNION ALL
+SELECT 'data_cambio', count(*)
+FROM fato_cambio_diario f LEFT JOIN dim_data d USING (data)
+WHERE d.data IS NULL
+ORDER BY relacao"""
+sql_asof = """SELECT data, product_id, data_ptax_usada, market_price_brl
+FROM fato_preco_diario
+ORDER BY data, product_id"""
+
+with TemporaryDirectory(prefix="t11-gold-") as tmp:
+    root = Path(tmp)
+    fonte = silver_fixture(root / "silver")
+    destino = LocalLake(root / "gold")
+    counts = gold_module().build(fonte, destino)
+
+    con = duckdb.connect()
+    for table in GOLD_TABLES:
+        key = f"gold/group_id=23651/{table}.parquet"
+        con.register(table, pq.read_table(io.BytesIO(destino.get(key))))
+
+    print("linhas_por_tabela:")
+    for table, count in sorted(counts.items()):
+        print(f"{table}: rows={count}")
+    print("consulta_chaves_orfas:")
+    print(sql_orfas)
+    print("chaves_orfas_por_relacao=", con.execute(sql_orfas).fetchall())
+    print("consulta_asof:")
+    print(sql_asof)
+    print("preco_asof=", con.execute(sql_asof).fetchall())
+    con.close()
+PY
+```
+
+### Saída real
+
+```text
+linhas_por_tabela:
+dim_acabamento: rows=2
+dim_colecao: rows=1
+dim_data: rows=5
+dim_produto: rows=2
+fato_cambio_diario: rows=3
+fato_preco_diario: rows=4
+consulta_chaves_orfas:
+SELECT 'produto' AS relacao, count(*) AS orfas
+FROM fato_preco_diario f LEFT JOIN dim_produto p USING (group_id, product_id)
+WHERE p.product_id IS NULL
+UNION ALL
+SELECT 'colecao', count(*)
+FROM fato_preco_diario f LEFT JOIN dim_colecao c USING (group_id)
+WHERE c.group_id IS NULL
+UNION ALL
+SELECT 'data_preco', count(*)
+FROM fato_preco_diario f LEFT JOIN dim_data d USING (data)
+WHERE d.data IS NULL
+UNION ALL
+SELECT 'acabamento', count(*)
+FROM fato_preco_diario f LEFT JOIN dim_acabamento a USING (acabamento)
+WHERE a.acabamento IS NULL
+UNION ALL
+SELECT 'data_cambio', count(*)
+FROM fato_cambio_diario f LEFT JOIN dim_data d USING (data)
+WHERE d.data IS NULL
+ORDER BY relacao
+chaves_orfas_por_relacao= [('acabamento', 0), ('colecao', 0), ('data_cambio', 0), ('data_preco', 0), ('produto', 0)]
+consulta_asof:
+SELECT data, product_id, data_ptax_usada, market_price_brl
+FROM fato_preco_diario
+ORDER BY data, product_id
+preco_asof= [(datetime.date(2026, 10, 8), 1001, None, None), (datetime.date(2026, 10, 9), 1001, datetime.date(2026, 10, 9), 10.0), (datetime.date(2026, 10, 12), 1001, datetime.date(2026, 10, 9), 15.0), (datetime.date(2026, 10, 13), 1002, datetime.date(2026, 10, 13), None)]
+```
+
+A Gold foi construída somente sob diretório temporário local; nenhum objeto do bucket foi lido ou gravado.
+
+### Testes após a limpeza
+
+```text
+$ python -m pytest tests/test_gold_schema.py
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 8 items
+
+tests/test_gold_schema.py ........                                       [100%]
+
+============================== 8 passed in 0.72s ===============================
+
+$ python -m pytest
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 92 items
+
+tests/test_collector.py ..........                                       [ 10%]
+tests/test_fx_asof.py .....                                              [ 16%]
+tests/test_gold_schema.py ........                                       [ 25%]
+tests/test_prefix_isolation.py .......                                   [ 32%]
+tests/test_ptax_backfill.py .......                                      [ 40%]
+tests/test_s3_timeouts.py ..                                             [ 42%]
+tests/test_secrets_not_versioned.py ..........                           [ 53%]
+tests/test_silver.py ...............................                     [ 86%]
+tests/test_silver_prefix.py ........                                     [ 95%]
+tests/test_tcgcsv_limits.py .                                            [ 96%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================== 92 passed in 1.31s ==============================
+```

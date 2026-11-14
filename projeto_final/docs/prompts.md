@@ -624,3 +624,40 @@ Respostas do aluno ao Codex:
 1. Respostas: (1) Autorizo adicionar duckdb ao requirements.txt, com a versão exata instalada (o ambiente é Python 3.14). Rode pip install -r requirements.txt e a suíte completa para provar que nada quebrou. (2) Use cotacao_compra para converter market_price. Faça a cotação ser um parâmetro da função (valores "venda" e "compra"), com "compra" como padrão, e cubra as duas nos testes. Registre na evidência e no docstring do módulo que a escolha é decisão do aluno em 2026-11-14, hipótese com validação pendente e ADR pendente, e que o RF-08 e as demais seções da especificação não a definem. Siga o plano: testes primeiro, executados e falhando, depois a implementação.
 2. Continue de onde parou. Grave docs/evidencias/T-10_asof.txt com as saídas reais: os testes novos antes da implementação (falhando), depois da implementação (passando) e a suíte completa. Mostre também o texto dos 6 avisos do pytest. Se a execução antes da implementação não foi feita, diga; não simule.
 3. Corrija o aviso: troque fetch_arrow_table() por to_arrow_table() em src/fx_asof.py e rode python -m pytest tests/test_fx_asof.py tests/test_collector.py e depois a suíte completa. Os 6 avisos devem desaparecer. Acrescente ao FINAL de docs/evidencias/T-10_asof.txt uma seção datada com essas duas execuções, sem reescrever o que já está lá. Não altere mais nada.
+
+**Data:** 2026-11-14, 01h02 (Brasília).
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `src/gold.py`, `tests/test_gold_schema.py` e `docs/evidencias/T-11_gold.txt`.
+- **Confirmação do plano:** o Codex informou que a especificação e o plano não definem nomes de tabelas, colunas nem chaves da gold e propôs um esquema (fato de preço e de câmbio; dimensões de produto, coleção, data e acabamento), que o aluno confirmou. Depois o aluno listou, em modo somente leitura, o padrão de chaves dos outros grupos no bucket (`gold/group_id=<id>/<tabela>.parquet`) e pediu a correção do layout das chaves, sem gravar no bucket. Uma terceira mensagem pediu a limpeza do código e o texto da consulta na evidência.
+- **Resultado:** testes escritos e executados antes da implementação (8 falhas por módulo inexistente); depois 8 passed na gold e 92 passed na suíte. Gold construída apenas em pasta local temporária, com 0 chaves órfãs nas cinco relações; nenhuma leitura ou gravação no bucket. Decisão do aluno: gold em Parquet no bucket (`gold/group_id=23651/`), reconstruída a cada execução regravando as mesmas chaves, sem apagar; a emenda correspondente ao AGENTS.md e as ADRs seguem pendentes. O padrão de chaves veio da observação dos outros grupos, não de contrato escrito; pergunta ao professor pendente.
+
+Prompt 18 (T-11): gold em esquema estrela
+
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: T-11 (specs/tasks.md), gold em esquema estrela. Requisitos: RF-06, RF-07 e RNF-01.
+[R] Pedido
+Decisão do aluno: a gold fica como Parquets no bucket, no prefixo group_id=23651, reconstruída a cada execução (regrava as mesmas chaves; nunca apaga objeto) e lendo a silver da mesma camada de armazenamento (--fonte local|s3, --destino local|s3), como src/silver.py. Esta tarefa NÃO grava no bucket.
+1. Crie src/gold.py: lê as tabelas da silver (colecao, produto, preco_diario, cambio_diario) e grava em Parquet: fato de preço, dimensões de produto, coleção, data e acabamento, e fato de câmbio diário (o que a especificação e o plano definirem). Reaproveite a camada de armazenamento e a validação de prefixo (validar_chave) de src/silver.py e src/prefixo.py; chaves no padrão gold/<tabela>/group_id=23651/<tabela>.parquet. Reaproveite src/fx_asof.py para o preço em reais; não duplique a lógica do ASOF.
+2. Preserve a regra: nulo não é zero (preço em reais nulo quando não houver PTAX anterior). Code Card permanece nas tabelas (as exclusões valem nas perguntas, não no esquema). Se a especificação ou o plano não definirem nomes de tabela ou coluna, proponha e pergunte; não invente.
+3. Crie o comando python -m src.gold build --fonte local|s3 --destino local|s3, com a mesma recusa de GROUP_ID diferente de 23651 antes de criar qualquer camada.
+4. Escreva tests/test_gold_schema.py, sem rede e sem bucket (armazenamento local em tmp_path): as tabelas e colunas esperadas; relações entre fato e dimensões sem chave órfã; reconstruir duas vezes dá resultado idêntico; toda chave gravada está em group_id=23651; chave de outro group_id é recusada antes de qualquer escrita; o preço em reais usa a última PTAX até a data do preço.
+[A] Ajustes
+NÃO execute python -m src.gold build --destino s3, nem rebuild, collect, upload ou backfill-ptax; nenhuma gravação no bucket. Não leia nem imprima .env. Sem segredos em evidências. Não altere src/collector.py, src/silver.py nem src/fx_asof.py; se achar que precisa, pergunte. Escreva e execute os testes novos antes de implementar, mostrando a falha. Grave as saídas com redirecionamento (comando 2>&1 | tee -a arquivo), sem retranscrever. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy], com código e testes juntos e a evidência em outro commit.
+[T] Tipo de saída
+Arquivos: src/gold.py (novo), tests/test_gold_schema.py (novo) e docs/evidencias/T-11_gold.txt (saída real dos testes e uma consulta DuckDB sobre uma gold construída em pasta local temporária, mostrando fatos, dimensões e relações). Mostre o plano em tópicos e espere minha confirmação antes de editar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-06, RF-07, RNF-01), specs/tasks.md (T-11), specs/plan.md (modelo da gold), src/silver.py, src/prefixo.py, src/fx_asof.py e docs/adr/. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+1. Confirmado.
+2. Ajuste na T-11, antes de qualquer commit:
+(1) O padrão de caminho da gold usado pelos outros grupos do bucket é gold/group_id=<id>/<tabela>.parquet (por exemplo gold/group_id=23651/dim_produto.parquet), e não gold/<tabela>/group_id=<id>/<tabela>.parquet. Troque o formato das chaves em src/gold.py e nos testes para gold/group_id=23651/<tabela>.parquet, concentrando a montagem da chave em uma única função. validar_chave deve continuar valendo.
+(2) Explique, mostrando o diff, o que você mudou no "teste de inspeção de caminhos" depois da implementação e por quê. Não afrouxe nenhuma verificação para fazer o teste passar.
+(3) Rode os testes e a suíte completa de novo e acrescente ao FINAL de docs/evidencias/T-11_gold.txt uma seção datada (com tee -a), sem reescrever o que já está lá.
+Não altere src/collector.py, src/silver.py nem src/fx_asof.py. Não grave no bucket.
+3. Ajustes finais na T-11, sem mudar comportamento:
+(1) Em src/gold.py, remova a variável base e o del base em _ler_silver (e o comentário que os acompanha), e remova o "for _ in [0]" da compreensão de dim_colecao. Remova imports não usados em src/gold.py e tests/test_gold_schema.py, se houver.
+(2) Rode python -m pytest tests/test_gold_schema.py e a suíte completa; os resultados devem continuar 8 passed e 92 passed.
+(3) Acrescente ao FINAL de docs/evidencias/T-11_gold.txt (com tee -a, sem reescrever) uma seção datada com o texto exato da consulta DuckDB e do comando que produziu as linhas por tabela, as cinco contagens de chaves órfãs e o resultado do ASOF, e a saída real de rodá-los de novo sobre uma gold construída em pasta local temporária.
+Não altere src/collector.py, src/silver.py nem src/fx_asof.py. Não grave no bucket.
