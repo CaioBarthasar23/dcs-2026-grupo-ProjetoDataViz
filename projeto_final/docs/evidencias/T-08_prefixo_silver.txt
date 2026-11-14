@@ -1,0 +1,61 @@
+T-08 — proteção de prefixo na escrita da silver
+
+Execução 1 — antes de alterar src/silver.py
+Comando: python -m pytest tests/test_silver_prefix.py
+Saída real (resumo do pytest):
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.1
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 8 items
+
+tests/test_silver_prefix.py .FF.FFFF                                     [100%]
+
+FAILED tests/test_silver_prefix.py::test_local_lake_recusa_chave_antes_de_criar_arquivos[silver/produto/group_id=24269/produto.parquet]
+  Failed: DID NOT RAISE ValueError
+FAILED tests/test_silver_prefix.py::test_local_lake_recusa_chave_antes_de_criar_arquivos[silver/produto/produto.parquet]
+  Failed: DID NOT RAISE ValueError
+FAILED tests/test_silver_prefix.py::test_s3_lake_recusa_chave_antes_de_chamar_cliente[silver/produto/group_id=24269/produto.parquet]
+  Failed: DID NOT RAISE ValueError
+FAILED tests/test_silver_prefix.py::test_s3_lake_recusa_chave_antes_de_chamar_cliente[silver/produto/produto.parquet]
+  Failed: DID NOT RAISE ValueError
+FAILED tests/test_silver_prefix.py::test_rebuild_recusa_group_id_alheio_antes_de_invocar_writer
+  Failed: DID NOT RAISE ValueError
+FAILED tests/test_silver_prefix.py::test_main_recusa_group_id_diferente_antes_de_criar_lakes
+  Failed: main criou lake 'local' antes de recusar GROUP_ID.
+
+=========================== short test summary info ============================
+FAILED: 6 failed, 2 passed in 2.46s
+
+Execução 2 — depois de alterar src/silver.py
+Comando: python -m pytest tests/test_silver_prefix.py
+Saída real:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.1
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 8 items
+
+tests/test_silver_prefix.py ........                                     [100%]
+
+============================== 8 passed in 0.25s ===============================
+
+Execução 3 — suíte completa
+Comando: python -m pytest
+Saída real:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.1
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 72 items
+
+tests/test_collector.py ..........                                       [ 13%]
+tests/test_prefix_isolation.py .......                                   [ 23%]
+tests/test_s3_timeouts.py ..                                             [ 26%]
+tests/test_secrets_not_versioned.py ..........                           [ 40%]
+tests/test_silver.py ...............................                     [ 83%]
+tests/test_silver_prefix.py ........                                     [ 94%]
+tests/test_tcgcsv_limits.py .                                            [ 95%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 72 passed in 10.45s ==============================

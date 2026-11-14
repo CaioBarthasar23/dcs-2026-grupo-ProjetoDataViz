@@ -537,3 +537,31 @@ Leia antes: AGENTS.md, specs/spec.md (RF-02, RNF-03), specs/tasks.md (T-06) e do
 Respostas do aluno ao Codex:
 1. Confirmado. Execute o plano.
 2. (Sem mensagem nova. O aluno aprovou, na tela do Codex, o pedido de permissão de acesso à rede para executar fora do sandbox, e a repetição das duas coletas ficou dentro da autorização do Prompt 14.)
+
+**Data:** 2026-11-14, <<hora do envio>> (Brasília).
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `src/silver.py`, `tests/test_silver_prefix.py` e `docs/evidencias/T-08_prefixo_silver.txt`.
+- **Confirmação do plano:** confirmado pelo aluno, com acréscimos (testes escritos e executados antes da proteção, suíte completa depois, commits separados). Sem autorização de escrita no bucket nesta tarefa. A mensagem seguinte do aluno foi recusada pelo agente por um filtro de segurança indevido e foi reenviada em versão curta.
+- **Resultado:** proteção aplicada nos gravadores local e S3 e na gravação de cada tabela; o `main` recusa `GROUP_ID` diferente de 23651 antes de criar os lagos; testes novos falharam antes (6 de 8) e passaram depois; suíte completa com 72 passed. Análise do rebuild parcial entregue sem alteração de código, decisão pendente em ADR.
+
+Prompt 15 (T-08, parte 2): proteger a escrita da silver por prefixo
+
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: T-08, parte 2 (specs/tasks.md): aplicar a proteção de prefixo à escrita da silver. Requisito: RNF-03 (nunca escrever no prefixo de outra coleção).
+[R] Pedido
+Hoje a proteção existe em src/prefixo.py (validar_chave) e já é aplicada no coletor, mas os gravadores da silver (src/silver.py, camadas local e S3) ainda não a usam.
+1. Em src/silver.py, aplique validar_chave a toda chave gravada, tanto no destino local quanto no S3, antes de qualquer escrita (inclusive tabelas, quarentena e arquivos auxiliares). Reaproveite src/prefixo.py; não duplique a regra.
+2. Verifique se o main de src/silver.py recusa GROUP_ID diferente de 23651, como o main do coletor faz. Se não recusa, aplique a mesma recusa.
+3. Escreva testes em tests/ (arquivo novo, por exemplo tests/test_silver_prefix.py) com armazenamento local temporário (tmp_path) e doubles em memória para o S3, sem rede: grava em group_id=23651 passa; grava em outro group_id é recusado; chave sem group_id é recusada; a recusa acontece antes de qualquer escrita; GROUP_ID diferente de 23651 faz o main recusar. Cada teste deve falhar sem a proteção e passar com ela.
+4. ANÁLISE, SEM IMPLEMENTAR: hoje a silver grava a tabela colecao antes de ler o bruto. Descreva, com base no código, o que sobra no destino se um rebuild falhar no meio (por exemplo, falha de rede com --destino s3) e proponha, em até três alternativas com custo e risco de cada uma, como evitar uma silver parcial. Não altere o código por causa desse item: a escolha é minha e vai em ADR.
+[A] Ajustes
+Não rode collect, upload, backfill-ptax nem rebuild --destino s3: não autorizo nenhuma gravação no bucket nesta tarefa. Não altere o coletor, exceto se o item 2 exigir algo mínimo em src/prefixo.py, e então me avise antes. Não leia nem imprima .env. Sem segredos em evidências. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy], com o código e a evidência em commits separados.
+[T] Tipo de saída
+Arquivos: src/silver.py (alterado), tests/test_silver_prefix.py (novo) e docs/evidencias/T-08_prefixo_silver.txt (saída real de python -m pytest tests/test_silver_prefix.py e de python -m pytest). Mostre o plano em tópicos e espere minha confirmação antes de editar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RNF-03, RF-05, RF-06), specs/tasks.md (T-08), src/prefixo.py, src/silver.py e tests/test_prefix_isolation.py. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+1. Confirmado. Pode editar. Acréscimos:Ordem: escreva primeiro tests/test_silver_prefix.py e rode-o ANTES de alterar src/silver.py; os testes de recusa devem falhar nessa execução. Só depois aplique a proteção e rode de novo. Registre as duas saídas em docs/evidencias/T-08_prefixo_silver.txt (antes: falhando; depois: passando). Depois, rode python -m pytest completo e mostre a contagem; os 64 testes existentes devem continuar passando.Proponha commits separados: código e testes juntos, evidência à parte.
+2. Continue de onde parou. Grave docs/evidencias/T-08_prefixo_silver.txt com as três saídas reais: testes novos antes da alteração, depois da alteração, e a suíte completa. Depois entregue o relatório do item 4. Não altere mais nada.
