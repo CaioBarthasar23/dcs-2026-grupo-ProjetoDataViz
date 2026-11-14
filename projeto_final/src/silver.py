@@ -34,6 +34,7 @@ from typing import Any, Callable, Literal, Optional
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from src.collector import GROUP_ID, LOCAL_ROOT, get_s3
+from src.prefixo import PREFIXO_PROPRIO, validar_chave
 
 log = logging.getLogger("silver")
 
@@ -231,6 +232,7 @@ class LocalLake:
         return p.read_bytes() if p.exists() else None
 
     def put(self, key: str, data: bytes) -> None:  # silver e derivada: pode sobrescrever
+        validar_chave(key)
         p = self.root / key
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_bytes(data)
@@ -257,6 +259,7 @@ class S3Lake:
             raise
 
     def put(self, key: str, data: bytes) -> None:
+        validar_chave(key)
         self.s3.client.put_object(Bucket=self.s3.bucket, Key=key, Body=data)
 
     def datas(self, prefix: str) -> list[date]:
@@ -381,6 +384,7 @@ def rebuild(
     tabs = {n: _Tab(n) for n in ("colecao", "produto", "preco_diario", "cambio_diario", "cdi_diario")}
 
     def gravar(tabela: str, key: str, objs: list) -> None:
+        validar_chave(key)
         writer(destino, key, tabela, [o.model_dump() for o in objs])
 
     # colecao
@@ -549,6 +553,23 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--fonte", choices=["local", "s3"], default=padrao, help="de onde ler o bruto")
     ap.add_argument("--destino", choices=["local", "s3"], default=padrao, help="onde gravar a silver")
     args = ap.parse_args(argv)
+    group_id_configurado = os.getenv("GROUP_ID", "23651")
+    try:
+        group_id_numerico = int(group_id_configurado)
+    except ValueError:
+        log.error(
+            "ERRO escrita recusada: GROUP_ID=%s inválido; prefixo permitido %s",
+            group_id_configurado,
+            PREFIXO_PROPRIO,
+        )
+        return 1
+    if group_id_numerico != 23651 or GROUP_ID != 23651:
+        log.error(
+            "ERRO escrita recusada: GROUP_ID=%s fora do prefixo %s",
+            group_id_configurado,
+            PREFIXO_PROPRIO,
+        )
+        return 1
     log.info("rebuild: fonte=%s destino=%s group_id=%d", args.fonte, args.destino, GROUP_ID)
     rebuild(make_lake(args.fonte), make_lake(args.destino))
     return 0
