@@ -595,3 +595,32 @@ Confirmado. Ajustes ao plano:
 2. Registre na evidência que a especificação (RF-01, RF-02, RF-08) não cobre intervalo, feriados nem lacunas do backfill; não preencha a lacuna.
 3. Somente leitura, sem rede: liste as datas de cambio_diario na silver local em data_local/silver_t08_b_retry e diga se a data de cotação 2026-10-30 já aparece. Somente leitura no bucket: leia o objeto raw/bcb_ptax/group_id=23651/data=2026-10-31/cotacao.json e informe qual data de cotação ele contém, sem imprimir endpoint nem credenciais. Registre as duas respostas na evidência.
 4. AUTORIZAÇÃO EXPRESSA: autorizo executar python -m src.collector backfill-ptax --de 2026-10-24 --ate 2026-10-30, uma vez, gravando no bucket compartilhado SOMENTE no prefixo raw/bcb_ptax/group_id=23651/. Depois autorizo repetir o mesmo comando uma segunda vez para provar "ja existia". Antes e depois de cada execução, rode o comando somente leitura de listagem (chave, tamanho e ETag) e prove que nenhum objeto existente mudou. Se o comando precisar de permissão de rede fora do sandbox, solicite-a. Não rode collect, upload nem rebuild. Não leia nem imprima .env. Sem segredos, sem host de endpoint na evidência.
+
+**Data:** 2026-11-14, 00h40 (Brasília).
+- **Quem enviou:** CaioBarthasar23.
+- **Agente e modelo:** Codex, GPT-6.
+- **Arquivos alterados:** `src/fx_asof.py`, `tests/test_fx_asof.py`, `requirements.txt` e `docs/evidencias/T-10_asof.txt`.
+- **Confirmação do plano:** o Codex parou e perguntou duas coisas: se podia adicionar `duckdb` ao `requirements.txt` e qual cotação (compra ou venda) converte `market_price`, porque o RF-08 não define. O aluno autorizou o `duckdb` com versão fixa e escolheu `cotacao_compra` como padrão, com a cotação como parâmetro, como hipótese com validação pendente e ADR pendente. Duas mensagens do aluno foram recusadas pelo agente por um filtro de segurança indevido e reenviadas em versão curta.
+- **Resultado:** testes escritos e executados antes da implementação (5 falhas por módulo inexistente), depois 15 passed no par de arquivos e 84 passed na suíte. O aviso `fetch_arrow_table()` foi corrigido para `to_arrow_table()`, e as duas execuções finais ficaram sem avisos.
+
+Prompt 17 (T-10): conversão para reais por ASOF JOIN e teste da semana de 09 a 13/10/2026
+
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: T-10 (specs/tasks.md), conversão para reais por ASOF JOIN, com teste da semana de 09/10 a 13/10/2026. Requisitos: RF-08, RF-09, RNF-01 e RNF-02.
+[R] Pedido
+O coletor já reconhece o rótulo "Fechamento PTAX" (coberto por tests/test_collector.py). O ASOF JOIN ainda não existe.
+1. Implemente em src/ (módulo novo, por exemplo src/fx_asof.py) uma função que associa a cada preço em dólar a última PTAX de fechamento conhecida até a data do preço, inclusive, nunca posterior, usando o ASOF JOIN do DuckDB, e calcula o preço em reais. Entrada: a tabela de preços e a de câmbio no contrato da silver; leia src/silver.py e specs/spec.md para os nomes das colunas.
+2. Regras: nulo não é zero. Se não houver PTAX até a data do preço, o preço em reais fica nulo, nunca zero e nunca a PTAX do dia seguinte. Registre a data da PTAX usada em cada linha (coluna extra), para auditoria.
+3. Escreva tests/test_fx_asof.py com dados fixos, sem rede e sem bucket, cobrindo a semana de 09/10 a 13/10/2026 (09/10 sexta, 10/10 sábado, 11/10 domingo, 12/10 segunda-feira feriado nacional sem PTAX, 13/10 terça). Inclua: a PTAX de 09/10 é a usada nos preços de 10, 11 e 12/10; a de 13/10 só vale para 13/10; uma linha de câmbio com data posterior ao preço e taxa muito diferente (armadilha) nunca é usada; preço anterior à primeira PTAX fica nulo; preço na mesma data da PTAX usa essa PTAX. Cada teste deve falhar se o ASOF usasse data posterior.
+4. Se RF-08 não definir qual cotação (compra ou venda) converte o preço de mercado, aponte como lacuna e pergunte; não escolha. Se duckdb não estiver em requirements.txt, pare e pergunte antes de adicionar qualquer dependência.
+[A] Ajustes
+Não rode collect, upload, backfill-ptax nem rebuild; não toque no bucket. Não leia nem imprima .env. Sem segredos em evidências. Não altere src/collector.py nem src/silver.py. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy], com código e testes juntos e a evidência em outro commit.
+[T] Tipo de saída
+Arquivos: src/fx_asof.py (novo), tests/test_fx_asof.py (novo) e docs/evidencias/T-10_asof.txt (saída real de python -m pytest tests/test_fx_asof.py tests/test_collector.py e da suíte completa; os testes novos escritos e executados antes da implementação, falhando, e depois passando). Mostre o plano em tópicos e espere minha confirmação antes de editar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-08, RF-09, RNF-01, RNF-02), specs/tasks.md (T-10), specs/plan.md (onde o ASOF entra), src/silver.py (contrato de preco_diario e cambio_diario), requirements.txt e tests/test_collector.py. Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Codex:
+1. Respostas: (1) Autorizo adicionar duckdb ao requirements.txt, com a versão exata instalada (o ambiente é Python 3.14). Rode pip install -r requirements.txt e a suíte completa para provar que nada quebrou. (2) Use cotacao_compra para converter market_price. Faça a cotação ser um parâmetro da função (valores "venda" e "compra"), com "compra" como padrão, e cubra as duas nos testes. Registre na evidência e no docstring do módulo que a escolha é decisão do aluno em 2026-11-14, hipótese com validação pendente e ADR pendente, e que o RF-08 e as demais seções da especificação não a definem. Siga o plano: testes primeiro, executados e falhando, depois a implementação.
+2. Continue de onde parou. Grave docs/evidencias/T-10_asof.txt com as saídas reais: os testes novos antes da implementação (falhando), depois da implementação (passando) e a suíte completa. Mostre também o texto dos 6 avisos do pytest. Se a execução antes da implementação não foi feita, diga; não simule.
+3. Corrija o aviso: troque fetch_arrow_table() por to_arrow_table() em src/fx_asof.py e rode python -m pytest tests/test_fx_asof.py tests/test_collector.py e depois a suíte completa. Os 6 avisos devem desaparecer. Acrescente ao FINAL de docs/evidencias/T-10_asof.txt uma seção datada com essas duas execuções, sem reescrever o que já está lá. Não altere mais nada.

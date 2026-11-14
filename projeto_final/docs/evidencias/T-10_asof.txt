@@ -1,0 +1,127 @@
+T-10 — conversão BRL por ASOF JOIN
+
+DuckDB em requirements.txt: duckdb==1.5.6.
+`pip install -r requirements.txt` foi executado; DuckDB 1.5.6 e as demais dependências já estavam instaladas. O comando terminou com todos os requisitos como “Requirement already satisfied”.
+
+Escolha da cotação: `cotacao_compra` como padrão e parâmetro `cotacao` com opções `compra` e `venda`. Esta escolha é decisão do aluno em 2026-11-14, hipótese com validação pendente e ADR pendente. RF-08 e as demais seções da especificação não definem qual cotação converte `market_price`.
+
+Execução antes da implementação
+Comando executado antes de criar `src/fx_asof.py`: `python -m pytest tests/test_fx_asof.py tests/test_collector.py`
+Trecho da saída real:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.1
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 15 items
+
+tests/test_fx_asof.py FFFFF                                              [ 33%]
+tests/test_collector.py ..........                                       [100%]
+
+As cinco falhas foram de `ModuleNotFoundError: No module named 'src.fx_asof'`, pois o módulo ainda não havia sido implementado. Os 10 testes de `tests/test_collector.py` passaram.
+========================= 5 failed, 10 passed in 0.31s =========================
+
+Execução depois da implementação
+Comando: `python -m pytest tests/test_fx_asof.py tests/test_collector.py`
+Saída real:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 15 items
+
+tests/test_fx_asof.py .....                                              [ 33%]
+tests/test_collector.py ..........                                       [100%]
+
+=============================== warnings summary ===============================
+tests/test_fx_asof.py::test_asof_usa_ultima_ptax_ate_data_do_preco_e_audita_data
+ tests/test_fx_asof.py::test_preco_anterior_a_primeira_ptax_fica_nulo
+ tests/test_fx_asof.py::test_ptax_na_mesma_data_do_preco_e_inclusiva
+ tests/test_fx_asof.py::test_cotacao_compra_e_padrao_e_venda_e_parametrizavel
+ tests/test_fx_asof.py::test_cotacao_compra_e_padrao_e_venda_e_parametrizavel
+ tests/test_fx_asof.py::test_preco_market_price_nulo_permanece_nulo
+  /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/fx_asof.py:93: DeprecationWarning: fetch_arrow_table() is deprecated, use to_arrow_table() instead.
+    ).fetch_arrow_table().to_pylist()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 15 passed, 6 warnings in 3.85s ========================
+
+Texto dos seis avisos do pytest: `DeprecationWarning: fetch_arrow_table() is deprecated, use to_arrow_table() instead.` Cada aviso aponta para `src/fx_asof.py:93` e para um dos seis casos listados acima. O mesmo aviso também aparece na execução da suíte completa.
+
+Suíte completa
+Comando: `python -m pytest`
+Saída real:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.1
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 84 items
+
+tests/test_collector.py ..........                                       [ 11%]
+tests/test_fx_asof.py .....                                              [ 17%]
+tests/test_prefix_isolation.py .......                                   [ 26%]
+tests/test_ptax_backfill.py .......                                      [ 34%]
+tests/test_s3_timeouts.py ..                                             [ 36%]
+tests/test_secrets_not_versioned.py ..........                           [ 48%]
+tests/test_silver.py ...............................                     [ 85%]
+tests/test_silver_prefix.py ........                                     [ 95%]
+tests/test_tcgcsv_limits.py .                                            [ 96%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+=============================== warnings summary ===============================
+tests/test_fx_asof.py::test_asof_usa_ultima_ptax_ate_data_do_preco_e_audita_data
+ tests/test_fx_asof.py::test_preco_anterior_a_primeira_ptax_fica_nulo
+ tests/test_fx_asof.py::test_ptax_na_mesma_data_do_preco_e_inclusiva
+ tests/test_fx_asof.py::test_cotacao_compra_e_padrao_e_venda_e_parametrizavel
+ tests/test_fx_asof.py::test_cotacao_compra_e_padrao_e_venda_e_parametrizavel
+ tests/test_fx_asof.py::test_preco_market_price_nulo_permanece_nulo
+  /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/fx_asof.py:93: DeprecationWarning: fetch_arrow_table() is deprecated, use to_arrow_table() instead.
+    ).fetch_arrow_table().to_pylist()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 84 passed, 6 warnings in 1.28s ========================
+
+## Correção do aviso — 2026-11-14
+
+Em `src/fx_asof.py`, a chamada `fetch_arrow_table()` foi substituída por `to_arrow_table()`.
+
+Comando: `python -m pytest tests/test_fx_asof.py tests/test_collector.py`
+Saída real:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.1
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 15 items
+
+tests/test_fx_asof.py .....                                              [ 33%]
+tests/test_collector.py ..........                                       [100%]
+
+============================== 15 passed in 0.52s ===============================
+
+Comando: `python -m pytest`
+Saída real:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.1
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 84 items
+
+tests/test_collector.py ..........                                       [ 11%]
+tests/test_fx_asof.py .....                                              [ 17%]
+tests/test_prefix_isolation.py .......                                   [ 26%]
+tests/test_ptax_backfill.py .......                                      [ 34%]
+tests/test_s3_timeouts.py ..                                             [ 36%]
+tests/test_secrets_not_versioned.py ..........                           [ 48%]
+tests/test_silver.py ...............................                     [ 85%]
+tests/test_silver_prefix.py ........                                     [ 95%]
+tests/test_tcgcsv_limits.py .                                            [ 96%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================== 84 passed in 1.11s ==============================
+
+Nenhum aviso foi emitido nas duas execuções.
+
+Nota de revisão (2026-11-14): a versão do pluggy no cabeçalho do pytest varia entre as execuções deste arquivo (1.7.0 e 1.7.1). No terminal do aluno, python -m pytest informa pluggy-1.7.0. A causa da diferença não foi apurada (há mais de um interpretador Python no ambiente); ela não altera o resultado dos testes.
+
+Atualização (2026-11-14, antes do commit): o duckdb ficou em requirements-gold.txt (que inclui requirements.txt) e não em requirements.txt, porque o workflow da coleta diária instala requirements.txt com Python 3.12 e não usa DuckDB. A instalação por requirements-gold.txt e a suíte completa foram repetidas depois da mudança: 84 passed.
+
+Nota de revisão (2026-11-14): a versão do pluggy no cabeçalho do pytest varia entre as execuções deste arquivo (1.7.0 e 1.7.1). No terminal do aluno, python -m pytest informa pluggy-1.7.0. A causa da diferença não foi apurada (há mais de um interpretador Python no ambiente); ela não altera o resultado dos testes.
