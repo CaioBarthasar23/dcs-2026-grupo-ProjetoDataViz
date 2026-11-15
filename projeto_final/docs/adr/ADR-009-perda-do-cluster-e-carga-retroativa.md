@@ -49,3 +49,7 @@ Hipótese, validação pendente: o preço do arquivo público do TCGCSV equivale
 - RNF-06 — declarar e preservar a carga retroativa do histórico.
 - RNF-03 — restringir escrita ao prefixo da própria coleção.
 - T-33 e T-34.
+
+## Atualização de 14/11/2026
+
+A PTAX de 30/10/2026 (último fechamento anterior ao primeiro dia de preços) foi acrescentada à recarga, porque a conversão de 31/10 a 02/11/2026 usa o último fechamento conhecido (ASOF) e ficaria nula sem ela. O texto original deste ADR não foi alterado.

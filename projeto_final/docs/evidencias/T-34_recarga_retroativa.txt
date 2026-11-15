@@ -1,0 +1,44 @@
+T-34 — evidência parcial da recarga (2026-11-14, horários em UTC)
+Nota: a primeira execução do backfill-ptax (00:43) foi gravada por engano em NOME_DA_EVIDENCIA.txt, um nome-modelo de comando do roteiro; o conteúdo foi movido para este arquivo sem alteração, na ordem real: (1) backfill-ptax de 31/10 a 13/11, 14 dias gravados, 0 erros; (2) upload da captura local do dia 12/11: enviados=3 e ja_existiam=1, porque o cotacao.json da PTAX do dia 12/11 já existia, criado pelo backfill, e foi mantido, pois o raw não se sobrescreve; a PTAX do dia 12/11 no bucket vem portanto do backfill, e não da captura local; (3) segundo upload: enviados=0 e ja_existiam=4; (4) repetição do backfill: ja existia nos 14 dias; (5) check.
+Sem boletim no dia, gravado como marcador pelo coletor: 31/10 e 07/11 (sábados), 01/11 e 08/11 (domingos) e 02/11 (segunda-feira, feriado de Finados).
+Esta evidência é parcial: a recarga dos preços do TCGplayer depende da T-33.
+
+2026-11-15 00:43:43,033 INFO raw/bcb_ptax/group_id=23651/data=2026-10-31/cotacao.json               gravado (sem boletim no dia)
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-01/cotacao.json               gravado (sem boletim no dia)
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-02/cotacao.json               gravado (sem boletim no dia)
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-03/cotacao.json               gravado
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-04/cotacao.json               gravado
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-05/cotacao.json               gravado
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-06/cotacao.json               gravado
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-07/cotacao.json               gravado (sem boletim no dia)
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-08/cotacao.json               gravado (sem boletim no dia)
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-09/cotacao.json               gravado
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-10/cotacao.json               gravado
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-11/cotacao.json               gravado
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-12/cotacao.json               gravado
+2026-11-15 00:43:43,034 INFO raw/bcb_ptax/group_id=23651/data=2026-11-13/cotacao.json               gravado
+2026-11-15 00:54:21,607 INFO subindo de data_local
+2026-11-15 00:54:22,529 INFO enviado raw/bcb_cdi/group_id=23651/data=2026-11-12/cdi.json
+2026-11-15 00:54:23,259 INFO enviado raw/tcgplayer/group_id=23651/data=2026-11-12/prices.json
+2026-11-15 00:54:23,911 INFO enviado raw/tcgplayer/group_id=23651/data=2026-11-12/products.json
+2026-11-15 00:54:23,912 INFO enviados=3 ja_existiam=1
+2026-11-15 00:54:24,152 INFO subindo de data_local
+2026-11-15 00:54:25,196 INFO enviados=0 ja_existiam=4
+2026-11-15 00:54:49,087 INFO raw/bcb_ptax/group_id=23651/data=2026-10-31/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-01/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-02/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-03/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-04/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-05/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-06/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-07/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-08/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-09/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-10/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-11/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-12/cotacao.json               ja existia
+2026-11-15 00:54:49,088 INFO raw/bcb_ptax/group_id=23651/data=2026-11-13/cotacao.json               ja existia
+2026-11-15 00:55:04,326 INFO ocupada: raw/tcgplayer/group_id=23651/
+2026-11-15 00:55:04,330 INFO ocupada: raw/tcgplayer/group_id=24541/
+2026-11-15 00:55:04,330 INFO group_id=23651 ja tem dados (confira se foram seus)
+2026-11-15 00:58:41,229 INFO raw/bcb_ptax/group_id=23651/data=2026-10-30/cotacao.json               gravado
