@@ -47,3 +47,7 @@ A especificação descreve o comportamento esperado e não declara nenhum requis
 - OBJ-07 — manter uma série diária contínua e verificável.
 - T-31 — registrar a origem de `src/collector.py` e `src/silver.py` sem reescrever a cronologia.
 - `AGENTS.md`, seção “Estado atual (honesto)” — registrar a origem do código em ADR-001 e separar comportamento esperado do estado real.
+
+## Atualização de 14/11/2026
+
+A frase do Contexto de que o TCGCSV não guarda histórico era imprecisa: o FAQ do TCGCSV descreve arquivos diários desde 08/02/2024 e os arquivos de 31/10, 01/11, 06/11, 12/11 e 13/11/2026 responderam `200` em 14/11/2026. A decisão de coletar antes da persona e da especificação permanece registrada como foi tomada; a justificativa de que cada dia perdido não volta não vale. A perda do raw de 31/10 a 13/11/2026 e a recarga estão em ADR-009. O texto original deste ADR não foi alterado.
