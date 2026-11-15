@@ -270,6 +270,20 @@ A validação da silver deve ser reproduzível e deixar rastros verificáveis do
 - **Quando** a reconstrução da silver for executada,
 - **Então** os registros inválidos são identificados com motivo e a contagem correspondente aparece no log da execução.
 
+### RNF-06 — Declarar e preservar a carga retroativa do histórico
+
+**Atributo:** integridade e rastreabilidade dos dados.
+
+Dias do raw recarregados depois de uma perda devem ser identificados como retroativos, sem preços inventados e sem sobrescrever nenhum objeto existente do raw. A carga retroativa só grava no prefixo da própria coleção.
+
+**Origem:** OBJ-07; ADR-009; invariantes de dados em `projeto_final/AGENTS.md`; autorização do professor em 14/11/2026.
+
+**Critério de aceite:**
+
+- **Dado** que o raw de 31/10 a 13/11/2026 foi perdido na queda do cluster,
+- **Quando** a carga retroativa for executada,
+- **Então** cada dia recarregado fica declarado como retroativo no README e no ADR-009, nenhum objeto existente de `raw/` é sobrescrito ou apagado, e nada é gravado fora do prefixo `group_id=23651`.
+
 ## Fora do escopo
 
 | Item | Motivo | Origem |
