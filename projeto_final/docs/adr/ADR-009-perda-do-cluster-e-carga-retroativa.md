@@ -53,3 +53,7 @@ Hipótese, validação pendente: o preço do arquivo público do TCGCSV equivale
 ## Atualização de 14/11/2026
 
 A PTAX de 30/10/2026 (último fechamento anterior ao primeiro dia de preços) foi acrescentada à recarga, porque a conversão de 31/10 a 02/11/2026 usa o último fechamento conhecido (ASOF) e ficaria nula sem ela. O texto original deste ADR não foi alterado.
+
+## Atualização de 19/11/2026
+
+Em 19/11/2026 a conferência do bucket mostrou que os preços do TCGplayer e a PTAX de 17/11/2026 não foram coletados: a lista de execuções do GitHub Actions não tem nenhuma execução depois das 18h (horário de Brasília) nesse dia. A PTAX de 17/11/2026 foi recarregada com `backfill-ptax`, e os preços de 17/11/2026 entram na carga retroativa dos preços (T-33 e T-34), com o dia declarado como retroativo no README e neste ADR. O texto original deste ADR não foi alterado.

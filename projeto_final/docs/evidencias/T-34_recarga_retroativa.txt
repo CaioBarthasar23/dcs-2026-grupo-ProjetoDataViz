@@ -42,3 +42,26 @@ Esta evidência é parcial: a recarga dos preços do TCGplayer depende da T-33.
 2026-11-15 00:55:04,330 INFO ocupada: raw/tcgplayer/group_id=24541/
 2026-11-15 00:55:04,330 INFO group_id=23651 ja tem dados (confira se foram seus)
 2026-11-15 00:58:41,229 INFO raw/bcb_ptax/group_id=23651/data=2026-10-30/cotacao.json               gravado
+2026-11-19 16:16:46,953 INFO raw/bcb_ptax/group_id=23651/data=2026-11-17/cotacao.json               gravado
+--- Estado do bucket em 2026-11-19 (apos PTAX de 17/11); tcg = prices.json ---
+2026-10-30 --- ptax ---
+2026-10-31 --- ptax ---
+2026-11-01 --- ptax ---
+2026-11-02 --- ptax ---
+2026-11-03 --- ptax ---
+2026-11-04 --- ptax ---
+2026-11-05 --- ptax ---
+2026-11-06 --- ptax ---
+2026-11-07 --- ptax ---
+2026-11-08 --- ptax ---
+2026-11-09 --- ptax ---
+2026-11-10 --- ptax ---
+2026-11-11 --- ptax ---
+2026-11-12 tcg ptax cdi
+2026-11-13 --- ptax ---
+2026-11-14 tcg ptax cdi
+2026-11-15 tcg ptax cdi
+2026-11-16 tcg ptax cdi
+2026-11-17 --- ptax cdi
+2026-11-18 tcg ptax cdi
+2026-11-19 --- ---- cdi
