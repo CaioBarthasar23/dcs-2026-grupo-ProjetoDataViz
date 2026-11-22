@@ -887,3 +887,89 @@ Respostas do aluno ao Copilot:
 3. python -m src.collector backfill-ptax --de 2026-11-18 --ate 2026-11-21. Antes de rodar, diga pela leitura do código, sem abrir o .env, para onde o backfill grava; se não for o bucket, pare e pergunte.
 4. A mesma listagem de novo, depois da gravação, e python -m src.collector check.
 Se a carga de preços terminar com ERRO apenas por arquivo ausente (404), siga para o passo 3 e relate; qualquer outro erro, inclusive TLS, pare e mostre a saída. Grave cada saída em docs/evidencias/T-34_recarga_retroativa.txt com tee -a, com um cabeçalho de data e hora, sem apagar nada. Leia a constante CDI_JANELA_DIAS no src/collector.py e diga, sem alterar nada, se a janela do CDI de 14/11 cobre as datas de 30/10 a 11/11. Não use --forcar, não rode collect nem upload, não apague nem sobrescreva objeto, não tente recarregar CDI. Não faça git commit nem git push. Ao terminar, liste os dias gravados, os que já existiam e as lacunas restantes por fonte, e pare."
+
+**Data:** 2026-11-22, entre 04h44 e 04h52 (Brasília).
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** `src/retorno_risco.py`, `tests/test_return_risk_metrics.py` e `docs/evidencias/T-16_retorno_risco.txt`.
+- **Confirmação do plano:** o Copilot perguntou como tratar Code Card na pergunta 5; o aluno respondeu com a hipótese D7 e depois confirmou o plano com ajustes (ambas as respostas estão em "Respostas do aluno ao Copilot").
+- **Resultado:** testes escritos antes da implementação (erro de importação por módulo inexistente, 0 itens coletados); na primeira execução depois da implementação 1 dos 19 testes falhou (o teste do desvio constante usava 10→12→12, cujos retornos são 0,20 e 0,00; fixture corrigida para 10→12→14,4); 19 passed e 169 na suíte; nenhuma operação no bucket. Hipóteses D1 a D7 registradas na evidência (hipótese, validação pendente). A revisão do aluno encontrou: teste do mínimo de observações que passava com ou sem a regra, code_card testado só como True, precedência dos motivos sem teste, chave com acento e parâmetro preco_minimo sem moeda, linha D3 truncada na evidência e ausência da chamada direta da função nos exemplos manuais; correção no Prompt 28.
+
+Prompt 27 (T-16): retorno no período e desvio-padrão dos retornos diários
+
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: T-16 (specs/tasks.md), calcular o retorno no período e o desvio-padrão dos retornos diários das cartas com preço acima de US$ 5. Requisitos: RF-11 (pergunta 5) e RNF-01; objetivo OBJ-05.
+[R] Pedido
+Contexto: a pergunta 5 do RF-11 pede retorno no período contra desvio-padrão dos retornos diários para cartas acima de US$ 5, com período, cobertura e quantidade de observações visíveis. O OBJ-05 pede filtro de preço mínimo em dólar. As regras abaixo não estão definidas na spec e são decisões do aluno, hipóteses com validação pendente e ADR pendente:
+D1: a série é por (product_id, acabamento); só entram cartas, sem selados.
+D2: elegível é a série com preço em dólar estritamente maior que o preço mínimo (padrão 5) no primeiro dia do período; série sem preço no primeiro ou no último dia fica fora e é contada.
+D3: período é da primeira à última data presente no fato; retorno no período é preço do último dia dividido pelo preço do primeiro dia, menos 1, na moeda escolhida.
+D4: retorno diário só entre duas datas consecutivas presentes no fato com preço não nulo nos dois lados; par com preço nulo não gera retorno e nada é preenchido; a quantidade de retornos de cada série é informada.
+D5: desvio-padrão amostral (n-1) dos retornos diários; com menos retornos que o mínimo de observações (padrão 2) o desvio é nulo, nunca zero.
+D6: moeda "brl" ou "usd" por parâmetro; o filtro de elegibilidade é sempre em dólar.
+Tratamento do Code Card: o AGENTS.md só o exclui das perguntas 1, 3 e 4. Leia a RF-12; se ela não definir o tratamento na pergunta 5, não decida, pergunte.
+1. Leia antes, sem alterar: AGENTS.md, specs/spec.md (RF-11, RF-12), docs/01_objetivos_negocio.md (OBJ-05), specs/tasks.md (T-16), src/concentracao_valor.py (padrão de entrada, validações e estilo), src/gold.py, src/fx_asof.py e tests/test_value_concentration.py.
+2. Crie src/retorno_risco.py com uma função pura que receba as linhas do fato de preço diário e da dimensão de produto, no mesmo formato usado em src/concentracao_valor.py, e devolva: data_inicial, data_final, moeda, preço mínimo usado, quantidade de séries elegíveis e excluídas (com o motivo), e, por série, product_id, acabamento, raridade, preço inicial e final, retorno no período, desvio-padrão dos retornos diários e quantidade de retornos; mais a cobertura (primeira data, última data, quantidade de datas). Ordem determinística por product_id e acabamento. Não calcule razão retorno/desvio nem crie função ou apelido que eu não pedi. ValueError para moeda inválida, grupo misto, linha duplicada (product_id, acabamento, data), ausência de datas, nenhuma série elegível.
+3. Escreva tests/test_return_risk_metrics.py antes do código e mostre a falha. Cada regra precisa de um teste que falharia se a regra fosse removida: fronteira exata de US$ 5 (preço igual a 5 fica fora); série sem preço no primeiro ou no último dia excluída e contada; preço nulo no meio gera menos retornos e não vira zero; menos retornos que o mínimo dá desvio nulo; série de retorno constante dá desvio zero legítimo; BRL e USD diferentes quando o câmbio muda; selado fora; cobertura e contagens corretas; resultado independente da ordem das linhas; valores esperados conferíveis à mão, com a conta na evidência.
+[A] Ajustes
+Sem rede e sem bucket. Não altere nenhum módulo existente nem teste existente. Não rode pip install. Sem git commit nem git push; proponha as mensagens no formato tipo(T-xx): descrição [RF-yy], código e testes em um commit e a evidência em outro. Se um teste falhar depois da implementação, explique na evidência sem afrouxá-lo. Grave as saídas com 2>&1 | tee -a, sem retranscrever. Não declare sucesso sem mostrar a saída. Mostre o plano em tópicos e espere minha confirmação antes de editar qualquer arquivo.
+[T] Tipo de saída
+Arquivos: src/retorno_risco.py (novo), tests/test_return_risk_metrics.py (novo) e docs/evidencias/T-16_retorno_risco.txt (falha antes, testes depois, suíte completa, exemplo numérico com a conta à mão, e D1 a D6 registradas como hipótese com validação pendente).
+[E] Extras
+Ao terminar, liste perguntas abertas e pare.
+
+Respostas do aluno ao Copilot:
+1. Pergunta do Copilot sobre o tratamento de Code Card na pergunta 5 (opções: incluir se passar no filtro; excluir; usar como elegível por enquanto e decidir em ADR). Resposta (campo "Other"): "Usar Code Card como elegível por enquanto, como hipótese D7 com validação pendente e ADR pendente. Inclua em cada série do resultado o campo que identifica Code Card, para o dashboard poder filtrar depois, e um teste que mostre a Code Card incluída quando passa o filtro de preço e que seja fácil de inverter se o ADR decidir excluir. Registre D7 na evidência."
+2. Confirmação do plano: "Confirmado, com estes ajustes e respostas:
+1. D7 como hipótese temporária: Code Card incluída na pergunta 5. O campo code_card (booleano) está aprovado. Use o mesmo critério de identificação de Code Card que src/concentracao_valor.py já usa, copiando a regra, sem alterar aquele módulo.
+2. O resultado deve trazer o preço mínimo usado e a contagem de séries excluídas por motivo, cada série em um único motivo, nesta ordem de precedência: sem preço no primeiro dia; sem preço no último dia; preço inicial não maior que o mínimo. Um teste para cada motivo.
+3. Além da ordenação da saída por product_id e acabamento, escreva um teste de que o resultado não depende da ordem das linhas de entrada.
+4. Cada teste de regra deve falhar se a regra for removida. Inclua na evidência três exemplos manuais com a conta à mão: 10→12→12; 10→12→9 (retornos 0,2 e -0,25); e uma série com preço nulo no meio.
+5. Rode a suíte completa de projeto_final e mostre a contagem total.
+Não altere nenhum módulo ou teste existente, não use rede nem bucket, não instale pacotes, sem commit nem push. Ao terminar, liste perguntas abertas e pare."
+
+**Data:** 2026-11-22, entre 04h53 e 04h56 (Brasília).
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** `src/retorno_risco.py`, `tests/test_return_risk_metrics.py` e `docs/evidencias/T-16_retorno_risco.txt`.
+- **Confirmação do plano:** o aluno confirmou o plano com acréscimos (texto em "Respostas do aluno ao Copilot").
+- **Resultado:** 8 falhas e 16 passes antes da correção (chave e parâmetro ainda não renomeados e um teste de preço zero); o número de testes passou de 19 para 24; 24 passed e 174 na suíte; evidência acrescentada com a chamada real dos três exemplos manuais, a correção da linha D3 e a observação de que produto ausente da dimensão é ignorado sem contagem. Na revisão, o aluno encontrou que o agente alterou o código para pular também preço atual zero (condição não pedida) e atribuiu isso, na evidência, a fixtures inválidas; correção no Prompt 29.
+
+Prompt 28 (T-16): correção do mínimo de observações, da precedência dos motivos e dos nomes
+
+[C] Personagem
+Você é o engenheiro que corrige a T-16 (specs/tasks.md) após revisão. Requisitos: RF-11 (pergunta 5) e RNF-01; objetivo OBJ-05.
+[R] Pedido
+Corrija src/retorno_risco.py e tests/test_return_risk_metrics.py:
+1. Renomeie a chave do resultado "quantidade_series_elegíveis" para "quantidade_series_elegiveis" (sem acento) e o parâmetro "preco_minimo" para "preco_minimo_usd". Ajuste os testes primeiro e mostre a falha.
+2. Testes novos, escritos e executados antes da correção, mostrando a falha quando houver (se algum já passar hoje porque o código estava certo, diga isso na evidência): (a) mínimo de observações: série com 2 retornos tem desvio com minimo_observacoes=2 e desvio nulo com minimo_observacoes=3; (b) code_card: carta de raridade comum tem code_card False e a Code Card tem True na mesma chamada; (c) precedência dos motivos: série com preço inicial menor que o mínimo e sem preço no último dia conta só em sem_preco_no_ultimo_dia; série sem preço no primeiro e no último dia conta só em sem_preco_no_primeiro_dia; a soma das contagens por motivo é igual a quantidade_series_excluidas; (d) série sem linha alguma no primeiro dia (não apenas preço nulo) é excluída como sem_preco_no_primeiro_dia; (e) preço anterior igual a zero não gera retorno e não divide por zero.
+3. Confirme, mostrando a linha de src/concentracao_valor.py, que o critério usado para code_card é o mesmo que aquele módulo usa para identificar Code Card. Se for diferente, pare e pergunte.
+4. Na evidência docs/evidencias/T-16_retorno_risco.txt, SOMENTE ACRESCENTE com tee -a, sem editar, substituir nem apagar nada do que já está no arquivo: uma seção "Correção após revisão" com a falha antes, os testes depois e a suíte completa; uma chamada direta de calcular_retorno_risco com a saída real para os três exemplos manuais (10→12→12; 10→12→9; 10→nulo→12), gravada com tee; uma nota corrigindo a linha D3 ("retorno no período = último preço dividido pelo primeiro preço, menos 1"); e uma observação: produto ausente da dimensão é ignorado sem contagem, comportamento atual, sem alteração.
+[A] Ajustes
+Não use rede nem bucket. Não altere nenhum outro módulo nem teste existente. Sem git commit nem git push. Nenhum teste existente é afrouxado; explique na evidência qualquer teste alterado. Mostre o plano e espere minha confirmação antes de editar.
+[E] Extras
+Pare ao terminar e liste perguntas abertas.
+
+Respostas do aluno ao Copilot:
+1. Confirmação do plano: "Confirmado, com estes acréscimos: na evidência, diga quais testes existentes foram alterados e confirme que nenhum foi afrouxado, e diga quais dos testes novos já passavam antes da correção por o código estar certo. Na evidência, só acrescente com tee -a, sem editar, substituir nem apagar texto existente (incluindo a linha D3 truncada, que continua no arquivo, e a nota nova a corrige). O teste de code_card deve conferir False e True na mesma chamada, e o de precedência deve conferir que a soma das contagens por motivo é igual a quantidade_series_excluidas. Sem rede, sem bucket, sem commit nem push. Ao terminar, pare e liste perguntas abertas."
+
+**Data:** 2026-11-22, entre 04h57 e 05h01 (Brasília).
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** `src/retorno_risco.py`, `tests/test_return_risk_metrics.py` e `docs/evidencias/T-16_retorno_risco.txt`.
+- **Confirmação do plano:** o aluno confirmou o plano com um acréscimo (texto em "Respostas do aluno ao Copilot"). O texto enviado tem um trecho truncado de autoria do revisor ("6/7... ou seja 7/6-1"), registrado como foi enviado.
+- **Resultado:** falha antes da correção (assert 0 == 1 no teste do preço que cai a zero); depois da correção, 24 passed e 174 na suíte; a condição "or atual_decimal == 0" foi removida; o caso 6→7→0 (2 retornos, desvio 0,8250, retorno no período -1,0) foi incluído no mesmo teste; a evidência foi acrescentada com a nota que corrige a atribuição anterior e a D8 (preço zero tratado como valor, hipótese com validação pendente, ADR pendente). Observação: produto ausente da dimensão continua ignorado sem contagem.
+
+Prompt 29 (T-16): correção do tratamento de preço zero
+
+[C] Personagem
+Você é o engenheiro que corrige a T-16 (specs/tasks.md) pela segunda vez após revisão. Requisitos: RF-11 (pergunta 5) e RNF-01; objetivo OBJ-05.
+[R] Pedido
+Na correção anterior, src/retorno_risco.py passou a pular também o par cujo preço atual é zero (condição "or atual_decimal == 0"), mudança de comportamento não pedida, que deixou o retorno diário e o retorno no período com tratamentos diferentes de preço zero. O prompt pedia apenas que preço anterior igual a zero não gerasse retorno nem divisão por zero.
+1. Escreva primeiro o teste corrigido e mostre a falha: para a série 6→0→7, o par 6→0 gera um retorno de -1,0 e o par 0→7 é pulado, logo quantidade_retornos == 1, desvio nulo (1 retorno é menos que o mínimo de 2) e retorno no período igual a 7/6 menos 1. Acrescente um segundo caso com preço final zero, em que o retorno no período é -1,0 e o par que chega a zero gera retorno -1,0.
+2. Em src/retorno_risco.py, remova a condição "or atual_decimal == 0" e mantenha só a proteção de preço anterior igual a zero. Nenhuma outra mudança.
+3. Na evidência docs/evidencias/T-16_retorno_risco.txt, SOMENTE ACRESCENTE com tee -a, sem editar, substituir nem apagar nada: uma seção "Correção 2 após revisão" com a falha antes, os testes depois, a suíte completa; uma nota dizendo que a versão anterior tratava também preço atual zero como ausente, que isso não foi pedido nem declarado na evidência anterior, e que a nota anterior atribuía o ajuste a "fixtures inválidas" quando houve mudança de código; e o registro de D8: preço zero é tratado como valor (retorno de -100% quando o preço cai a zero), só se evita a divisão por zero, hipótese com validação pendente, ADR pendente.
+[A] Ajustes
+Não use rede nem bucket. Não altere nenhum outro módulo nem teste. Sem git commit nem git push. Nenhum teste é afrouxado. Mostre o plano e espere minha confirmação antes de editar.
+[E] Extras
+Pare ao terminar e liste perguntas abertas.
+
+Respostas do aluno ao Copilot:
+1. Confirmação do plano: "Confirmado, com um acréscimo: no caso 6→7→0, exija também quantidade_retornos == 2 (retornos 6/7... ou seja 7/6-1 e 0/7-1 = -1,0) além do retorno diário -1,0 no par final e do retorno no período -1,0, mostrando a conta na evidência. Na evidência, só acrescente com tee -a, sem editar, substituir nem apagar texto existente. Sem rede, sem bucket, sem commit nem push. Ao terminar, pare e liste perguntas abertas."

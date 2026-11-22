@@ -1,0 +1,717 @@
+
+[2026-11-22 07:50:15 UTC] T-16 falha antes da implementacao
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+______________ ERROR collecting tests/test_return_risk_metrics.py ______________
+ImportError while importing test module '/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/tests/test_return_risk_metrics.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.14.2/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_return_risk_metrics.py:6: in <module>
+    from src.retorno_risco import calcular_retorno_risco
+E   ModuleNotFoundError: No module named 'src.retorno_risco'
+=========================== short test summary info ============================
+ERROR tests/test_return_risk_metrics.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+=============================== 1 error in 0.20s ===============================
+
+[2026-11-22 07:51:13 UTC] T-16 testes apos implementacao
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 19 items
+
+tests/test_return_risk_metrics.py ......F............                    [100%]
+
+=================================== FAILURES ===================================
+_______________ test_retorno_constante_tem_desvio_zero_legitimo ________________
+
+    def test_retorno_constante_tem_desvio_zero_legitimo():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 10.0, 100.0),
+            preco(23651, 1, D2, "Normal", 12.0, 120.0),
+            preco(23651, 1, D3, "Normal", 12.0, 120.0),
+        ]
+        resultado = calcular_retorno_risco(fatos, [produto(23651, 1)])
+        serie = resultado["series"][0]
+        assert serie["quantidade_retornos"] == 2
+>       assert serie["desvio_padrao_retornos_diarios"] == 0.0
+E       assert 0.1414213562373095 == 0.0
+
+tests/test_return_risk_metrics.py:132: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_return_risk_metrics.py::test_retorno_constante_tem_desvio_zero_legitimo
+========================= 1 failed, 18 passed in 0.10s =========================
+
+[2026-11-22 07:51:33 UTC] T-16 testes apos correcao da fixture
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 19 items
+
+tests/test_return_risk_metrics.py ...................                    [100%]
+
+============================== 19 passed in 0.07s ==============================
+
+[2026-11-22 07:51:59 UTC] T-16 falha explicada e exemplos manuais
+Falha da primeira execução pós-implementação: test_retorno_constante_tem_desvio_zero_legitimo usava 10→12→12. Os retornos eram 0,20 e 0,00, portanto o desvio amostral era 0,1414213562373095, não zero. A fixture foi corrigida para 10→12→14,4, que produz retornos constantes 0,20 e desvio 0,00.
+
+Exemplo manual 10→12→12:
+retorno no período = 12/10 - 1 = 0,20.
+retornos diários = 12/10 - 1 = 0,20; 12/12 - 1 = 0,00.
+média = (0,20 + 0,00)/2 = 0,10.
+desvio amostral = sqrt(((0,20-0,10)^2+(0,00-0,10)^2)/(2-1)) = sqrt(0,02) = 0,1414213562373095.
+quantidade de retornos = 2.
+
+Exemplo manual 10→12→9:
+retornos diários = 12/10 - 1 = 0,20; 9/12 - 1 = -0,25.
+média = (0,20-0,25)/2 = -0,025.
+desvio amostral = sqrt(((0,225)^2+(-0,225)^2)/(2-1)) = sqrt(0,10125) = 0,31819805153394637.
+retorno no período = 9/10 - 1 = -0,10.
+quantidade de retornos = 2.
+
+Exemplo manual 10→nulo→12:
+10→nulo não gera par válido; nulo→12 não gera par válido.
+quantidade de retornos = 0.
+desvio amostral = nulo.
+retorno no período = 12/10 - 1 = 0,20.
+
+D1: hipótese, validação pendente — série por (product_id, acabamento); entram apenas tipo_produto=carta; selados ficam fora.
+D2: hipótese, validação pendente — elegível quando o preço USD inicial é estritamente maior que o mínimo; sem preço na moeda da série no primeiro ou último dia fica excluída e contada.
+D3: hipótese, validação pendente — período da primeira à última data do fato; retorno no período = último primeiro preço menos 1 na moeda escolhida.
+D4: hipótese, validação pendente — retorno diário apenas entre datas consecutivas presentes no fato; nulo em um lado não gera retorno.
+D5: hipótese, validação pendente — desvio amostral n-1; abaixo do mínimo de observações o desvio é nulo.
+D6: hipótese, validação pendente — moeda brl ou usd por parâmetro; elegibilidade sempre por USD.
+D7: hipótese, validação pendente — Code Card é elegível; o campo code_card booleano identifica a raridade Code Card; exclusão futura fica fácil de ativar.
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 169 items
+
+tests/test_collection_comparison.py .............                        [  7%]
+tests/test_collector.py ..........                                       [ 13%]
+tests/test_decomposition.py .........                                    [ 18%]
+tests/test_fx_asof.py .....                                              [ 21%]
+tests/test_gold_schema.py ........                                       [ 26%]
+tests/test_prefix_isolation.py .......                                   [ 30%]
+tests/test_ptax_backfill.py .......                                      [ 34%]
+tests/test_retroactive_load.py .......                                   [ 39%]
+tests/test_return_risk_metrics.py ...................                    [ 50%]
+tests/test_s3_timeouts.py ..                                             [ 51%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 57%]
+tests/test_secrets_not_versioned.py ..........                           [ 63%]
+tests/test_silver.py ...............................                     [ 82%]
+tests/test_silver_prefix.py ........                                     [ 86%]
+tests/test_tcgcsv_limits.py .                                            [ 87%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 169 passed in 4.90s ==============================
+
+[2026-11-22 07:55:38 UTC] Correção após revisão: falha antes da correção
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 24 items
+
+tests/test_return_risk_metrics.py FFF......FF..FFF........               [100%]
+
+=================================== FAILURES ===================================
+_____________________ test_fronteira_exata_usd_5_fica_fora _____________________
+
+    def test_fronteira_exata_usd_5_fica_fora():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 5.0, 50.0),
+            preco(23651, 1, D2, "Normal", 6.0, 60.0),
+            preco(23651, 1, D3, "Normal", 7.0, 70.0),
+            preco(23651, 2, D1, "Normal", 6.0, 60.0),
+            preco(23651, 2, D2, "Normal", 7.0, 70.0),
+            preco(23651, 2, D3, "Normal", 8.0, 80.0),
+        ]
+        resultado = calcular_retorno_risco(
+            fatos, [produto(23651, 1), produto(23651, 2)], moeda="usd"
+        )
+>       assert resultado["quantidade_series_elegiveis"] == 1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'quantidade_series_elegiveis'
+
+tests/test_return_risk_metrics.py:46: KeyError
+______________ test_sem_preco_no_primeiro_dia_excluido_e_contado _______________
+
+    def test_sem_preco_no_primeiro_dia_excluido_e_contado():
+        fatos = [
+            preco(23651, 1, D1, "Normal", None, None),
+            preco(23651, 1, D2, "Normal", 6.0, 60.0),
+            preco(23651, 1, D3, "Normal", 7.0, 70.0),
+            preco(23651, 2, D1, "Normal", 6.0, 60.0),
+            preco(23651, 2, D3, "Normal", 7.0, 70.0),
+        ]
+        resultado = calcular_retorno_risco(
+            fatos, [produto(23651, 1), produto(23651, 2)]
+        )
+>       assert resultado["quantidade_series_elegiveis"] == 1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'quantidade_series_elegiveis'
+
+tests/test_return_risk_metrics.py:65: KeyError
+_______________ test_sem_preco_no_ultimo_dia_excluido_e_contado ________________
+
+    def test_sem_preco_no_ultimo_dia_excluido_e_contado():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 6.0, 60.0),
+            preco(23651, 1, D2, "Normal", 7.0, 70.0),
+            preco(23651, 1, D3, "Normal", None, None),
+            preco(23651, 2, D1, "Normal", 6.0, 60.0),
+            preco(23651, 2, D3, "Normal", 7.0, 70.0),
+        ]
+        resultado = calcular_retorno_risco(
+            fatos, [produto(23651, 1), produto(23651, 2)]
+        )
+>       assert resultado["quantidade_series_elegiveis"] == 1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'quantidade_series_elegiveis'
+
+tests/test_return_risk_metrics.py:80: KeyError
+__________________________ test_selado_fora_da_saida ___________________________
+
+    def test_selado_fora_da_saida():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 10.0, 100.0),
+            preco(23651, 1, D3, "Normal", 12.0, 120.0),
+            preco(23651, 2, D1, "Normal", 6.0, 60.0),
+            preco(23651, 2, D3, "Normal", 8.0, 80.0),
+        ]
+        resultado = calcular_retorno_risco(
+            fatos,
+            [produto(23651, 1, tipo="selado"), produto(23651, 2)],
+        )
+>       assert resultado["quantidade_series_elegiveis"] == 1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'quantidade_series_elegiveis'
+
+tests/test_return_risk_metrics.py:181: KeyError
+__________________ test_code_card_incluida_com_code_card_true __________________
+
+    def test_code_card_incluida_com_code_card_true():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 6.0, 60.0),
+            preco(23651, 1, D3, "Normal", 8.0, 80.0),
+            preco(23651, 2, D1, "Normal", 6.0, 60.0),
+            preco(23651, 2, D3, "Normal", 8.0, 80.0),
+        ]
+        resultado = calcular_retorno_risco(
+            fatos,
+            [
+                produto(23651, 1, raridade="Rare"),
+                produto(23651, 2, raridade="Code Card"),
+            ],
+        )
+>       assert resultado["quantidade_series_elegiveis"] == 2
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'quantidade_series_elegiveis'
+
+tests/test_return_risk_metrics.py:199: KeyError
+_______ test_preco_anterior_zero_nao_gera_retorno_e_nao_divide_por_zero ________
+
+    def test_preco_anterior_zero_nao_gera_retorno_e_nao_divide_por_zero():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 6.0, 60.0),
+            preco(23651, 1, D2, "Normal", 0.0, 0.0),
+            preco(23651, 1, D3, "Normal", 7.0, 70.0),
+        ]
+        resultado = calcular_retorno_risco(fatos, [produto(23651, 1)])
+        serie = resultado["series"][0]
+>       assert serie["quantidade_retornos"] == 0
+E       assert 1 == 0
+
+tests/test_return_risk_metrics.py:253: AssertionError
+_________ test_parametro_preco_minimo_renomeado_e_resultado_sem_acento _________
+
+    def test_parametro_preco_minimo_renomeado_e_resultado_sem_acento():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 6.0, 60.0),
+            preco(23651, 1, D3, "Normal", 7.0, 70.0),
+        ]
+>       resultado = calcular_retorno_risco(
+            fatos,
+            [produto(23651, 1)],
+            preco_minimo_usd=Decimal("6"),
+        )
+E       TypeError: calcular_retorno_risco() got an unexpected keyword argument 'preco_minimo_usd'. Did you mean 'preco_minimo'?
+
+tests/test_return_risk_metrics.py:262: TypeError
+_____________________ test_cobertura_e_contagens_corretas ______________________
+
+    def test_cobertura_e_contagens_corretas():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 6.0, 60.0),
+            preco(23651, 1, D3, "Normal", 8.0, 80.0),
+            preco(23651, 2, D1, "Normal", 5.0, 50.0),
+            preco(23651, 2, D3, "Normal", 7.0, 70.0),
+        ]
+        resultado = calcular_retorno_risco(
+            fatos, [produto(23651, 1), produto(23651, 2)]
+        )
+        assert resultado["cobertura"] == {
+            "primeira_data": D1,
+            "ultima_data": D3,
+            "quantidade_datas": 2,
+        }
+>       assert resultado["quantidade_series_elegiveis"] == 1
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'quantidade_series_elegiveis'
+
+tests/test_return_risk_metrics.py:285: KeyError
+=========================== short test summary info ============================
+FAILED tests/test_return_risk_metrics.py::test_fronteira_exata_usd_5_fica_fora
+FAILED tests/test_return_risk_metrics.py::test_sem_preco_no_primeiro_dia_excluido_e_contado
+FAILED tests/test_return_risk_metrics.py::test_sem_preco_no_ultimo_dia_excluido_e_contado
+FAILED tests/test_return_risk_metrics.py::test_selado_fora_da_saida - KeyErro...
+FAILED tests/test_return_risk_metrics.py::test_code_card_incluida_com_code_card_true
+FAILED tests/test_return_risk_metrics.py::test_preco_anterior_zero_nao_gera_retorno_e_nao_divide_por_zero
+FAILED tests/test_return_risk_metrics.py::test_parametro_preco_minimo_renomeado_e_resultado_sem_acento
+FAILED tests/test_return_risk_metrics.py::test_cobertura_e_contagens_corretas
+========================= 8 failed, 16 passed in 0.18s =========================
+
+[2026-11-22 07:56:04 UTC] Correção após revisão: testes focados depois da correção
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 24 items
+
+tests/test_return_risk_metrics.py ..............F.........               [100%]
+
+=================================== FAILURES ===================================
+_________ test_parametro_preco_minimo_renomeado_e_resultado_sem_acento _________
+
+    def test_parametro_preco_minimo_renomeado_e_resultado_sem_acento():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 6.0, 60.0),
+            preco(23651, 1, D3, "Normal", 7.0, 70.0),
+        ]
+>       resultado = calcular_retorno_risco(
+            fatos,
+            [produto(23651, 1)],
+            preco_minimo_usd=Decimal("6"),
+        )
+
+tests/test_return_risk_metrics.py:262: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fato_preco_diario = [{'group_id': 23651, 'product_id': 1, 'data': datetime.date(2026, 10, 9), 'acabamento': 'Normal', ...}, {'group_id': 23651, 'product_id': 1, 'data': datetime.date(2026, 10, 11), 'acabamento': 'Normal', ...}]
+dim_produto = [{'group_id': 23651, 'product_id': 1, 'tipo_produto': 'carta', 'raridade': 'Rare'}]
+moeda = 'brl', preco_minimo_usd = Decimal('6'), minimo_observacoes = 2
+
+    def calcular_retorno_risco(
+        fato_preco_diario: Sequence[Mapping[str, Any]],
+        dim_produto: Sequence[Mapping[str, Any]],
+        *,
+        moeda: str = "brl",
+        preco_minimo_usd: float | Decimal | str = 5,
+        minimo_observacoes: int = 2,
+    ) -> dict[str, Any]:
+        """Retorna retorno no período e desvio amostral dos retornos consecutivos."""
+        if moeda not in ("brl", "usd"):
+            raise ValueError("moeda deve ser 'brl' ou 'usd'")
+        if not isinstance(minimo_observacoes, int) or minimo_observacoes < 1:
+            raise ValueError("minimo_observacoes deve ser um inteiro maior ou igual a 1")
+    
+        limite_decimal = _decimal(preco_minimo_usd, "preco_minimo_usd")
+        if not limite_decimal.is_finite():
+            raise ValueError("preco_minimo_usd deve ser finito")
+    
+        fatos = [dict(row) for row in fato_preco_diario]
+        produtos_linhas = [dict(row) for row in dim_produto]
+        grupos = {
+            row["group_id"]
+            for row in fatos + produtos_linhas
+            if row.get("group_id") is not None
+        }
+        if len(grupos) > 1:
+            raise ValueError("as linhas misturam mais de um group_id")
+    
+        vistos: set[tuple[Any, Any, Any]] = set()
+        for row in fatos:
+            chave = (row.get("product_id"), row.get("acabamento"), row.get("data"))
+            if chave in vistos:
+                raise ValueError(
+                    "linha duplicada para (produto, acabamento, data): "
+                    f"{chave}"
+                )
+            vistos.add(chave)
+    
+        if not fatos:
+            raise ValueError("não há datas no fato_preco_diario")
+        datas = sorted({row["data"] for row in fatos if row.get("data") is not None})
+        if not datas:
+            raise ValueError("não há datas no fato_preco_diario")
+    
+        primeira_data = datas[0]
+        ultima_data = datas[-1]
+        coluna_preco = "market_price_brl" if moeda == "brl" else "market_price"
+    
+        produtos: dict[Any, Mapping[str, Any]] = {}
+        for row in produtos_linhas:
+            product_id = row.get("product_id")
+            if product_id in produtos:
+                raise ValueError(f"produto duplicado product_id={product_id}")
+            produtos[product_id] = row
+    
+        exclusoes_por_motivo = {
+            "sem_preco_no_primeiro_dia": 0,
+            "sem_preco_no_ultimo_dia": 0,
+            "preco_inicial_nao_maior_que_minimo": 0,
+        }
+        series_excluidas: list[dict[str, Any]] = []
+        series: list[dict[str, Any]] = []
+    
+        pares = sorted(
+            {
+                (row["product_id"], row["acabamento"])
+                for row in fatos
+                if row.get("product_id") is not None
+                and row.get("acabamento") is not None
+            },
+            key=lambda par: (_product_id_sort(par[0]), str(par[1]))
+        )
+    
+        for product_id, acabamento in pares:
+            produto = produtos.get(product_id)
+            if produto is None or produto.get("tipo_produto") != "carta":
+                continue
+    
+            linhas_por_data = {
+                row["data"]: row
+                for row in fatos
+                if row.get("product_id") == product_id
+                and row.get("acabamento") == acabamento
+                and row.get("data") is not None
+            }
+    
+            linha_inicial = linhas_por_data.get(primeira_data)
+            linha_final = linhas_por_data.get(ultima_data)
+            preco_usd_inicial = (
+                linha_inicial.get("market_price")
+                if linha_inicial is not None
+                else None
+            )
+            preco_escolhido_inicial = (
+                linha_inicial.get(coluna_preco)
+                if linha_inicial is not None
+                else None
+            )
+            preco_escolhido_final = (
+                linha_final.get(coluna_preco)
+                if linha_final is not None
+                else None
+            )
+    
+            motivo: str | None = None
+            if preco_usd_inicial is not None:
+                usd_inicial = _decimal(
+                    preco_usd_inicial,
+                    f"market_price de product_id={product_id}",
+                )
+                elegivel_por_minimo = usd_inicial > limite_decimal
+            else:
+                elegivel_por_minimo = False
+    
+            if preco_escolhido_inicial is None:
+                motivo = "sem_preco_no_primeiro_dia"
+            elif preco_escolhido_final is None:
+                motivo = "sem_preco_no_ultimo_dia"
+            elif not elegivel_por_minimo:
+                motivo = "preco_inicial_nao_maior_que_minimo"
+    
+            if motivo is not None:
+                exclusoes_por_motivo[motivo] += 1
+                series_excluidas.append(
+                    {
+                        "product_id": product_id,
+                        "acabamento": acabamento,
+                        "motivo": motivo,
+                    }
+                )
+                continue
+    
+            inicial = _decimal(
+                preco_escolhido_inicial,
+                f"{coluna_preco} inicial de product_id={product_id}",
+            )
+            final = _decimal(
+                preco_escolhido_final,
+                f"{coluna_preco} final de product_id={product_id}",
+            )
+            retorno_periodo = final / inicial - Decimal("1")
+    
+            retornos: list[Decimal] = []
+            for anterior, atual in zip(datas, datas[1:]):
+                linha_anterior = linhas_por_data.get(anterior)
+                linha_atual = linhas_por_data.get(atual)
+                if linha_anterior is None or linha_atual is None:
+                    continue
+                valor_anterior = linha_anterior.get(coluna_preco)
+                valor_atual = linha_atual.get(coluna_preco)
+                if valor_anterior is None or valor_atual is None:
+                    continue
+                anterior_decimal = _decimal(
+                    valor_anterior,
+                    f"{coluna_preco} de product_id={product_id}",
+                )
+                atual_decimal = _decimal(
+                    valor_atual,
+                    f"{coluna_preco} de product_id={product_id}",
+                )
+                if anterior_decimal == 0 or atual_decimal == 0:
+                    continue
+                retornos.append(atual_decimal / anterior_decimal - Decimal("1"))
+    
+            desvio = (
+                _desvio_amostral(retornos)
+                if len(retornos) >= minimo_observacoes
+                else None
+            )
+            raridade = produto.get("raridade")
+            series.append(
+                {
+                    "product_id": product_id,
+                    "acabamento": acabamento,
+                    "raridade": None if raridade is None else str(raridade),
+                    "code_card": raridade == "Code Card",
+                    "preco_inicial": float(inicial),
+                    "preco_final": float(final),
+                    "retorno_no_periodo": float(retorno_periodo),
+                    "desvio_padrao_retornos_diarios": desvio,
+                    "quantidade_retornos": len(retornos),
+                }
+            )
+    
+        if not series:
+>           raise ValueError("nenhuma série elegível")
+E           ValueError: nenhuma série elegível
+
+src/retorno_risco.py:226: ValueError
+=========================== short test summary info ============================
+FAILED tests/test_return_risk_metrics.py::test_parametro_preco_minimo_renomeado_e_resultado_sem_acento
+========================= 1 failed, 23 passed in 0.11s =========================
+
+[2026-11-22 07:56:21 UTC] Correção após revisão: testes focados depois da correção final da fixture
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 24 items
+
+tests/test_return_risk_metrics.py ........................               [100%]
+
+============================== 24 passed in 0.07s ==============================
+
+[2026-11-22 07:56:22 UTC] Correção após revisão: suíte completa do projeto
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 174 items
+
+tests/test_collection_comparison.py .............                        [  7%]
+tests/test_collector.py ..........                                       [ 13%]
+tests/test_decomposition.py .........                                    [ 18%]
+tests/test_fx_asof.py .....                                              [ 21%]
+tests/test_gold_schema.py ........                                       [ 25%]
+tests/test_prefix_isolation.py .......                                   [ 29%]
+tests/test_ptax_backfill.py .......                                      [ 33%]
+tests/test_retroactive_load.py .......                                   [ 37%]
+tests/test_return_risk_metrics.py ........................               [ 51%]
+tests/test_s3_timeouts.py ..                                             [ 52%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 59%]
+tests/test_secrets_not_versioned.py ..........                           [ 64%]
+tests/test_silver.py ...............................                     [ 82%]
+tests/test_silver_prefix.py ........                                     [ 87%]
+tests/test_tcgcsv_limits.py .                                            [ 87%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 174 passed in 4.77s ==============================
+
+[2026-11-22 07:56:43 UTC] Correção após revisão: chamada direta dos exemplos manuais
+10->12->12
+{'data_inicial': datetime.date(2026, 10, 9),
+ 'data_final': datetime.date(2026, 10, 11),
+ 'moeda': 'usd',
+ 'preco_minimo_usado': 5.0,
+ 'quantidade_series_elegiveis': 1,
+ 'quantidade_series_excluidas': 0,
+ 'exclusoes_por_motivo': {'sem_preco_no_primeiro_dia': 0,
+                          'sem_preco_no_ultimo_dia': 0,
+                          'preco_inicial_nao_maior_que_minimo': 0},
+ 'series_excluidas': [],
+ 'series': [{'product_id': 1,
+             'acabamento': 'Normal',
+             'raridade': 'Rare',
+             'code_card': False,
+             'preco_inicial': 10.0,
+             'preco_final': 12.0,
+             'retorno_no_periodo': 0.2,
+             'desvio_padrao_retornos_diarios': 0.1414213562373095,
+             'quantidade_retornos': 2}],
+ 'cobertura': {'primeira_data': datetime.date(2026, 10, 9),
+               'ultima_data': datetime.date(2026, 10, 11),
+               'quantidade_datas': 3}}
+10->12->9
+{'data_inicial': datetime.date(2026, 10, 9),
+ 'data_final': datetime.date(2026, 10, 11),
+ 'moeda': 'usd',
+ 'preco_minimo_usado': 5.0,
+ 'quantidade_series_elegiveis': 1,
+ 'quantidade_series_excluidas': 0,
+ 'exclusoes_por_motivo': {'sem_preco_no_primeiro_dia': 0,
+                          'sem_preco_no_ultimo_dia': 0,
+                          'preco_inicial_nao_maior_que_minimo': 0},
+ 'series_excluidas': [],
+ 'series': [{'product_id': 1,
+             'acabamento': 'Normal',
+             'raridade': 'Rare',
+             'code_card': False,
+             'preco_inicial': 10.0,
+             'preco_final': 9.0,
+             'retorno_no_periodo': -0.1,
+             'desvio_padrao_retornos_diarios': 0.31819805153394637,
+             'quantidade_retornos': 2}],
+ 'cobertura': {'primeira_data': datetime.date(2026, 10, 9),
+               'ultima_data': datetime.date(2026, 10, 11),
+               'quantidade_datas': 3}}
+10->nulo->12
+{'data_inicial': datetime.date(2026, 10, 9),
+ 'data_final': datetime.date(2026, 10, 11),
+ 'moeda': 'usd',
+ 'preco_minimo_usado': 5.0,
+ 'quantidade_series_elegiveis': 1,
+ 'quantidade_series_excluidas': 0,
+ 'exclusoes_por_motivo': {'sem_preco_no_primeiro_dia': 0,
+                          'sem_preco_no_ultimo_dia': 0,
+                          'preco_inicial_nao_maior_que_minimo': 0},
+ 'series_excluidas': [],
+ 'series': [{'product_id': 1,
+             'acabamento': 'Normal',
+             'raridade': 'Rare',
+             'code_card': False,
+             'preco_inicial': 10.0,
+             'preco_final': 12.0,
+             'retorno_no_periodo': 0.2,
+             'desvio_padrao_retornos_diarios': None,
+             'quantidade_retornos': 0}],
+ 'cobertura': {'primeira_data': datetime.date(2026, 10, 9),
+               'ultima_data': datetime.date(2026, 10, 11),
+               'quantidade_datas': 3}}
+
+Correção após revisão:
+Testes existentes alterados: apenas tests/test_return_risk_metrics.py, criado anteriormente na implementação de T-16 e agora revisado. Nenhum teste existente ou teste novo foi afrouxado; as expectativas alteradas corrigem nomes de API ou fixtures inválidas.
+Falha antes da correção: 8 falhas e 16 passes. Falhas: quantidade_series_elegíveis ainda inexistente, preco_minimo_usd ainda não aceito e preço zero no meio gerava um retorno em uma fixture.
+Testes novos que já passavam antes da correção: mínimo_observacoes_altera_desvio, test_precedencia_motivos_e_soma_excluidas e test_sem_linha_no_primeiro_dia_exclui_com_motivo já estavam certos com o código atual.
+Code Card foi falho antes apenas pela chave renomeada solicitada, mas o comportamento code_card False/True já usa raridade == "Code Card" igual ao src/concentracao_valor.py:108.
+Testes depois da correção: 24 passed em 0.07s.
+Suíte completa: 174 passed em 4.77s.
+Nota D3 corrigida: retorno no período = último preço dividido pelo primeiro preço, menos 1.
+Observação: produto ausente da dimensão é ignorado sem contagem; comportamento atual mantido sem alteração.
+
+[2026-11-22 08:00:28 UTC] Correção 2 após revisão: falha antes da correção
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 24 items
+
+tests/test_return_risk_metrics.py .............F..........               [100%]
+
+=================================== FAILURES ===================================
+______________ test_preco_cai_a_zero_e_retorna_menos_100_porcento ______________
+
+    def test_preco_cai_a_zero_e_retorna_menos_100_porcento():
+        fatos = [
+            preco(23651, 1, D1, "Normal", 6.0, 60.0),
+            preco(23651, 1, D2, "Normal", 0.0, 0.0),
+            preco(23651, 1, D3, "Normal", 7.0, 70.0),
+        ]
+        resultado = calcular_retorno_risco(fatos, [produto(23651, 1)])
+        serie = resultado["series"][0]
+>       assert serie["quantidade_retornos"] == 1
+E       assert 0 == 1
+
+tests/test_return_risk_metrics.py:253: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_return_risk_metrics.py::test_preco_cai_a_zero_e_retorna_menos_100_porcento
+========================= 1 failed, 23 passed in 0.12s =========================
+
+[2026-11-22 08:00:54 UTC] Correção 2 após revisão: testes focados depois da correção
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 24 items
+
+tests/test_return_risk_metrics.py ........................               [100%]
+
+============================== 24 passed in 0.09s ==============================
+
+[2026-11-22 08:00:54 UTC] Correção 2 após revisão: suíte completa do projeto
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 174 items
+
+tests/test_collection_comparison.py .............                        [  7%]
+tests/test_collector.py ..........                                       [ 13%]
+tests/test_decomposition.py .........                                    [ 18%]
+tests/test_fx_asof.py .....                                              [ 21%]
+tests/test_gold_schema.py ........                                       [ 25%]
+tests/test_prefix_isolation.py .......                                   [ 29%]
+tests/test_ptax_backfill.py .......                                      [ 33%]
+tests/test_retroactive_load.py .......                                   [ 37%]
+tests/test_return_risk_metrics.py ........................               [ 51%]
+tests/test_s3_timeouts.py ..                                             [ 52%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 59%]
+tests/test_secrets_not_versioned.py ..........                           [ 64%]
+tests/test_silver.py ...............................                     [ 82%]
+tests/test_silver_prefix.py ........                                     [ 87%]
+tests/test_tcgcsv_limits.py .                                            [ 87%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 174 passed in 5.57s ==============================
+
+[2026-11-22 08:01:12 UTC] Correção 2 após revisão: observações e contas manuais
+Correção 2 após revisão:
+Falha antes da correção: test_preco_cai_a_zero_e_retorna_menos_100_porcento esperava quantidade_retornos=1 para 6→0→7, mas a condição anterior também pulava preço atual zero e encontrou 0; 23 testes passaram e 1 falhou.
+Testes depois da correção: 24 passed em 0.09s.
+Suíte completa: 174 passed em 5.57s.
+
+Conta manual 6→0→7:
+6→0: retorno diário = 0/6 - 1 = -1,0.
+0→7: preço anterior igual a zero é pulado; não se divide por zero.
+quantidade de retornos = 1.
+retorno no período = 7/6 - 1 = 1/6 = 0,16666666666666674.
+desvio nulo porque há 1 retorno e o mínimo é 2.
+
+Conta manual 6→7→0:
+6→7: retorno diário = 7/6 - 1 = 1/6.
+7→0: retorno diário = 0/7 - 1 = -1,0.
+quantidade de retornos = 2.
+retorno no período = 0/6 - 1 = -1,0.
+retornos = [1/6, -1]. Média = (1/6 - 1)/2 = -5/12.
+Desvio amostral = sqrt((((1/6+5/12)^2 + (-1+5/12)^2))/(2-1)) = sqrt(49/72) = 0,8249579113843057.
+
+Nota da correção anterior: a versão anterior tratava também preço atual zero como ausente por causa da condição "ou atual_decimal == 0". Isso não foi pedido nem declarado na evidência anterior. A nota anterior atribuía o ajuste a "fixtures inválidas" quando houve uma mudança de código; essa atribuição estava incorreta.
+D8: hipótese com validação pendente e ADR pendente — preço zero é tratado como valor: queda de qualquer preço positivo para zero gera retorno diário de -100%, mas preço anterior igual a zero é pulado para evitar divisão por zero.
