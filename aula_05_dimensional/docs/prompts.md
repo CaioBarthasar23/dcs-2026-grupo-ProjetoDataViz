@@ -88,6 +88,40 @@
 
 - Confirmação: execução autorizada pelo usuário.
 
+## Etapa 03 — documentação de views
+
+- Data: 2026-11-22
+- Prompt recebido:
+
+  > [C] Personagem
+  > Você é engenheiro de dados que documenta para o time como cada objeto
+  > do grupo no banco mackenzie funciona. Explica mecanismo e consequência.
+  >
+  > [R] Pedido
+  > Criar docs/views.md com comparação de VIEW, MATERIALIZED VIEW ... TO
+  > incremental e MATERIALIZED VIEW ... REFRESH refreshable, consequências
+  > da incremental e objetos g00 confirmados por system.tables.
+  >
+  > [A] Ajustes
+  > - Nenhum DDL nesta etapa.
+  > - WINDOW VIEW fora de escopo; LIVE VIEW obsoleta.
+  > - EXPLAIN de view comum marcado como pendente para a Etapa 05.
+
+- Comando registrado:
+
+  ```bash
+  python sql/rodar_sql.py -q "SELECT name, engine, engine_full, total_rows FROM system.tables WHERE database='mackenzie' AND startsWith(name,'g00_') ORDER BY name"
+  ```
+
+  ```sql
+  SELECT name, engine, engine_full, total_rows
+  FROM system.tables
+  WHERE database='mackenzie' AND startsWith(name,'g00_')
+  ORDER BY name;
+  ```
+
+- Confirmação: execução autorizada pelo usuário.
+
 ## Saída da Etapa 02
 
 Comandos executados:
