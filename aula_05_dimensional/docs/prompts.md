@@ -47,3 +47,65 @@
 
   Confirmação: `ok, 06, https://clickhouse.afonsolelis.tech` (porta 443), usuário `turma`, senha `[OMITIDA]`. A senha não foi registrada.
 - Arquivos criados ou alterados: `AGENTS.md`, `.env.example`, `.gitignore`, `sql/rodar_sql.py`, `docs/prompts.md`, `.env`.
+
+## Etapa 00 — preparação adicional
+
+- Data: 2026-11-22
+- Prompt recebido:
+
+  > [C] Personagem
+  > Você é engenheiro de dados que prepara a pasta de trabalho do grupo
+  > para usar o ClickHouse da turma. Não lê nem imprime o .env.
+  >
+  > [R] Pedido
+  > Na pasta aula_05_dimensional/:
+  > 1. Confira que rodar_sql.py, AGENTS.md e .env.example estão na pasta
+  >    e que o .env está ignorado pelo Git (git check-ignore .env).
+  > 2. Crie as pastas specs/, sql/ e docs/adr/, se não existirem.
+  > 3. Crie docs/prompts.md com o título "Registro de prompts".
+  > 4. Rode e mostre a saída de três consultas com python rodar_sql.py -q:
+  >    a) o usuário e a versão do servidor;
+  >    b) as linhas por data_tag em mackenzie.db_ingestion;
+  >    c) um exemplo de data_json por data_tag (toJSONString, LIMIT 1 BY).
+  >
+  > [E] Exemplos
+  > python rodar_sql.py -q "SELECT currentUser(), version()"
+  >   -> turma | 25.8.33.6
+  > Contagem esperada: livros 1000, ptax 40, telemetria 31265.
+  >
+  > [A] Ajustes
+  > - Só SELECT. Nenhum objeto é criado no banco nesta etapa.
+  > - Use os nomes das variáveis do .env, nunca os valores.
+  > - Se GRUPO ainda estiver como g00, pare e peça o número do grupo:
+  >   g00 é o prefixo do professor.
+  >
+  > [T] Tipo de saída
+  > docs/prompts.md criado e as três saídas copiadas na resposta.
+  >
+  > [E] Extras
+  > Leia AGENTS.md. Mostre o plano, espere meu ok, execute, registre este
+  > prompt em docs/prompts.md e pare.
+
+- Confirmação: execução autorizada pelo usuário.
+
+## Etapa 01 — modelo dimensional
+
+- Data: 2026-11-22
+- Prompt recebido:
+
+  > [C] Personagem
+  > Você é engenheiro de dados que modela no estilo de Kimball. Declara o
+  > grão antes de qualquer coluna e não escreve DDL nesta etapa.
+  >
+  > [R] Pedido
+  > Crie specs/04_modelo_dimensional.md a partir de mackenzie.db_ingestion
+  > (livros, ptax e telemetria), com quatro fatos, dimensões g00, testes
+  > do grão com FINAL, diagrama Mermaid e matriz de barramento.
+  >
+  > [A] Ajustes
+  > - tipo_boletim da PTAX é dimensão degenerada.
+  > - posição e alerta são fatos separados.
+  > - ERR SAT e #RADIO são descarte.
+  > - nenhuma coluna é número sem consulta que o gere.
+
+- Confirmação: execução autorizada pelo usuário.
