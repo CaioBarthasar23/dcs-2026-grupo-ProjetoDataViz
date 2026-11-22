@@ -88,6 +88,78 @@
 
 - Confirmação: execução autorizada pelo usuário.
 
+## Saída da Etapa 04
+
+Comandos executados:
+
+```bash
+python sql/rodar_sql.py -f sql/003_relatorios_fechados.sql
+python sql/rodar_sql.py -q "SYSTEM REFRESH VIEW mackenzie.g00_mv_rel_preco_categoria_dia"
+python sql/rodar_sql.py -q "SYSTEM WAIT VIEW mackenzie.g00_mv_rel_preco_categoria_dia"
+python sql/rodar_sql.py -q "SYSTEM REFRESH VIEW mackenzie.g00_mv_rel_telemetria_caminhao_dia"
+python sql/rodar_sql.py -q "SYSTEM WAIT VIEW mackenzie.g00_mv_rel_telemetria_caminhao_dia"
+python sql/rodar_sql.py -q "SELECT view,status,last_success_time,last_refresh_time,next_refresh_time,exception,total_rows,written_rows FROM system.view_refreshes WHERE database='mackenzie' AND view IN ('g00_mv_rel_preco_categoria_dia','g00_mv_rel_telemetria_caminhao_dia') ORDER BY view"
+python sql/rodar_sql.py -q "SELECT categoria, sum(livros) AS livros, round(avg(preco_medio_gbp),2) AS preco_medio_gbp, max(cotacao_venda_ptax) AS cotacao_venda_ptax, round(avg(preco_medio_brl),2) AS preco_medio_brl FROM mackenzie.g00_rel_preco_categoria_dia GROUP BY categoria ORDER BY livros DESC LIMIT 5"
+```
+
+Estado das refreshables:
+
+```text
+g00_mv_rel_preco_categoria_dia        Scheduled  4080  50
+g00_mv_rel_telemetria_caminhao_dia    Scheduled  73984 20
+```
+
+Teste de grão:
+
+```text
+g00_rel_preco_categoria_dia:
+linhas = 50
+chaves = 50
+
+g00_rel_telemetria_caminhao_dia:
+linhas = 20
+chaves = 20
+```
+
+Exemplo de fechamento:
+
+```text
+New Adult 20261030 6 46.3833 GBP 7.1899 333.4915 BRL
+```
+
+Cinco categorias maiores por livros no cubo fechado:
+
+```text
+Default        152
+Nonfiction     110
+Sequential Art 75
+Add a comment  67
+Fiction        65
+```
+
+## Etapa 04 — cubos fechados refreshable
+
+- Data: 2026-11-22
+- Prompt recebido:
+
+  > [C] Personagem
+  > Você é engenheiro de dados que publica cubos fechados para compras
+  > e logística. Um dia publicado não muda depois.
+  >
+  > [R] Pedido
+  > Criar sql/003_relatorios_fechados.sql com duas tabelas MergeTree,
+  > dois refreshables diários, ASOF PTAX por fechamento e conferências
+  > via system.view_refreshes e categorias.
+  >
+  > [A] Ajustes
+  > - Apenas data_key anterior a hoje.
+  > - Fatos e dimensão de livro com FINAL.
+  > - PTAX por ASOF LEFT JOIN com moeda igual e Fechamento permitido.
+  > - `SYSTEM REFRESH VIEW` e `SYSTEM WAIT VIEW`.
+  > - OFFSET 1 HOUR significa 01h00 UTC.
+
+- Confirmação: execução autorizada pelo usuário.
+
 ## Etapa 03 — documentação de views
 
 - Data: 2026-11-22

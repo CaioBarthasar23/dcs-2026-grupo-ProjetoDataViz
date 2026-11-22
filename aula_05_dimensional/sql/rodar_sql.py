@@ -45,6 +45,8 @@ def validar_consulta(sql: str) -> str:
         or prefixo.startswith("CREATE VIEW")
         or prefixo.startswith("INSERT")
         or prefixo.startswith("TRUNCATE TABLE")
+        or prefixo.startswith("SYSTEM REFRESH VIEW")
+        or prefixo.startswith("SYSTEM WAIT VIEW")
     )
     if not permitido:
         sys.exit("Comando não permitido.")
