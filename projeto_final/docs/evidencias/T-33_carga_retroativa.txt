@@ -1,0 +1,116 @@
+
+==================================== ERRORS ====================================
+_______________ ERROR collecting tests/test_retroactive_load.py ________________
+ImportError while importing test module '/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/tests/test_retroactive_load.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.14.2/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_retroactive_load.py:9: in <module>
+    from src import carga_retroativa as r
+E   ImportError: cannot import name 'carga_retroativa' from 'src' (/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/src/__init__.py)
+=========================== short test summary info ============================
+ERROR tests/test_retroactive_load.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.22s
+public_bytes=69058
+public_type=dict
+public_keys=['errors', 'results', 'success']
+public_results_type=list
+public_results_count=452
+local_exists=True
+local_bytes=69058
+local_type=dict
+local_keys=['errors', 'results', 'success']
+local_results_count=452
+.......                                                                  [100%]
+7 passed in 0.41s
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 132 items
+
+tests/test_collection_comparison.py .............                        [  9%]
+tests/test_collector.py ..........                                       [ 17%]
+tests/test_decomposition.py .........                                    [ 24%]
+tests/test_fx_asof.py .....                                              [ 28%]
+tests/test_gold_schema.py ........                                       [ 34%]
+tests/test_prefix_isolation.py .......                                   [ 39%]
+tests/test_ptax_backfill.py .......                                      [ 44%]
+tests/test_retroactive_load.py .......                                   [ 50%]
+tests/test_s3_timeouts.py ..                                             [ 51%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 59%]
+tests/test_secrets_not_versioned.py ..........                           [ 67%]
+tests/test_silver.py ...............................                     [ 90%]
+tests/test_silver_prefix.py ........                                     [ 96%]
+tests/test_tcgcsv_limits.py .                                            [ 97%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 132 passed in 14.69s =============================
+validacao_2026-11-12
+linhas_publico=452
+linhas_captura_local=452
+produtos_so_publico=0
+produtos_so_local=0
+linhas_marketPrice_diferente=0
+maior_diferenca_marketPrice=0
+ensaio_intervalo_2026-10-31_a_2026-11-11
+2026-10-31 gravado
+2026-11-01 gravado
+2026-11-02 gravado
+2026-11-03 gravado
+2026-11-04 gravado
+2026-11-05 gravado
+2026-11-06 gravado
+2026-11-07 gravado
+2026-11-08 gravado
+2026-11-09 gravado
+2026-11-10 gravado
+2026-11-11 gravado
+codigo_intervalo_1=0
+ensaio_dia_2026-11-13
+2026-11-13 gravado
+codigo_intervalo_2=0
+
+DECISOES_E_HIPOTESES_ADR-009
+- Hipótese, validação pendente: o preço do arquivo público equivale ao que o coletor teria gravado depois das 18h BRT.
+- Hipótese, validação pendente: o horário de geração do arquivo público não é informado pela fonte.
+- Os dias retroativos são declarados no README e no ADR, sem marca dentro do raw.
+- Não foram gravados products.json nos dias retroativos.
+- Nenhuma operação em bucket foi executada nesta tarefa.
+
+PERGUNTAS_ABERTAS
+- O aluno deve decidir como e quando executar a recarga no bucket em T-34, com autorização expressa em mensagem separada.
+- O aluno deve decidir se a declaração dos dias retroativos será atualizada no README nesta etapa ou em T-34.
+verificacao_final_local
+dias_verificados=13
+prices_presentes=13
+products_presentes=0
+dias_com_resultados=13
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 132 items
+
+tests/test_collection_comparison.py .............                        [  9%]
+tests/test_collector.py ..........                                       [ 17%]
+tests/test_decomposition.py .........                                    [ 24%]
+tests/test_fx_asof.py .....                                              [ 28%]
+tests/test_gold_schema.py ........                                       [ 34%]
+tests/test_prefix_isolation.py .......                                   [ 39%]
+tests/test_ptax_backfill.py .......                                      [ 44%]
+tests/test_retroactive_load.py .......                                   [ 50%]
+tests/test_s3_timeouts.py ..                                             [ 51%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 59%]
+tests/test_secrets_not_versioned.py ..........                           [ 67%]
+tests/test_silver.py ...............................                     [ 90%]
+tests/test_silver_prefix.py ........                                     [ 96%]
+tests/test_tcgcsv_limits.py .                                            [ 97%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 132 passed in 5.05s ==============================
+reexecucao_revisao_aluno_item1 caminho_presente= True entradas_total= 4749
+reexecucao_revisao_aluno_comparativo bytes_publico= 69058 bytes_local= 69058 conteudo_identico= True
