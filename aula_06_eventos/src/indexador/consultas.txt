@@ -1,0 +1,62 @@
+# Consultas Elasticsearch
+
+## Busca textual por preço em cancelamentos
+
+```json
+{
+  "query": {
+    "bool": {
+      "filter": [{"term": {"tipo": "cancelamento"}}],
+      "must": [{"match": {"motivo": "preço"}}]
+    }
+  },
+  "_source": ["event_id", "academia", "motivo", "tipo"],
+  "sort": ["_score"],
+  "track_scores": true
+}
+```
+
+## Alunos únicos exatos em volume pequeno
+
+```json
+{
+  "size": 0,
+  "aggs": {
+    "alunos": {"terms": {"field": "aluno", "size": 100000}}
+  }
+}
+```
+
+## Alunos únicos estimados por cardinality
+
+```json
+{
+  "size": 0,
+  "aggs": {
+    "alunos_estimativa": {
+      "cardinality": {"field": "aluno", "precision_threshold": 40000}
+    }
+  }
+}
+```
+
+Toda saída baseada em cardinality ou percentiles deve marcar o número como
+"estimativa". O valor exato vem da agregação terms no volume pequeno.
+
+## Relatório por mês
+
+```json
+{
+  "size": 0,
+  "aggs": {
+    "meses": {
+      "date_histogram": {
+        "field": "ocorrido_em",
+        "calendar_interval": "month",
+        "format": "yyyy.MM"
+      },
+      "aggs": {"por_tipo": {"terms": {"field": "tipo", "size": 20}}}
+    }
+  }
+}
+```
