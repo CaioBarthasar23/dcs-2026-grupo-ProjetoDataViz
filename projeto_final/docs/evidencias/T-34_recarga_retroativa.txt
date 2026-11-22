@@ -65,3 +65,100 @@ Esta evidência é parcial: a recarga dos preços do TCGplayer depende da T-33.
 2026-11-17 --- ptax cdi
 2026-11-18 tcg ptax cdi
 2026-11-19 --- ---- cdi
+
+[2026-11-22 07:32:08 UTC] 1. Listagem somente leitura antes da gravacao
+2026-10-30 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-10-31 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-01 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-02 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-03 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-04 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-05 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-06 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-07 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-08 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-09 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-10 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-11 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-12 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-13 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-14 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-15 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-16 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-17 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-18 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-19 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-20 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=False bcb_cdi cdi.json=True
+2026-11-21 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+
+[2026-11-22 07:32:40 UTC] 2. Carga retroativa de precos TCGplayer
+2026-10-31 gravado
+2026-11-01 gravado
+2026-11-02 gravado
+2026-11-03 gravado
+2026-11-04 gravado
+2026-11-05 gravado
+2026-11-06 gravado
+2026-11-07 gravado
+2026-11-08 gravado
+2026-11-09 gravado
+2026-11-10 gravado
+2026-11-11 gravado
+2026-11-12 ja existia
+2026-11-13 gravado
+2026-11-14 ja existia
+2026-11-15 ja existia
+2026-11-16 ja existia
+2026-11-17 gravado
+2026-11-18 ja existia
+2026-11-19 ja existia
+2026-11-20 gravado
+2026-11-21 ja existia
+
+[2026-11-22 07:34:03 UTC] 3. Backfill PTAX
+2026-11-22 07:34:05,285 INFO raw/bcb_ptax/group_id=23651/data=2026-11-18/cotacao.json               ja existia
+2026-11-22 07:34:05,287 INFO raw/bcb_ptax/group_id=23651/data=2026-11-19/cotacao.json               ja existia
+2026-11-22 07:34:05,287 INFO raw/bcb_ptax/group_id=23651/data=2026-11-20/cotacao.json               gravado (sem boletim no dia)
+2026-11-22 07:34:05,287 INFO raw/bcb_ptax/group_id=23651/data=2026-11-21/cotacao.json               ja existia
+
+[2026-11-22 07:34:14 UTC] 4. Listagem somente leitura depois da gravacao
+2026-10-30 tcgplayer products.json=False prices.json=False bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-10-31 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-01 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-02 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-03 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-04 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-05 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-06 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-07 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-08 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-09 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-10 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-11 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-12 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-13 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=False
+2026-11-14 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-15 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-16 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-17 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-18 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-19 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-20 tcgplayer products.json=False prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+2026-11-21 tcgplayer products.json=True prices.json=True bcb_ptax cotacao.json=True bcb_cdi cdi.json=True
+
+[2026-11-22 07:34:26 UTC] 4. Collector check apos a gravacao
+2026-11-22 07:34:27,704 INFO ocupada: raw/tcgplayer/group_id=23651/
+2026-11-22 07:34:27,705 INFO ocupada: raw/tcgplayer/group_id=24269/
+2026-11-22 07:34:27,705 INFO ocupada: raw/tcgplayer/group_id=24325/
+2026-11-22 07:34:27,705 INFO ocupada: raw/tcgplayer/group_id=24380/
+2026-11-22 07:34:27,705 INFO ocupada: raw/tcgplayer/group_id=24541/
+2026-11-22 07:34:27,705 INFO group_id=23651 ja tem dados (confira se foram seus)
+
+[2026-11-22 07:37:22 UTC] 5. Check final com codigo de saida (executado pelo aluno)
+2026-11-22 07:37:23,280 INFO ocupada: raw/tcgplayer/group_id=23651/
+2026-11-22 07:37:23,280 INFO ocupada: raw/tcgplayer/group_id=24269/
+2026-11-22 07:37:23,281 INFO ocupada: raw/tcgplayer/group_id=24325/
+2026-11-22 07:37:23,281 INFO ocupada: raw/tcgplayer/group_id=24380/
+2026-11-22 07:37:23,281 INFO ocupada: raw/tcgplayer/group_id=24541/
+2026-11-22 07:37:23,281 INFO group_id=23651 ja tem dados (confira se foram seus)
+codigo: 0
