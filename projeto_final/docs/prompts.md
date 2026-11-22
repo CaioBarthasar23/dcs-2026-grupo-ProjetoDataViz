@@ -852,3 +852,38 @@ Pare ao terminar e liste perguntas abertas.
 
 Respostas do aluno ao Copilot:
 1. Confirmação do plano: "Confirmado"
+
+**Data:** 2026-11-22, entre 04h24 e 04h34 (Brasília).
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** `docs/evidencias/T-34_recarga_retroativa.txt` (pelo agente). Gravações no bucket, só no prefixo `group_id=23651`: preços do TCGplayer de 15 dias (31/10 a 11/11, 13/11, 17/11 e 20/11) e a marca de PTAX "sem boletim no dia" de 20/11. O aluno acrescentou o bloco 5 da evidência (check final com código de saída) e o item da carga retroativa no `AGENTS.md`, antes do prompt.
+- **Confirmação do plano:** a confirmação com autorização expressa, em quatro comandos nomeados, está em "Respostas do aluno ao Copilot", abaixo.
+- **Resultado:** o plano mostrou check com código 0, listagem somente leitura, carga `--de 2026-10-31 --ate 2026-11-21 --destino s3`, backfill de PTAX de 18/11 a 21/11 e as lacunas de CDI; depois da confirmação, a listagem anterior mostrou preços existentes em 12/11, 14/11 a 16/11, 18/11, 19/11 e 21/11; a carga gravou 15 dias e 7 já existiam, sem ERRO nem 404; o backfill de PTAX gravou 20/11 (sem boletim no dia) e os outros 3 dias já existiam; a listagem posterior mostra preços em todos os dias de 31/10 a 21/11 e `products.json` ausente nos 15 dias retroativos, como decidido no ADR-009; o check final saiu com código 0. O agente descreveu a lacuna de CDI como 30/10 a 11/11; a verificação do aluno no cdi.json de 12/11 mostrou janela de 03/11 a 11/11, o que reduz a lacuna efetiva a 30/10 (hipótese, confirmação na silver pendente). A equivalência entre arquivo público e captura própria continua validada só para 12/11 (hipótese, validação pendente nos demais dias).
+
+Prompt 26 (T-34): retomada da recarga retroativa no bucket, plano
+
+[C] Personagem
+Você é o engenheiro que retoma a T-34 (specs/tasks.md): recarga retroativa real no bucket após a volta do RustFS. Requisitos: RNF-06, RNF-03 e RNF-01. Decisão: docs/adr/ADR-009-perda-do-cluster-e-carga-retroativa.md.
+[R] Pedido
+Contexto (fatos): o RustFS da turma voltou e o professor confirmou; a coleta diária já voltou a funcionar no GitHub. Ficaram lacunas de preços do TCGplayer em 31/10 a 11/11, 13/11, 17/11 e provavelmente 20/11 e 21/11. A PTAX de 30/10 a 17/11 já foi carregada e a captura de 12/11 foi enviada. O arquivo público do TCGCSV de 12/11 foi idêntico à captura própria (hipótese para os demais dias, validação pendente).
+Mostre um plano em tópicos, sem executar nada além de python -m src.collector check, com:
+1. O resultado de python -m src.collector check (com o código de saída). Se não for 0, pare.
+2. A listagem somente leitura do prefixo group_id=23651, por data e por fonte (tcgplayer products.json e prices.json, bcb_ptax cotacao.json, bcb_cdi cdi.json), de 2026-10-30 até 2026-11-21, usando as abstrações de armazenamento do src/collector.py, sem imprimir credenciais. Diga o comando exato que pretende rodar.
+3. Quais datas de preços faltam, e o comando exato de python -m src.carga_retroativa --de ... --ate ... --destino s3 que você rodaria (--ate deve ser 2026-11-21 ou anterior; dias com preço já existente são ignorados pelo próprio comando).
+4. Quais datas de PTAX faltam depois de 17/11 e, se houver, o comando exato de python -m src.collector backfill-ptax que você rodaria (dia sem boletim é declarado, não inventado).
+5. Quais datas de CDI faltam. Não há comando de recarga de CDI; apenas informe as lacunas.
+6. Como a evidência será gravada (acrescentar em docs/evidencias/T-34_recarga_retroativa.txt com tee -a, sem apagar o que existe e sem segredos).
+[A] Ajustes
+Esta mensagem não autoriza nenhuma gravação no bucket: a autorização expressa virá na minha mensagem de confirmação, com os comandos exatos. Não leia nem imprima .env. Não apague nem sobrescreva objeto do bucket. Nunca desative a validação de certificado TLS. Não escreva fora do prefixo group_id=23651. Não altere nenhum arquivo em src/. Sem git commit nem git push. Pare e me avise se qualquer comando falhar. Não declare sucesso sem mostrar a saída.
+[T] Tipo de saída
+Plano em tópicos; ao executar, apenas o arquivo docs/evidencias/T-34_recarga_retroativa.txt (acrescentado).
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RNF-06), docs/adr/ADR-009-perda-do-cluster-e-carga-retroativa.md e o final de docs/evidencias/T-34_recarga_retroativa.txt. Ao terminar o plano, liste perguntas abertas e pare.
+
+Respostas do aluno ao Copilot:
+1. Confirmação do plano:
+"Confirmado, com autorização expressa para gravar no bucket, apenas no prefixo group_id=23651, estes comandos e nenhum outro, nesta ordem:
+1. A listagem somente leitura do item 2, antes de gravar.
+2. python -m src.carga_retroativa --de 2026-10-31 --ate 2026-11-21 --destino s3
+3. python -m src.collector backfill-ptax --de 2026-11-18 --ate 2026-11-21. Antes de rodar, diga pela leitura do código, sem abrir o .env, para onde o backfill grava; se não for o bucket, pare e pergunte.
+4. A mesma listagem de novo, depois da gravação, e python -m src.collector check.
+Se a carga de preços terminar com ERRO apenas por arquivo ausente (404), siga para o passo 3 e relate; qualquer outro erro, inclusive TLS, pare e mostre a saída. Grave cada saída em docs/evidencias/T-34_recarga_retroativa.txt com tee -a, com um cabeçalho de data e hora, sem apagar nada. Leia a constante CDI_JANELA_DIAS no src/collector.py e diga, sem alterar nada, se a janela do CDI de 14/11 cobre as datas de 30/10 a 11/11. Não use --forcar, não rode collect nem upload, não apague nem sobrescreva objeto, não tente recarregar CDI. Não faça git commit nem git push. Ao terminar, liste os dias gravados, os que já existiam e as lacunas restantes por fonte, e pare."
