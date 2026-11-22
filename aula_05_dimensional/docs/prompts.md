@@ -88,6 +88,96 @@
 
 - Confirmação: execução autorizada pelo usuário.
 
+## Saída da Etapa 02
+
+Comandos executados:
+
+```bash
+python sql/rodar_sql.py -f sql/001_dimensoes_e_fatos.sql
+python sql/rodar_sql.py -q "SELECT count() AS linhas FROM mackenzie.g00_fato_preco_livro FINAL"
+python sql/rodar_sql.py -f sql/002_carga_historico.sql
+python sql/rodar_sql.py -f sql/002_carga_historico.sql
+python sql/rodar_sql.py -f sql/005_consultas.sql
+```
+
+Contagem antes da carga:
+
+```text
+linhas
+UInt64
+0
+```
+
+Dimensão de data após recarga:
+
+```text
+linhas  731
+chaves  731
+```
+
+Fato de livros após carga:
+
+```text
+linhas
+UInt64
+1000
+```
+
+Teste do grão:
+
+```text
+fato                         modo       linhas  chaves
+g00_fato_preco_livro         sem FINAL  2000    1000
+g00_fato_cotacao_ptax        sem FINAL  80      40
+g00_fato_leitura_telemetria  sem FINAL  57600   28800
+g00_fato_alerta_direcao      sem FINAL  138     69
+g00_fato_alerta_direcao      com FINAL  69      69
+g00_fato_preco_livro         com FINAL  1000    1000
+g00_fato_cotacao_ptax        com FINAL  40      40
+g00_fato_leitura_telemetria  com FINAL  28800   28800
+```
+
+Roteamento de telemetria:
+
+```text
+destino             linhas
+alerta              69
+descarte ERR SAT    932
+descarte RADIO      1464
+leitura barra       22432
+leitura espaço      6368
+```
+
+Os arquivos `001`, `002` e `005` foram criados em `sql/`.
+`rodar_sql.py` passou a aceitar SELECT, WITH, CREATE TABLE,
+CREATE MATERIALIZED VIEW, CREATE VIEW, INSERT e TRUNCATE restrito a
+`mackenzie.g00_dim_data`.
+
+## Etapa 02 — DDL dimensional no ClickHouse
+
+- Data: 2026-11-22
+- Prompt recebido:
+
+  > [C] Personagem
+  > Você é engenheiro de dados que escreve DDL para ClickHouse 25.8.
+  >
+  > [R] Pedido
+  > Criar 001_dimensoes_e_fatos.sql, 002_carga_historico.sql e
+  > 005_consultas.sql para dimensões, fatos, views incrementais,
+  > carga histórica e testes de grão e classificação de telemetria.
+  >
+  > [A] Ajustes
+  > - ReplacingMergeTree com versao_ms; AggregatingMergeTree para caminhão.
+  > - datas em America/Sao_Paulo.
+  > - ERR SAT e #RADIO ficam fora dos fatos.
+  > - adaptar rodar_sql.py para DDL/INSERT e arquivos SQL.
+  >
+  > [T] Tipo de saída
+  > três arquivos SQL comentados e saídas da contagem antes da carga
+  > e das consultas 1 e 2.
+
+- Confirmação: execução autorizada pelo usuário.
+
 ## Etapa 01 — modelo dimensional
 
 - Data: 2026-11-22
