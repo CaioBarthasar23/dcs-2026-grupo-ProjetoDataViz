@@ -88,6 +88,57 @@
 
 - Confirmação: execução autorizada pelo usuário.
 
+## Confirmação das respostas
+
+- Data: 2026-11-22
+- Prompt recebido:
+
+  > Leia o docs/respostas.md: cada número tem a consulta ao lado? Registre
+  > o prompt e faça o commit.
+
+- Resultado: confirmado que cada número P1–P5 está acompanhado de sua
+  consulta SQL na mesma seção do documento.
+- Confirmação: execução autorizada pelo usuário.
+
+## Etapa 06 — respostas de negócio
+
+- Comando executado:
+
+  ```bash
+  python sql/rodar_sql.py -f sql/005_consultas.sql
+  ```
+
+- Saída P1–P5 registrada em `docs/respostas.md`:
+
+  ```text
+  P1 New Adult | 6 livros | 333.4915 BRL
+  P2 Default | 1345 exemplares
+  P3 hora 0 | 78.3675 km/h
+  P4 CAM-5707 | 4076 min | 12 alertas
+  P5 subiu | 6.7072 para 7.1899 | variacao 0.4827
+  ```
+
+- Data: 2026-11-22
+- Prompt recebido:
+
+  > [C] Personagem
+  > Você é analista de dados que responde a área de negócio a partir do
+  > modelo dimensional do grupo, nunca da tabela de pouso.
+  >
+  > [R] Pedido
+  > Completar sql/005_consultas.sql com estrela, alertas, views, EXPLAIN,
+  > refreshables, observabilidade e P1–P5; executar o arquivo e criar
+  > docs/respostas.md com a resposta, número, tabela, tipo de medida e
+  > consulta copiada.
+  >
+  > [A] Ajustes
+  > - Nenhuma resposta lê db_ingestion.
+  > - Preço, velocidade e cotação não são somados.
+  > - Fatos e dimensões com FINAL.
+  > - Valores sem consulta são marcados como hipótese.
+
+- Confirmação: execução autorizada pelo usuário.
+
 ## Confirmação da Etapa 05
 
 - Data: 2026-11-22
