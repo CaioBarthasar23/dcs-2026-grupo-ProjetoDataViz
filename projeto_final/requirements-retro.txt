@@ -1,0 +1,3 @@
+# Carga retroativa do arquivo diario do TCGCSV (7z). A coleta diaria instala so requirements.txt.
+-r requirements.txt
+py7zr==0.22.0
