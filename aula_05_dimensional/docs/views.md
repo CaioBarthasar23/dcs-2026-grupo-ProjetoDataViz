@@ -115,5 +115,13 @@ LIVE VIEW é obsoleta e não faz parte da arquitetura.
 
 ## EXPLAIN de uma view comum
 
-Pendente. Será completado na Etapa 05, quando
-`mackenzie.g00_v_saude_ingestao_15min` existir.
+Saída real de
+`EXPLAIN SELECT * FROM mackenzie.g00_v_saude_ingestao_15min`:
+
+```text
+Expression ((Project names + (Projection + (Change column names to column identifiers + (Convert VIEW subquery result to VIEW table structure + (Materialize constants after VIEW subquery + (Project names + (Projection + (Change column names to column identifiers + (Project names + Projection))))))))))
+  Aggregating
+    Expression (Before GROUP BY)
+      Filter ((WHERE + Change column names to column identifiers))
+        ReadFromPreparedSource (Read from NullSource)
+```

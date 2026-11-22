@@ -47,6 +47,7 @@ def validar_consulta(sql: str) -> str:
         or prefixo.startswith("TRUNCATE TABLE")
         or prefixo.startswith("SYSTEM REFRESH VIEW")
         or prefixo.startswith("SYSTEM WAIT VIEW")
+        or prefixo.startswith("EXPLAIN")
     )
     if not permitido:
         sys.exit("Comando não permitido.")
@@ -58,13 +59,17 @@ def validar_consulta(sql: str) -> str:
             prefixo.startswith("CREATE MATERIALIZED VIEW")
             and re.search(r"(?is)\bAS\s+(SELECT|WITH)\b", consulta) is not None
         )
+        view_seletiva = (
+            prefixo.startswith("CREATE VIEW")
+            and re.search(r"(?is)\bAS\s+(SELECT|WITH)\b", consulta) is not None
+        )
         carga_seletiva = (
             prefixo.startswith("INSERT")
             and re.search(r"(?is)\bSELECT\b", consulta) is not None
             and re.search(r"(?is)\bFROM\s+mackenzie\.db_ingestion\b", consulta) is not None
         )
         direta = prefixo.startswith("SELECT") or prefixo.startswith("WITH")
-        if not (direta or mv_seletiva or carga_seletiva):
+        if not (direta or mv_seletiva or view_seletiva or carga_seletiva):
             sys.exit("db_ingestion aceita somente SELECT ou cargas INSERT ... SELECT.")
     return consulta
 

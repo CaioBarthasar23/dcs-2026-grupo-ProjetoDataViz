@@ -88,6 +88,78 @@
 
 - Confirmação: execução autorizada pelo usuário.
 
+## Confirmação da Etapa 05
+
+- Data: 2026-11-22
+- Prompt recebido:
+
+  > Confira que o fato de leitura não mudou com o reenvio, complete a
+  > seção pendente de docs/views.md com o EXPLAIN, registre o prompt e
+  > faça o commit.
+
+- Resultado: o fato permaneceu em 28.800 linhas e 28.800 chaves únicas.
+- Confirmação: execução autorizada pelo usuário.
+
+## Saída da Etapa 05
+
+Comandos executados:
+
+```bash
+python sql/rodar_sql.py -f sql/004_observabilidade.sql
+python sql/rodar_sql.py -q "SELECT * FROM mackenzie.g00_v_saude_ingestao_15min"
+python sql/rodar_sql.py -q "SELECT * FROM mackenzie.g00_v_caminhoes_5min"
+python sql/rodar_sql.py -q "SELECT * FROM mackenzie.g00_v_descartes_telemetria_1h"
+python sql/rodar_sql.py -q "EXPLAIN SELECT * FROM mackenzie.g00_v_saude_ingestao_15min"
+```
+
+As três views voltaram vazias. A origem mostrou apenas o último
+timestamp 1793924957222, convertido em 2026-11-05 21:29:17.222
+America/Sao_Paulo. Não havia dados nos últimos 15 minutos nem na última
+hora de telemetria; o SQL não foi alterado por essa lacuna.
+
+EXPLAIN real:
+
+```text
+Expression
+  Aggregating
+    Expression
+      Filter
+        ReadFromPreparedSource (Read from NullSource)
+```
+
+Conferência após o reenvio:
+
+```text
+g00_fato_leitura_telemetria FINAL
+linhas = 28800
+chaves = 28800
+```
+
+O resultado permaneceu igual ao estado registrado antes do reenvio;
+nenhuma alteração duplicou ou removeu linhas do fato de leitura.
+
+## Etapa 05 — observabilidade
+
+- Data: 2026-11-22
+- Prompt recebido:
+
+  > [C] Personagem
+  > Você é engenheiro de confiabilidade de dados. Quer saber se a
+  > ingestão está chegando, com volume, caminhões transmitindo e
+  > descartes, sem abrir log.
+  >
+  > [R] Pedido
+  > Criar sql/004_observabilidade.sql com contadores incrementais,
+  > classificacao de descartes e tres views comuns em janelas.
+  >
+  > [A] Ajustes
+  > - Sem carga histórica dos contadores.
+  > - Minuto em America/Sao_Paulo a partir de timestamp unix ms.
+  > - Sem WINDOW VIEW ou LIVE VIEW.
+  > - Alvo de SLO sem origem marcado como hipótese do grupo.
+
+- Confirmação: execução autorizada pelo usuário.
+
 ## Saída da Etapa 04
 
 Comandos executados:
