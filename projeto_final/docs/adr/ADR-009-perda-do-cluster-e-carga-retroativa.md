@@ -57,3 +57,15 @@ A PTAX de 30/10/2026 (último fechamento anterior ao primeiro dia de preços) fo
 ## Atualização de 19/11/2026
 
 Em 19/11/2026 a conferência do bucket mostrou que os preços do TCGplayer e a PTAX de 17/11/2026 não foram coletados: a lista de execuções do GitHub Actions não tem nenhuma execução depois das 18h (horário de Brasília) nesse dia. A PTAX de 17/11/2026 foi recarregada com `backfill-ptax`, e os preços de 17/11/2026 entram na carga retroativa dos preços (T-33 e T-34), com o dia declarado como retroativo no README e neste ADR. O texto original deste ADR não foi alterado.
+
+## Atualização de 22/11/2026
+
+Estado final da recarga retroativa, conforme a evidência `docs/evidencias/T-34_recarga_retroativa.txt` (listagens de 22/11/2026, antes e depois da gravação):
+
+- **Preços do TCGplayer carregados do arquivo público do TCGCSV (15 dias):** 31/10 a 11/11, 13/11, 17/11 e 20/11. Os dias 12/11 (captura própria enviada pelo aluno) e 14/11 a 16/11, 18/11, 19/11 e 21/11 foram gravados pela coleta diária.
+- **Motivo por dia:** 31/10 a 11/11 e 13/11, perda do cluster; 17/11, ausência da execução da noite; 20/11, falha de TLS no endpoint do RustFS.
+- **`products.json`:** ausente nos 15 dias retroativos, por decisão do aluno de 14/11/2026.
+- **PTAX:** 30/10 a 13/11 e 17/11 recarregadas pelo backfill; 20/11 gravada como "sem boletim no dia" (feriado nacional). Sem lacuna de PTAX de 30/10 a 21/11.
+- **CDI:** o objeto diário não existe em 30/10 a 11/11 nem em 13/11. O arquivo de 12/11 traz a janela de 03/11 a 11/11, então a série tem valores a partir de 03/11; o valor de 30/10 (sexta-feira) não está no bucket, e 31/10, 01/11 e 02/11 não têm CDI. Hipótese, validação pendente na silver. O tratamento do CDI de 30/10 na carteira CDI será decidido no ADR da carteira.
+- **Hipótese mantida:** o arquivo público equivale ao que o coletor teria gravado depois das 18h BRT. Verificada por conteúdo idêntico apenas em 12/11; hipótese, validação pendente nos demais dias.
+- **Pendente:** teste da reconstrução da silver em dias sem `products.json`.
