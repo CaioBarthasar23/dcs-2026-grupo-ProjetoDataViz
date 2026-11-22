@@ -805,3 +805,50 @@ Respostas do aluno ao Copilot:
 1. Mensagem preliminar (19/11/2026, 13h09): "Leia AGENTS.md e resuma em cinco linhas o que ele diz sobre bucket, credenciais, commits e como tratar nulos."
 2. Mensagem preliminar (19/11/2026, 13h13): "Pelo AGENTS.md: (1) em qual prefixo do bucket você pode gravar; (2) quais comandos exigem autorização expressa do aluno na mesma mensagem; (3) o que você pode fazer com o arquivo .env."
 3. Confirmação do plano: "Confirmado"
+
+**Data:** 2026-11-21, término às 21h38 (Brasília); início não anotado.
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** `src/concentracao_valor.py`, `tests/test_value_concentration.py` e `docs/evidencias/T-15_concentracao_valor.txt`.
+- **Confirmação do plano:** Plano aprovado
+- **Resultado:** testes escritos antes da implementação (erro de importação por módulo inexistente); quatro expectativas da fixture corrigidas durante a execução (8 cartas, 2 excluídas, total 1980 e última raridade Ultra Rare), todas por erro de expectativa e não de código; 18 passed no arquivo e 150 na suíte; nenhuma operação no bucket. A revisão do aluno encontrou o teste do desempate de acabamento sem como falhar, conferências fracas na fixture principal e uma função não pedida (calcular_concentracao); a correção foi feita no Prompt 25.
+
+Prompt 24 (T-15): concentração de valor por raridade e cartas nos 80%
+
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: T-15 (specs/tasks.md), calcular, no último dia, a participação de cada raridade no valor total da coleção e a quantidade de cartas que somam 80% do valor, excluindo Code Card. Requisitos: RF-11 (pergunta 4) e RNF-01; objetivo OBJ-04.
+[R] Pedido
+Decisões do aluno em 2026-11-21 (hipóteses com validação pendente, ADR pendente): (D1) o valor total é a soma dos preços de um exemplar por carta (somente tipo_produto "carta", sem Code Card e sem selados), e o exemplar é o acabamento de menor preço, na moeda escolhida, no último dia, entre os acabamentos com preço nesse dia (empate: ordem alfabética do acabamento); (D2) carta sem preço no último dia fica fora do total e é contada à parte; não se carrega preço de dia anterior; (D3) a regra dos 80%: cartas em ordem decrescente de valor (empate: product_id crescente) e conta-se o menor número de cartas cuja soma acumulada é maior ou igual a 80% do total, com limite inclusivo e o percentual como parâmetro; (D4) a participação por raridade vem em ordem decrescente de participação (empate: nome da raridade), e carta com raridade nula entra no grupo visível "sem raridade"; (D5) o último dia é a última data presente no fato da coleção, e a função recebe as linhas de uma única coleção.
+1. Crie em src/ um módulo novo (por exemplo src/concentracao_valor.py) com uma função que recebe as linhas de fato_preco_diario e dim_produto da gold (src/gold.py), como em src/selado_vs_cartas.py, e devolve: a data de referência (último dia); a moeda; o valor total; a quantidade de cartas no total; a quantidade de cartas excluídas por falta de preço no último dia; a participação por raridade (raridade, valor, participação do total, quantidade de cartas), em ordem decrescente de participação; o limite usado (padrão 0,8) e o número de cartas que o atingem; e a cobertura (primeira data do fato, última data e quantidade de datas distintas), para que período e quantidade de observações fiquem visíveis.
+2. Regras: Code Card fica fora pela raridade "Code Card"; selados e qualquer tipo_produto diferente de "carta" ficam fora. A moeda é parâmetro: "brl" (padrão, usa market_price_brl) ou "usd" (usa market_price). Preço nulo na moeda escolhida não vale como preço (nulo não é zero). Não há filtro de preço mínimo em dólar nesta pergunta. O percentual é parâmetro entre 0 (exclusivo) e 1 (inclusivo), e fora disso levante ValueError. Levante ValueError também quando: as linhas misturarem mais de um group_id; houver linha duplicada para (produto, acabamento, data); o último dia não tiver nenhuma carta elegível com preço; ou o valor total for zero. A comparação com o limite não pode errar por arredondamento de ponto flutuante: use Decimal ou uma tolerância documentada.
+3. Se a especificação não definir algum caso, pergunte; não escolha.
+4. Escreva tests/test_collection_comparison.py... NÃO: escreva tests/test_value_concentration.py com dados fixos, sem rede e sem bucket: Code Card e selado ficam fora; o último dia é a data máxima do fato, mesmo que alguma carta só tenha preço em dias anteriores; o exemplar é o acabamento de menor preço no último dia, com desempate alfabético; carta sem preço no último dia sai do total e é contada em quantidade de excluídas; as participações somam 1 e vêm em ordem decrescente, com desempate pelo nome da raridade; carta com raridade nula aparece como "sem raridade"; o número de cartas dos 80% confere com uma conta feita à mão, inclusive o caso de fronteira em que a soma acumulada é exatamente 80% (limite inclusivo) e o desempate por product_id; moeda "usd" e "brl" dão valores diferentes quando o câmbio muda; limite fora de (0, 1] levanta ValueError; mais de um group_id, linha duplicada, nenhuma carta elegível e valor total zero levantam ValueError; o resultado não depende da ordem das linhas de entrada.
+[A] Ajustes
+Não use rede nem bucket: sem collect, upload, backfill-ptax, rebuild nem gold build. Não leia nem imprima .env. Sem segredos em evidências. Não altere src/collector.py, src/silver.py, src/fx_asof.py, src/gold.py, src/decomposicao.py, src/selado_vs_cartas.py, src/comparacao_colecoes.py nem src/carga_retroativa.py; se achar que precisa, pergunte. Escreva e execute os testes novos antes de implementar, mostrando a falha. Grave as saídas com redirecionamento (comando 2>&1 | tee -a arquivo), sem retranscrever. Se um teste falhar depois da implementação, ou se acrescentar teste depois, explique na evidência, sem afrouxar a verificação. Não faça git commit nem git push: proponha as mensagens no formato tipo(T-xx): descrição [RF-yy], com código e testes juntos e a evidência em outro commit.
+[T] Tipo de saída
+Arquivos: src/concentracao_valor.py (novo), tests/test_value_concentration.py (novo) e docs/evidencias/T-15_concentracao_valor.txt (saída real dos testes e da suíte completa; um exemplo numérico com dados fixos, chamando a função diretamente e gravando a saída com tee, sem reformatar; as cinco decisões do aluno registradas como hipótese com validação pendente). Mostre o plano em tópicos e espere minha confirmação antes de editar. Não declare sucesso sem mostrar a saída.
+[E] Extras
+Leia antes: AGENTS.md, specs/spec.md (RF-11, RNF-01), docs/01_objetivos_negocio.md (OBJ-04), specs/tasks.md (T-15), specs/plan.md, src/gold.py, src/selado_vs_cartas.py e src/comparacao_colecoes.py (como padrão de estilo). Ao terminar, liste perguntas abertas e pare.
+
+**Data:** 2026-11-21, término às 22h08 (Brasília); início não anotado.
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** `src/concentracao_valor.py`, `tests/test_value_concentration.py` e `docs/evidencias/T-15_concentracao_valor.txt`.
+- **Confirmação do plano:** Confirmado. A confirmação foi enviada antes de o plano ser revisado; a instrução de só acrescentar na evidência, dada depois na revisão, não chegou ao agente.
+- **Resultado:** o teste do desempate de acabamento foi escrito antes da correção e falhou com KeyError: 'acabamentos_escolhidos' (1 failed, 1 passed nos 2 testes selecionados); depois da correção, 18 passed no arquivo e 150 na suíte; calcular_concentracao foi removida; as conferências exatas da fixture principal já passavam antes, porque o cálculo estava correto. O agente substituiu o bloco do exemplo antigo da evidência por uma frase de remissão; o texto original não é recuperável, e isso está declarado na nota e na correção da nota no próprio arquivo de evidência.
+
+Prompt 25 (T-15): correção do desempate de acabamento e dos testes da concentração de valor
+
+[C] Personagem
+Você é o engenheiro que corrige a T-15 (specs/tasks.md) após revisão. Requisitos: RF-11 (pergunta 4) e RNF-01; objetivo OBJ-04.
+[R] Pedido
+Corrija src/concentracao_valor.py e tests/test_value_concentration.py:
+1. O resultado passa a incluir "acabamentos_escolhidos": um mapa product_id para o acabamento do exemplar escolhido de cada carta que entrou no valor total.
+2. Testes novos ou ajustados, escritos e executados antes da correção, mostrando a falha: (a) o desempate de acabamento por ordem alfabética é verificado pelo acabamento escolhido em acabamentos_escolhidos (dois acabamentos com o mesmo preço, esperado o primeiro em ordem alfabética); (b) no teste da fixture principal, confira as participações exatas por raridade e a ordem completa (Rare 1840, sem raridade 80, Ultra Rare 60, sobre o total 1980).
+3. Remova a função calcular_concentracao, que repete a principal e não foi pedida (ou, se achar que precisa dela, explique antes de manter).
+4. Na evidência, acrescente uma seção "Correção após revisão" com a saída real da falha antes da correção e dos testes depois, sem apagar nada do que já está no arquivo (use tee -a). Substitua o exemplo numérico por uma chamada direta da função que inclua acabamentos_escolhidos, gravada com tee. Registre também uma nota: o desempate de product_id entre cartas de valor igual não altera a quantidade de cartas dos 80%.
+[A] Ajustes
+Não use rede nem bucket. Não altere nenhum outro módulo. Sem commit nem push. Nenhum teste existente é afrouxado; explique na evidência qualquer teste alterado. Mostre o plano e espere minha confirmação antes de editar.
+[E] Extras
+Pare ao terminar e liste perguntas abertas.
+
+Respostas do aluno ao Copilot:
+1. Confirmação do plano: "Confirmado"
