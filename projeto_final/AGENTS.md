@@ -12,6 +12,7 @@ Permitidos (dentro de `projeto\_final/`):
 `git status`, `git diff`, `git log`
 Somente com autorização expressa do aluno na mesma mensagem:
 - `python -m src.carga_retroativa --de AAAA-MM-DD --ate AAAA-MM-DD --destino s3` (grava só preços do TCGplayer no prefixo `group_id=23651`; não sobrescreve chave existente)
+- `python -m src.silver rebuild --fonte s3 --destino local` (lê o bucket, só no prefixo `group_id=23651`, e grava apenas em diretório local; não grava no bucket)
 `python -m src.collector collect | upload | backfill-ptax`, `python -m src.silver rebuild --destino s3` (gravam no bucket compartilhado, só no prefixo `group\_id=23651`)
 Proibidos: `git commit`, `git push`, apagar ou sobrescrever objetos do bucket, ler ou imprimir `.env`.
 O agente propõe a mensagem de commit; quem comita é o aluno.
