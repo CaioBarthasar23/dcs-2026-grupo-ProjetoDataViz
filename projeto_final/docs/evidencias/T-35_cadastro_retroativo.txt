@@ -1,0 +1,301 @@
+2026-11-23 00:05:58,214 INFO rebuild: fonte=s3 destino=local group_id=23651
+2026-11-23 00:06:20,305 INFO colecao        lidos=1 validos=1 quarentena=0
+2026-11-23 00:06:20,305 INFO produto        lidos=2023 validos=2023 quarentena=0
+2026-11-23 00:06:20,305 INFO preco_diario   lidos=9955 validos=4521 quarentena=5434
+2026-11-23 00:06:20,306 INFO cambio_diario  lidos=14 validos=14 quarentena=0
+2026-11-23 00:06:20,306 INFO cdi_diario     lidos=64 validos=64 quarentena=0
+[T-35 antes 31/10 a 21/11]
+2026-10-31 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-01 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-02 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-03 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-04 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-05 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-06 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-07 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-08 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-09 validas=0 quarentena=453 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-10 validas=0 quarentena=452 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-11 validas=0 quarentena=452 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=0
+2026-11-12 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-13 validas=453 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-14 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-15 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-16 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-17 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-18 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-19 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-20 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-21 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 7 items
+
+tests/test_silver_retro_catalog.py F.FF..F                               [100%]
+
+=================================== FAILURES ===================================
+________ test_datas_anteriores_usam_primeiro_cadastro_valido_com_marca _________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-0/test_datas_anteriores_usam_pri0')
+
+    def test_datas_anteriores_usam_primeiro_cadastro_valido_com_marca(tmp_path):
+        anterior = date(2026, 10, 31)
+        primeiro = date(2026, 11, 12)
+        catalogo = [prod(1, "Pikachu ex", "057/191", "Double Rare")]
+        lake = montar_lake(tmp_path, {
+            anterior: (None, ok([preco(1, market=1.75)])),
+            primeiro: (ok(catalogo), ok([preco(1, market=1.75)])),
+        })
+        w = FakeWriter()
+    
+        r = s.rebuild(lake, lake, writer=w)
+    
+>       linha_anterior = _precos(w, anterior)[0]
+                         ^^^^^^^^^^^^^^^^^^^^
+
+tests/test_silver_retro_catalog.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = <test_silver_retro_catalog.FakeWriter object at 0x76d6fe5b8ec0>
+dia = datetime.date(2026, 10, 31)
+
+    def _precos(w, dia):
+        key = f"silver/preco_diario/group_id={GID}/data={dia.isoformat()}/preco.parquet"
+>       return w.saidas[key][1]
+               ^^^^^^^^^^^^^
+E       KeyError: 'silver/preco_diario/group_id=23651/data=2026-10-31/preco.parquet'
+
+tests/test_silver_retro_catalog.py:66: KeyError
+___________ test_nenhum_preco_e_criado_e_contagens_sao_consistentes ____________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-0/test_nenhum_preco_e_criado_e_c0')
+
+    def test_nenhum_preco_e_criado_e_contagens_sao_consistentes(tmp_path):
+        anterior = date(2026, 10, 31)
+        primeiro = date(2026, 11, 12)
+        raw = preco(1, "Holofoil", market=2.25, low=1.5, mid=2.0, high=4.0)
+        lake = montar_lake(tmp_path, {
+            anterior: (None, ok([raw, preco(999)])),
+            primeiro: (ok([prod(1, "Pikachu ex", "057/191", "Double Rare")]), ok([raw])),
+        })
+        w = FakeWriter()
+    
+        r = s.rebuild(lake, lake, writer=w)
+>       linhas = _precos(w, anterior) + _precos(w, primeiro)
+                 ^^^^^^^^^^^^^^^^^^^^
+
+tests/test_silver_retro_catalog.py:119: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+w = <test_silver_retro_catalog.FakeWriter object at 0x76d6fe57df90>
+dia = datetime.date(2026, 10, 31)
+
+    def _precos(w, dia):
+        key = f"silver/preco_diario/group_id={GID}/data={dia.isoformat()}/preco.parquet"
+>       return w.saidas[key][1]
+               ^^^^^^^^^^^^^
+E       KeyError: 'silver/preco_diario/group_id=23651/data=2026-10-31/preco.parquet'
+
+tests/test_silver_retro_catalog.py:66: KeyError
+_______ test_dia_sem_products_depois_do_primeiro_continua_nao_retroativo _______
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-0/test_dia_sem_products_depois_d0')
+
+    def test_dia_sem_products_depois_do_primeiro_continua_nao_retroativo(tmp_path):
+        primeiro = date(2026, 11, 12)
+        seguinte = date(2026, 11, 13)
+        lake = montar_lake(tmp_path, {
+            primeiro: (ok([prod(1, "Pikachu ex", "057/191", "Double Rare")]), ok([preco(1)])),
+            seguinte: (None, ok([preco(1)])),
+        })
+        w = FakeWriter()
+    
+        s.rebuild(lake, lake, writer=w)
+    
+>       assert _precos(w, primeiro)[0]["cadastro_retroativo"] is False
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'cadastro_retroativo'
+
+tests/test_silver_retro_catalog.py:147: KeyError
+_______________ test_coluna_extra_nao_altera_colunas_do_contrato _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-codespace/pytest-0/test_coluna_extra_nao_altera_c0')
+
+    def test_coluna_extra_nao_altera_colunas_do_contrato(tmp_path):
+        pytest = __import__("pytest")
+        pa = pytest.importorskip("pyarrow")
+        schema = s._schemas(pa)["preco_diario"].names
+    
+        contrato = [
+            "data", "product_id", "group_id", "acabamento",
+            "market_price", "low_price", "mid_price", "high_price",
+            "moeda", "fonte", "chave_raw",
+        ]
+>       assert schema[:-1] == contrato
+E       AssertionError: assert ['data', 'pro...w_price', ...] == ['data', 'pro...w_price', ...]
+E         
+E         Right contains one more item: 'chave_raw'
+E         Use -v to get more diff
+
+tests/test_silver_retro_catalog.py:189: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_silver_retro_catalog.py::test_datas_anteriores_usam_primeiro_cadastro_valido_com_marca
+FAILED tests/test_silver_retro_catalog.py::test_nenhum_preco_e_criado_e_contagens_sao_consistentes
+FAILED tests/test_silver_retro_catalog.py::test_dia_sem_products_depois_do_primeiro_continua_nao_retroativo
+FAILED tests/test_silver_retro_catalog.py::test_coluna_extra_nao_altera_colunas_do_contrato
+========================= 4 failed, 3 passed in 0.41s ==========================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 7 items
+
+tests/test_silver_retro_catalog.py .......                               [100%]
+
+============================== 7 passed in 0.34s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 46 items
+
+tests/test_silver.py ...............................                     [ 67%]
+tests/test_silver_prefix.py ........                                     [ 84%]
+tests/test_silver_retro_catalog.py .......                               [100%]
+
+============================== 46 passed in 0.59s ==============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 181 items
+
+tests/test_collection_comparison.py .............                        [  7%]
+tests/test_collector.py ..........                                       [ 12%]
+tests/test_decomposition.py .........                                    [ 17%]
+tests/test_fx_asof.py .....                                              [ 20%]
+tests/test_gold_schema.py ........                                       [ 24%]
+tests/test_prefix_isolation.py .......                                   [ 28%]
+tests/test_ptax_backfill.py .......                                      [ 32%]
+tests/test_retroactive_load.py .......                                   [ 36%]
+tests/test_return_risk_metrics.py ........................               [ 49%]
+tests/test_s3_timeouts.py ..                                             [ 50%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 56%]
+tests/test_secrets_not_versioned.py ..........                           [ 62%]
+tests/test_silver.py ...............................                     [ 79%]
+tests/test_silver_prefix.py ........                                     [ 83%]
+tests/test_silver_retro_catalog.py .......                               [ 87%]
+tests/test_tcgcsv_limits.py .                                            [ 88%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 181 passed in 9.01s ==============================
+2026-11-23 00:08:43,395 INFO rebuild: fonte=s3 destino=local group_id=23651
+2026-11-23 00:08:56,460 INFO preco_diario cadastro_retroativo validos=5434
+2026-11-23 00:08:56,460 INFO colecao        lidos=1 validos=1 quarentena=0
+2026-11-23 00:08:56,460 INFO produto        lidos=2023 validos=2023 quarentena=0
+2026-11-23 00:08:56,460 INFO preco_diario   lidos=9955 validos=9955 quarentena=0
+2026-11-23 00:08:56,460 INFO cambio_diario  lidos=14 validos=14 quarentena=0
+2026-11-23 00:08:56,460 INFO cdi_diario     lidos=64 validos=64 quarentena=0
+[T-35 depois 31/10 a 21/11]
+2026-10-31 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-01 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-02 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-03 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-04 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-05 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-06 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-07 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-08 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-09 validas=453 quarentena=453 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-10 validas=452 quarentena=452 cadastro_retroativo=452 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-11 validas=452 quarentena=452 cadastro_retroativo=452 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-12 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-13 validas=453 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-14 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-15 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-16 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-17 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-18 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-19 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-20 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-21 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-23 00:09:23,761 INFO rebuild: fonte=s3 destino=local group_id=23651
+2026-11-23 00:09:36,680 INFO preco_diario cadastro_retroativo validos=5434
+2026-11-23 00:09:36,680 INFO colecao        lidos=1 validos=1 quarentena=0
+2026-11-23 00:09:36,680 INFO produto        lidos=2023 validos=2023 quarentena=0
+2026-11-23 00:09:36,680 INFO preco_diario   lidos=9955 validos=9955 quarentena=0
+2026-11-23 00:09:36,681 INFO cambio_diario  lidos=14 validos=14 quarentena=0
+2026-11-23 00:09:36,681 INFO cdi_diario     lidos=64 validos=64 quarentena=0
+[T-35 depois limpo 31/10 a 21/11]
+2026-10-31 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-01 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-02 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-03 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-04 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-05 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-06 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-07 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-08 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-09 validas=453 quarentena=0 cadastro_retroativo=453 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-10 validas=452 quarentena=0 cadastro_retroativo=452 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-11 validas=452 quarentena=0 cadastro_retroativo=452 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-12 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-13 validas=453 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=26
+2026-11-14 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-15 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-16 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-17 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-18 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-19 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-20 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+2026-11-21 validas=452 quarentena=0 cadastro_retroativo=0 nulos_nome=0 nulos_tipo_produto=0 nulos_raridade=25
+
+Nota de revisao (22/11/2026)
+- Estado "antes" (codigo anterior a T-35, rebuild --fonte s3 --destino local): preco_diario lidos=9955 validos=4521 quarentena=5434; de 31/10 a 11/11 validas=0 e quarentena=453 ou 452 por dia. Confirma a hipotese do ADR-010: a silver so tinha dados validos a partir de 12/11.
+- Estado "depois": preco_diario lidos=9955 validos=9955 quarentena=0; cadastro_retroativo verdadeiro em 5434 linhas (31/10 a 11/11) e falso de 12/11 em diante.
+- A primeira conferencia "depois" mostrou quarentena=453 por dia porque o rebuild local nao apaga saidas anteriores: os arquivos de quarentena do "antes" permaneceram, embora o log da mesma execucao ja indicasse quarentena=0. O agente apagou apenas data_local/silver/ e data_local/quarentena/ (derivados, ignorados pelo Git; data_local/raw nao foi tocado) e repetiu; a segunda conferencia ("depois limpo") mostra quarentena=0. Essa limpeza nao estava na autorizacao do aluno; fica registrada aqui. Ponto aberto: o rebuild nao remove saidas antigas, e no bucket o AGENTS.md proibe apagar objetos; fora do escopo da T-35.
+- nulos_raridade de 25 a 26 por dia: produtos sem raridade em products.json (hipotese, validacao pendente: selados), mantidos nulos e nunca zero.
+- ADR-010: hipotese, validacao pendente. O cadastro de 12/11 e associado a 31/10 a 11/11; produto cujo nome ou raridade mudou nesse intervalo nao e detectavel.
+
+Correção após revisão (23/11/2026)
+Teste novo "primeiro catálogo válido": falha se o código escolher o primeiro products.json mesmo inválido ou vazio; a correção seria continuar a busca até encontrar pelo menos um produto válido.
+Teste novo "catálogo fixo": falha se o código atualizasse o catálogo retroativo a partir de produtos posteriores ou marcasse o produto posterior como retroativo; a correção seria congelar o catálogo do primeiro dia válido e manter o fallback desse catálogo apenas nas datas anteriores.
+Teste novo "tipo booleano do Parquet": falha se cadastro_retroativo deixar de ser pa.bool_ no esquema ou aparecer como outro tipo; a correção seria preservar o tipo booleano no schema e no modelo.
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 9 items
+
+tests/test_silver_retro_catalog.py .........                             [100%]
+
+============================== 9 passed in 0.35s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 183 items
+
+tests/test_collection_comparison.py .............                        [  7%]
+tests/test_collector.py ..........                                       [ 12%]
+tests/test_decomposition.py .........                                    [ 17%]
+tests/test_fx_asof.py .....                                              [ 20%]
+tests/test_gold_schema.py ........                                       [ 24%]
+tests/test_prefix_isolation.py .......                                   [ 28%]
+tests/test_ptax_backfill.py .......                                      [ 32%]
+tests/test_retroactive_load.py .......                                   [ 36%]
+tests/test_return_risk_metrics.py ........................               [ 49%]
+tests/test_s3_timeouts.py ..                                             [ 50%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 56%]
+tests/test_secrets_not_versioned.py ..........                           [ 61%]
+tests/test_silver.py ...............................                     [ 78%]
+tests/test_silver_prefix.py ........                                     [ 83%]
+tests/test_silver_retro_catalog.py .........                             [ 87%]
+tests/test_tcgcsv_limits.py .                                            [ 88%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 183 passed in 4.77s ==============================

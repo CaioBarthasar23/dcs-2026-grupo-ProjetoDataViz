@@ -973,3 +973,76 @@ Pare ao terminar e liste perguntas abertas.
 
 Respostas do aluno ao Copilot:
 1. Confirmação do plano: "Confirmado, com um acréscimo: no caso 6→7→0, exija também quantidade_retornos == 2 (retornos 6/7... ou seja 7/6-1 e 0/7-1 = -1,0) além do retorno diário -1,0 no par final e do retorno no período -1,0, mostrando a conta na evidência. Na evidência, só acrescente com tee -a, sem editar, substituir nem apagar texto existente. Sem rede, sem bucket, sem commit nem push. Ao terminar, pare e liste perguntas abertas."
+
+**Data:** 2026-11-22, entre 20h56 e 20h59 (Brasília); início aproximado.
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** nenhum (prompt somente de plano).
+- **Confirmação do plano:** não houve; o prompt pedia só plano, e o aluno seguiu com o Prompt 31.
+- **Resultado:** o plano, por leitura do código, mostrou que o rebuild aceita --fonte local|s3 e --destino local|s3, que a silver processa os dias em ordem sem olhar à frente e que preço sem produto conhecido vai para a quarentena; previsão: 31/10 a 11/11 com 0 linhas válidas; opções A a D apresentadas sem escolha. O aluno decidiu pelo cadastro retroativo (ADR-010).
+
+Prompt 30 (T-35): plano do ensaio da silver com os dias retroativos
+
+[C] Personagem
+Você é o engenheiro que prepara o ensaio da silver com os dias retroativos, para fechar a T-34 e preparar a T-17 (specs/tasks.md). Requisitos: RNF-06, RNF-01 e RNF-03. Decisão: docs/adr/ADR-009-perda-do-cluster-e-carga-retroativa.md.
+[R] Pedido
+Contexto: 15 dias (31/10 a 11/11, 13/11, 17/11 e 20/11/2026) foram carregados no bucket só com prices.json, sem products.json, por decisão do aluno no ADR-009. A T-17 precisa de nome, tipo (carta ou selado) e raridade no primeiro dia da janela (31/10).
+Mostre um plano em tópicos, sem executar nada além de ler código e testes:
+1. Leia, sem alterar, src/silver.py, tests/test_silver.py, tests/test_silver_prefix.py, o contrato comum da silver na spec e o final de docs/evidencias/T-34_recarga_retroativa.txt. Responda: (a) quais são os comandos e opções do rebuild (fonte e destino) e se existe como ler o bucket e gravar só em diretório local; (b) o que a silver faz com uma data que tem prices.json e não tem products.json (erro, quarentena, colunas nulas ou outra coisa); (c) de onde vêm nome, tipo_produto e raridade.
+2. Proponha o comando exato do ensaio que reconstrói a silver a partir do bucket com destino local, sem gravar nada no bucket, e diga o que será conferido por data: quantidade de linhas, quantas com nome, tipo_produto ou raridade nulos, quarentena e as contagens do log, com atenção especial a 31/10.
+3. Se o ensaio puder deixar o primeiro dia sem nome, tipo ou raridade, descreva as opções para preenchê-los a partir do cadastro mais antigo disponível (12/11), com riscos para o contrato comum e para o RNF-01. Não implemente nem escolha: a decisão é do aluno e vai em ADR.
+[A] Ajustes
+Esta mensagem não autoriza leitura nem gravação no bucket; a autorização expressa, se houver, virá na minha confirmação, com o comando exato. Não leia nem imprima .env. Não altere nenhum arquivo. Sem git commit nem git push. Não declare nada sem mostrar o trecho de código que o sustenta.
+[T] Tipo de saída
+Plano e respostas em tópicos, citando arquivo e função.
+[E] Extras
+Ao terminar o plano, liste perguntas abertas e pare.
+
+**Data:** 2026-11-22, entre 21h03 e 21h10 (Brasília).
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** `src/silver.py`, `tests/test_silver_retro_catalog.py` e `docs/evidencias/T-35_cadastro_retroativo.txt`. Leitura do bucket (duas execuções de `rebuild --fonte s3 --destino local`, sem gravação no bucket). O agente apagou `data_local/silver/` e `data_local/quarentena/` (derivados) entre as duas execuções, sem estar na autorização; `data_local/raw` não foi tocado.
+- **Confirmação do plano:** o aluno confirmou o plano com autorização expressa de leitura do bucket (texto em "Respostas do aluno ao Copilot").
+- **Resultado:** estado antes (código anterior): preco_diario lidos=9955, validos=4521, quarentena=5434, com 31/10 a 11/11 em quarentena; teste novo falhou antes (4 failed, 3 passed) e passou depois (7 passed); 46 testes na silver e 181 na suíte; estado depois: validos=9955, quarentena=0, 5434 linhas com cadastro_retroativo verdadeiro; nulos de raridade mantidos como nulo. A revisão do aluno apontou que a evidência não tinha anotações em texto nem a hipótese do ADR-010 e que a limpeza local não estava autorizada; nota acrescentada na evidência. Duas regras sem teste (primeiro catálogo válido e catálogo fixo) levaram ao Prompt 32.
+
+Prompt 31 (T-35): cadastro retroativo na silver
+
+[C] Personagem
+Você é o engenheiro que executa uma única tarefa do plano: T-35 (specs/tasks.md), fazer a silver associar nome, tipo e raridade nos dias anteriores ao primeiro products.json disponível. Requisitos: RNF-06 e RNF-01. Decisão: docs/adr/ADR-010-cadastro-retroativo-na-silver.md (hipótese, validação pendente). Código existente: src/silver.py (ADR-001), mudança pequena.
+[R] Pedido
+Contexto: os preços de 31/10 a 11/11/2026 estão no bucket sem products.json e, pela sua análise de src/silver.py, vão todos para a quarentena porque o cadastro é montado dia a dia sem olhar à frente. Decisão do aluno (ADR-010): para datas anteriores ao primeiro products.json disponível (hoje 12/11), a silver usa o cadastro mais antigo disponível apenas para associar nome, tipo e raridade ao product_id; nenhum preço ou câmbio é criado; as linhas associadas assim levam a coluna extra booleana cadastro_retroativo verdadeira e as demais falsa; o log informa a contagem; preço com product_id fora desse cadastro continua em quarentena com o motivo atual; o raw não é alterado.
+1. Leia antes, sem alterar: AGENTS.md, docs/adr/ADR-010-cadastro-retroativo-na-silver.md, docs/adr/ADR-009-perda-do-cluster-e-carga-retroativa.md, specs/tasks.md (T-35), a regra de nulo e o contrato da silver em specs/spec.md, src/silver.py inteiro, tests/test_silver.py e tests/test_silver_prefix.py.
+2. Escreva primeiro tests/test_silver_retro_catalog.py, sem rede e sem bucket, e mostre a falha. Cada regra precisa de um teste que falharia se ela fosse removida: (a) datas anteriores ao primeiro products.json usam o cadastro mais antigo, com linhas válidas e cadastro_retroativo verdadeiro; (b) o dia do primeiro products.json e os seguintes têm cadastro_retroativo falso; (c) product_id ausente do cadastro mais antigo vai para a quarentena com o mesmo motivo de hoje; (d) nenhum preço é criado ou alterado: valores idênticos aos do raw e linhas lidas iguais a válidas mais quarentena; (e) dia sem products.json depois de um dia com produtos continua como hoje; (f) reconstruir duas vezes dá o mesmo resultado; (g) sem nenhum products.json em nenhum dia, tudo continua em quarentena como hoje; (h) a coluna extra não quebra o contrato comum: nomes e tipos exatos das colunas do contrato preservados.
+3. Faça a menor mudança possível em src/silver.py para isso, sem refatorar nada além do necessário, e documente na docstring que o cadastro mais antigo é a única informação lida de dias posteriores. Não altere src/collector.py, src/gold.py, src/fx_asof.py nem os demais módulos. Se o gold ou algum teste existente depender do esquema da silver e quebrar, pare e me avise, sem alterar.
+4. Plano do ensaio com o bucket: proponha o comando exato python -m src.silver rebuild --fonte s3 --destino local (leitura do bucket, gravação só em diretório local) e a conferência por data de 31/10 a 21/11: linhas válidas, linhas em quarentena, linhas com cadastro_retroativo verdadeiro e nulos em nome, tipo e raridade, sem apresentar nulo como zero. Diga onde o resultado local será gravado e que esse diretório não será commitado.
+[A] Ajustes
+Esta mensagem não autoriza leitura nem gravação no bucket; a autorização expressa do ensaio virá na minha confirmação, com o comando exato. Nunca grave no bucket nesta tarefa. Não leia nem imprima .env. Sem rede além do bucket autorizado depois. Não rode pip install. Não altere testes existentes; se algum precisar mudar, explique e pergunte. Sem git commit nem git push; proponha as mensagens no formato tipo(T-xx): descrição [RNF-yy], código e testes em um commit e a evidência em outro. Grave as saídas com 2>&1 | tee -a, sem retranscrever, em um arquivo novo, e não sobrescreva nenhuma evidência existente. Não declare sucesso sem mostrar a saída. Mostre o plano em tópicos e espere minha confirmação antes de editar qualquer arquivo.
+[T] Tipo de saída
+Arquivos: src/silver.py (alterado), tests/test_silver_retro_catalog.py (novo) e docs/evidencias/T-35_cadastro_retroativo.txt (novo: falha antes, testes depois, suítes da silver e completa, e o resultado do ensaio por data). Registre a hipótese do ADR-010 como hipótese, validação pendente.
+[E] Extras
+Ao terminar o plano, liste perguntas abertas e pare.
+
+Respostas do aluno ao Copilot:
+1. Confirmação do plano: "Confirmado, com autorização expressa para ler o bucket, apenas no prefixo group_id=23651, e gravar apenas em data_local/, o comando python -m src.silver rebuild --fonte s3 --destino local, duas vezes: (1) antes de editar qualquer arquivo, com o código atual, registrando na evidência, por data de 31/10 a 21/11, as linhas válidas, as em quarentena e os nulos, como estado "antes"; (2) depois da implementação e dos testes verdes, com a mesma conferência, como estado "depois". Grave a conferência do "antes" na evidência antes da segunda execução, porque a segunda sobrescreve a silver local. Antes da primeira execução, confirme pelo código que o rebuild local não escreve em data_local/raw e que não chama S3Lake.put. Respostas às suas perguntas: (a) o catálogo mais antigo é o primeiro dia em que exista pelo menos um produto válido; (b) o catálogo retroativo fica fixo nesse dia e não é atualizado por dias posteriores; produto que aparece só depois fica em quarentena nas datas anteriores. Não grave nada no bucket, não use rede além da leitura do bucket, não leia nem imprima .env, sem commit nem push. Se qualquer comando falhar, inclusive TLS, pare e mostre a saída. Ao terminar, pare e liste perguntas abertas."
+
+**Data:** 2026-11-22, entre 21h20 e 21h31 (Brasília); início aproximado.
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** `tests/test_silver_retro_catalog.py` e `docs/evidencias/T-35_cadastro_retroativo.txt`.
+- **Confirmação do plano:** o aluno confirmou o plano com acréscimos (texto em "Respostas do aluno ao Copilot").
+- **Resultado:** dois testes novos (primeiro catálogo válido e catálogo fixo com produto só no catálogo posterior) e a checagem do tipo booleano da coluna no esquema do Parquet; todos já passavam porque o código estava certo (9 passed no arquivo e 183 na suíte); a evidência foi acrescentada com a explicação de que alteração do código faria cada teste novo falhar; src/silver.py não foi alterado nesta correção.
+
+Prompt 32 (T-35): testes do primeiro catálogo válido e do catálogo fixo
+
+[C] Personagem
+Você é o engenheiro que corrige a T-35 (specs/tasks.md) após revisão. Requisitos: RNF-06 e RNF-01; decisão: docs/adr/ADR-010-cadastro-retroativo-na-silver.md.
+[R] Pedido
+O código de src/silver.py está aprovado. Faltam testes para duas regras decididas pelo aluno. Acrescente a tests/test_silver_retro_catalog.py, sem alterar nenhum teste existente nem src/:
+1. Primeiro catálogo válido: um dia anterior ao primeiro catálogo válido tem products.json inválido ou sem produtos válidos; o primeiro dia com produto válido vem depois. Esperado: os preços do dia com catálogo inválido e dos dias anteriores são válidos com cadastro_retroativo verdadeiro, e o dia do primeiro catálogo válido tem a marca falsa.
+2. Catálogo fixo: um product_id que só existe no products.json de um dia posterior ao primeiro catálogo (não existe no primeiro) tem seus preços das datas anteriores ao primeiro catálogo em quarentena com o motivo "product_id sem produto correspondente", e seus preços do dia posterior válidos com a marca falsa; um produto que existe no primeiro catálogo continua válido nas datas anteriores.
+3. No teste do contrato, confira também que a coluna cadastro_retroativo tem tipo booleano no esquema do Parquet.
+Escreva e execute antes de qualquer outra coisa. Se algum já passar porque o código está certo, diga na evidência, e explique, para cada teste novo, que alteração do código o faria falhar.
+[A] Ajustes
+Não use rede nem bucket. Não altere src/ nem nenhum teste existente. Sem git commit nem git push. Na evidência docs/evidencias/T-35_cadastro_retroativo.txt, SOMENTE ACRESCENTE com tee -a, sem editar nem apagar nada: uma seção "Correção após revisão" com a saída dos testes novos e da suíte completa de projeto_final. Mostre o plano e espere minha confirmação antes de editar.
+[E] Extras
+Pare ao terminar e liste perguntas abertas.
+
+Respostas do aluno ao Copilot:
+1. Confirmação do plano: "Confirmado, com estes acréscimos: no teste do catálogo fixo, confira também que os preços do produto que só existe no catálogo posterior ficam válidos, com cadastro_retroativo falso, no dia posterior. Na evidência, explique para cada teste novo que alteração do código o faria falhar. Se algum teste novo falhar, pare e mostre a saída, sem alterar src/ nem testes existentes. Na evidência, só acrescente com tee -a, sem editar nem apagar texto existente. Sem rede, sem bucket, sem commit nem push. Ao terminar, pare e liste perguntas abertas."
