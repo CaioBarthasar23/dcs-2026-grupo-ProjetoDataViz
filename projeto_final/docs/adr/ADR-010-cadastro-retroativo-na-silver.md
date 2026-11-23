@@ -27,3 +27,7 @@ Para as datas anteriores ao primeiro `products.json` disponível (hoje, 12/11/20
 ## Requisitos relacionados
 
 RNF-06 e RNF-01; T-35.
+
+## Esclarecimento de 22/11/2026 (após a T-35)
+
+A implementação usa o cadastro mais antigo disponível apenas para decidir se o `product_id` é conhecido nas datas anteriores (condição para o preço ser válido). Nome, tipo e raridade continuam vindo da tabela `produto` da silver, que é global e guarda a versão mais recente de cada produto (não há dimensão diária de produto). As linhas de 31/10 a 11/11 são, portanto, lidas com os atributos da versão mais recente do produto, e não com os do cadastro de 12/11. O cadastro mais antigo considerado é o do primeiro dia com pelo menos um produto válido. Hipótese, validação pendente.
