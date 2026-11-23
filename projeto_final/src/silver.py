@@ -6,6 +6,11 @@ unico comando (o bruto em raw/ nunca e alterado):
     python -m src.silver rebuild --fonte s3 --destino s3
     python -m src.silver rebuild --fonte local --destino local   # teste sem rede
 
+Para datas anteriores ao primeiro products.json valido, o primeiro cadastro
+disponivel e usado apenas para associar nome, tipo e raridade ao product_id.
+Essa informacao vem de um cadastro observado em dia posterior e nao cria
+precos ou altera o raw.
+
 Contrato comum da turma (nomes e tipos nao mudam; colunas extras sao permitidas):
     colecao       group_id INTEGER, nome, sigla, data_lancamento DATE, responsavel
     produto       product_id INTEGER, group_id INTEGER, nome, tipo_produto, raridade,
@@ -85,6 +90,7 @@ class PrecoDiario(_Base):
     moeda: Literal["USD"]
     fonte: str = Field(min_length=1)
     chave_raw: str = Field(min_length=1)
+    cadastro_retroativo: bool = False
 
 
 class CambioDiario(_Base):
@@ -167,7 +173,9 @@ def montar_produto(p: dict) -> dict:
     )
 
 
-def montar_preco(q: dict, dia: date, group_id: int, chave: str) -> dict:
+def montar_preco(
+    q: dict, dia: date, group_id: int, chave: str, cadastro_retroativo: bool = False
+) -> dict:
     return dict(
         data=dia,
         product_id=q.get("productId"),
@@ -180,6 +188,7 @@ def montar_preco(q: dict, dia: date, group_id: int, chave: str) -> dict:
         moeda=MOEDA,
         fonte=FONTE_PRECO,
         chave_raw=chave,
+        cadastro_retroativo=cadastro_retroativo,
     )
 
 
@@ -302,6 +311,7 @@ def _schemas(pa) -> dict:
                 ("data", d32), ("product_id", i32), ("group_id", i32), ("acabamento", s),
                 ("market_price", f64), ("low_price", f64), ("mid_price", f64),
                 ("high_price", f64), ("moeda", s), ("fonte", s), ("chave_raw", s),
+                ("cadastro_retroativo", pa.bool_()),
             ]
         ),
         "cambio_diario": pa.schema(
@@ -401,7 +411,37 @@ def rebuild(
     # produtos e precos (dia a dia, em ordem; produto do dia mais recente prevalece)
     tp, tq = tabs["produto"], tabs["preco_diario"]
     produtos: dict[int, Produto] = {}
-    for dia in fonte.datas(f"raw/tcgplayer/group_id={gid}/"):
+    datas_tcg = fonte.datas(f"raw/tcgplayer/group_id={gid}/")
+
+    catalogo_retroativo: dict[int, Produto] = {}
+    primeiro_dia_catalogo: Optional[date] = None
+    for dia in datas_tcg:
+        chave = f"raw/tcgplayer/group_id={gid}/data={dia.isoformat()}/products.json"
+        raw = fonte.get(chave)
+        if raw is None:
+            continue
+        try:
+            payload = json.loads(raw)
+        except ValueError:
+            continue
+        if not payload.get("success") or not isinstance(payload.get("results"), list):
+            continue
+        catalogo_dia: dict[int, Produto] = {}
+        for p in payload["results"]:
+            try:
+                dados = montar_produto(p)
+                obj = Produto(**dados)
+            except (AttributeError, TypeError, ValidationError):
+                continue
+            if obj.group_id == gid:
+                catalogo_dia[obj.product_id] = obj
+        if catalogo_dia:
+            primeiro_dia_catalogo = dia
+            catalogo_retroativo = catalogo_dia
+            break
+
+    cadastro_retroativo_validos = 0
+    for dia in datas_tcg:
         base = f"raw/tcgplayer/group_id={gid}/data={dia.isoformat()}"
         kp, kq = f"{base}/products.json", f"{base}/prices.json"
 
@@ -436,8 +476,11 @@ def rebuild(
             continue
         validos: dict[tuple[int, str], PrecoDiario] = {}
         for q in dq["results"]:
+            cadastro_retroativo = (
+                primeiro_dia_catalogo is not None and dia < primeiro_dia_catalogo
+            )
             try:
-                dados = montar_preco(q, dia, gid, kq)
+                dados = montar_preco(q, dia, gid, kq, cadastro_retroativo)
             except (AttributeError, TypeError) as e:
                 tq.lidos += 1
                 tq.rejeitar(dia, f"registro ilegivel: {e}", q)
@@ -445,10 +488,15 @@ def rebuild(
             obj = _validar(PrecoDiario, dados, tq, dia, q)
             if obj is None:
                 continue
-            if obj.product_id not in produtos:
+            cadastro_conhecido = (
+                catalogo_retroativo if cadastro_retroativo else produtos
+            )
+            if obj.product_id not in cadastro_conhecido:
                 tq.validos -= 1
                 tq.rejeitar(dia, "product_id sem produto correspondente", q)
                 continue
+            if cadastro_retroativo:
+                cadastro_retroativo_validos += 1
             chave = (obj.product_id, obj.acabamento)
             if chave in validos:
                 tq.validos -= 1
@@ -538,6 +586,7 @@ def rebuild(
         n: {"lidos": t.lidos, "validos": t.validos, "quarentena": t.n_quarentena}
         for n, t in tabs.items()
     }
+    log.info("preco_diario cadastro_retroativo validos=%d", cadastro_retroativo_validos)
     for n, r in resumo.items():
         log.info("%-14s lidos=%d validos=%d quarentena=%d", n, r["lidos"], r["validos"], r["quarentena"])
     return resumo
