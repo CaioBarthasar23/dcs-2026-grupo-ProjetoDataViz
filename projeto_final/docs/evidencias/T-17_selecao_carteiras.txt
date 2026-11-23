@@ -1,0 +1,703 @@
+T-17: falha antes da implementacao
+
+==================================== ERRORS ====================================
+______________ ERROR collecting tests/test_portfolio_selection.py ______________
+ImportError while importing test module '/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/tests/test_portfolio_selection.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.14.2/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_portfolio_selection.py:7: in <module>
+    from src.selecao_carteiras import selecionar_carteiras
+E   ModuleNotFoundError: No module named 'src.selecao_carteiras'
+=========================== short test summary info ============================
+ERROR tests/test_portfolio_selection.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.31s
+F......F...F...                                                          [100%]
+=================================== FAILURES ===================================
+_____________ test_fronteira_exata_e_arredondamento_round_half_up ______________
+
+    def test_fronteira_exata_e_arredondamento_round_half_up():
+        preco_diario = [
+            preco(1, 100.0),
+            preco(2, 10.0),
+        ]
+        produtos = [
+            produto(1, "selado"),
+            produto(2, "carta"),
+        ]
+        result = selecionar_carteiras(
+            preco_diario,
+            produtos,
+            [cambio(venda=Decimal("10"))],
+        )
+    
+>       assert posicao(result, "selado")["custo_brl"] == Decimal("649.89")
+E       AssertionError: assert Decimal('1000.00') == Decimal('649.89')
+E        +  where Decimal('649.89') = Decimal('649.89')
+
+tests/test_portfolio_selection.py:61: AssertionError
+__________ test_propria_compra_varias_unidades_de_selado_e_uma_carta ___________
+
+    def test_propria_compra_varias_unidades_de_selado_e_uma_carta():
+        result = selecionar_carteiras(
+            [preco(1, 50.0), preco(2, 40.0), preco(3, 20.0)],
+            [
+                produto(1, "selado"),
+                produto(2, "selado"),
+                produto(3, "carta", "Rare"),
+            ],
+            [cambio(venda=Decimal("10"))],
+        )
+        posicoes = result["propria"]["posicoes"]
+        selado = [p for p in posicoes if p["tipo"] == "selado"]
+        carta = [p for p in posicoes if p["tipo"] == "carta"]
+        assert selado == [{
+            "tipo": "selado",
+            "product_id": 1,
+            "acabamento": "Normal",
+            "unidades": 1,
+            "market_price_usd": Decimal("50"),
+            "ptax_venda": Decimal("10"),
+            "custo_brl": Decimal("500.00"),
+        }]
+        assert len(carta) == 1
+        assert carta[0]["product_id"] == 3
+        assert carta[0]["unidades"] == 1
+>       assert result["propria"]["caixa_brl"] == Decimal("100.00")
+E       AssertionError: assert Decimal('300.00') == Decimal('100.00')
+E        +  where Decimal('100.00') = Decimal('100.00')
+
+tests/test_portfolio_selection.py:173: AssertionError
+_________________ test_precos_posteriores_nao_alteram_selecao __________________
+
+    def test_precos_posteriores_nao_alteram_selecao():
+        result = selecionar_carteiras(
+            [
+                preco(1, 10.0, D1),
+                preco(2, 15.0, D1),
+                preco(1, 100.0, D2),
+                preco(3, 200.0, D2),
+            ],
+            [produto(1), produto(2), produto(3)],
+            [cambio(venda=Decimal("10"))],
+        )
+        ids = [p["product_id"] for p in result["cesta_raras"]["posicoes"]]
+>       assert ids == [2, 1]
+E       assert [1] == [2, 1]
+E         
+E         At index 0 diff: 1 != 2
+E         Right contains one more item: 1
+E         Use -v to get more diff
+
+tests/test_portfolio_selection.py:219: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_fronteira_exata_e_arredondamento_round_half_up
+FAILED tests/test_portfolio_selection.py::test_propria_compra_varias_unidades_de_selado_e_uma_carta
+FAILED tests/test_portfolio_selection.py::test_precos_posteriores_nao_alteram_selecao
+3 failed, 12 passed in 0.10s
+...............                                                          [100%]
+15 passed in 0.06s
+
+Explicacao dos testes sintéticos:
+- test_fronteira_exata_e_arredondamento_round_half_up falharia se o preço ou PTAX fosse arredondado antes da elegibilidade, ou se ROUND_HALF_UP não fosse usado.
+- test_igualdade_exata_na_fronteira_de_100_reais_e_elegivel falharia se <= R$ 100 fosse tratado como estritamente menor.
+- test_fronteira_1000_e_desempate_por_menor_product_id falharia sem a elegibilidade exata em R$ 1.000 ou sem desempate pelo menor product_id.
+- test_fronteira_500_da_propria_e_carta_de_1_unidade falharia se a metade própria não tivesse teto R$ 500 ou permitisse unidades fracionárias.
+- test_nulo_e_zero_sao_ignorados falharia se nulo fosse convertido em zero ou zero fosse elegível.
+- test_tipo_produto_e_code_card falharia se selado fosse misturado a cartas, ou se Code Card fosse excluída da cesta ou incluída na própria.
+- test_unidades_inteiras_sobra_e_selado_mais_barato_compra_varias falharia se o cálculo permitisse fração, usasse arredondamento antecipado ou não retornasse sobra.
+- test_propria_compra_varias_unidades_de_selado_e_uma_carta falharia se a metade selado não comprasse o máximo inteiro ou a metade carta comprasse mais de uma unidade.
+- test_propria_metade_sem_candidato_fica_em_caixa falharia se uma metade sem candidato deixasse de ficar integralmente em caixa.
+- test_dolar_converte_capital_e_cdi_usam_capital_sem_fixo falharia se dolar/CDI usassem R$ 1.000 fixo em vez de capital_brl.
+- test_menos_de_10_cartas_elegiveis_deixa_resto_em_caixa falharia se exigisse exatamente 10 cartas mesmo com menos elegíveis.
+- test_precos_posteriores_nao_alteram_selecao falharia se incluísse dias posteriores na escolha.
+- test_ptax_asof_nao_usa_cotacao_posterior falharia se usasse cotação posterior ou a menor cotação futura.
+- test_primeiro_dia_exige_market_price_nao_nulo falharia se a primeira data fosse escolhida apesar de todos os preços nulos.
+- test_nao_altera_entrada_e_resultado_e_deterministico falharia se mutasse entradas ou depender de sua ordem.
+
+Conferencia com dados reais da silver local (somente leitura):
+{'metadata': {'data_inicial': datetime.date(2026, 10, 31), 'ptax_venda': Decimal('5.4212'), 'data_ptax_venda': datetime.date(2026, 10, 30)}, 'selado': {'posicoes': [{'tipo': 'selado', 'product_id': 565630, 'acabamento': 'Normal', 'unidades': 1, 'market_price_usd': Decimal('119.88'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('649.89')}], 'caixa_brl': Decimal('350.11')}, 'cesta_raras': {'posicoes': [{'tipo': 'carta', 'product_id': 590003, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('13.33'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('72.26')}, {'tipo': 'carta', 'product_id': 589869, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('11.8'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('63.97')}, {'tipo': 'carta', 'product_id': 593855, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('10.9'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('59.09')}, {'tipo': 'carta', 'product_id': 593857, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('10.9'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('59.09')}, {'tipo': 'carta', 'product_id': 590057, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('10.52'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('57.03')}, {'tipo': 'carta', 'product_id': 590063, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('9.58'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('51.94')}, {'tipo': 'carta', 'product_id': 593859, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('8.7'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('47.16')}, {'tipo': 'carta', 'product_id': 590024, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('8.19'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('44.40')}, {'tipo': 'carta', 'product_id': 589984, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('8.09'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('43.86')}, {'tipo': 'carta', 'product_id': 589865, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('7.77'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('42.12')}], 'caixa_brl': Decimal('459.08')}, 'propria': {'posicoes': [{'tipo': 'selado', 'product_id': 565629, 'acabamento': 'Normal', 'unidades': 1, 'market_price_usd': Decimal('66.06'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('358.12')}, {'tipo': 'carta', 'product_id': 593169, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('67.45'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('365.66')}], 'caixa_brl': Decimal('276.22')}, 'dolar': {'posicoes': [], 'caixa_brl': Decimal('0'), 'dolar_parado_usd': Decimal('184.4610049435549324872721907')}, 'cdi': {'posicoes': [], 'caixa_brl': Decimal('1000')}}
+
+Suite completa:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 198 items
+
+tests/test_collection_comparison.py .............                        [  6%]
+tests/test_collector.py ..........                                       [ 11%]
+tests/test_decomposition.py .........                                    [ 16%]
+tests/test_fx_asof.py .....                                              [ 18%]
+tests/test_gold_schema.py ........                                       [ 22%]
+tests/test_portfolio_selection.py ...............                        [ 30%]
+tests/test_prefix_isolation.py .......                                   [ 33%]
+tests/test_ptax_backfill.py .......                                      [ 37%]
+tests/test_retroactive_load.py .......                                   [ 40%]
+tests/test_return_risk_metrics.py ........................               [ 53%]
+tests/test_s3_timeouts.py ..                                             [ 54%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 59%]
+tests/test_secrets_not_versioned.py ..........                           [ 64%]
+tests/test_silver.py ...............................                     [ 80%]
+tests/test_silver_prefix.py ........                                     [ 84%]
+tests/test_silver_retro_catalog.py .........                             [ 88%]
+tests/test_tcgcsv_limits.py .                                            [ 89%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 198 passed in 14.60s =============================
+
+Reteste da propria com varias unidades:
+...............                                                          [100%]
+15 passed in 0.05s
+
+Suite completa apos o ajuste:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 198 items
+
+tests/test_collection_comparison.py .............                        [  6%]
+tests/test_collector.py ..........                                       [ 11%]
+tests/test_decomposition.py .........                                    [ 16%]
+tests/test_fx_asof.py .....                                              [ 18%]
+tests/test_gold_schema.py ........                                       [ 22%]
+tests/test_portfolio_selection.py ...............                        [ 30%]
+tests/test_prefix_isolation.py .......                                   [ 33%]
+tests/test_ptax_backfill.py .......                                      [ 37%]
+tests/test_retroactive_load.py .......                                   [ 40%]
+tests/test_return_risk_metrics.py ........................               [ 53%]
+tests/test_s3_timeouts.py ..                                             [ 54%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 59%]
+tests/test_secrets_not_versioned.py ..........                           [ 64%]
+tests/test_silver.py ...............................                     [ 80%]
+tests/test_silver_prefix.py ........                                     [ 84%]
+tests/test_silver_retro_catalog.py .........                             [ 88%]
+tests/test_tcgcsv_limits.py .                                            [ 89%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 198 passed in 5.66s ==============================
+
+== Conferencia independente da propria (revisor, 23/11/2026) ==
+primeiro dia: 2026-10-31
+selados que cabem em R$ 500 (4 de maior preco):
+   (565629, 'Normal', 'Surging Sparks Booster Bundle (LGS)', 66.06, 358.12, 1)
+   (565599, 'Normal', 'Surging Sparks Build & Battle Box', 62.48, 338.72, 1)
+   (679564, 'Normal', 'Surging Sparks Booster Bundle (Retail)', 54.81, 297.14, 1)
+   (565634, 'Normal', 'Surging Sparks 3 Pack Blisters [Zapdos]', 48.0, 260.22, 1)
+selados que NAO cabem em R$ 500 (2 mais baratos):
+   (565630, 'Surging Sparks Elite Trainer Box', 119.88, 649.89)
+   (646039, 'Surging Sparks Half Booster Box', 194.71, 1055.56)
+cartas sem Code Card que cabem em R$ 500 (5 de maior preco):
+   (593169, 'Holofoil', 'Pikachu ex - 247/191', 'Hyper Rare', 67.45, 365.66)
+   (589930, 'Holofoil', 'Durant ex - 236/191', 'Special Illustration Rare', 33.47, 181.45)
+   (589967, 'Holofoil', 'Hydreigon ex - 240/191', 'Special Illustration Rare', 30.6, 165.89)
+   (589987, 'Holofoil', 'Latios - 203/191', 'Illustration Rare', 28.96, 157.0)
+   (589860, 'Holofoil', 'Alolan Exeggutor ex - 242/191', 'Special Illustration Rare', 23.51, 127.45)
+cartas sem Code Card que NAO cabem em R$ 500 (2 mais baratas):
+   (590006, 'Milotic ex - 237/191', 102.01, 553.02)
+   (589985, 'Latias ex - 239/191', 167.54, 908.27)
+Code Cards que cabem em R$ 500 (3 de maior preco, devem ficar fora):
+   (602788, 'Code Card - Surging Sparks Pokemon Center Elite Trainer Box', 1.25, 6.78)
+   (620134, 'Code Card - Surging Sparks Elite Trainer Box', 0.42, 2.28)
+   (616131, 'Code Card - Surging Sparks Build & Battle Box', 0.21, 1.14)
+
+Correção após revisão (23/11/2026)
+Falha dos testes novos/reforcados contra o código atual:
+......FFF............F......                                             [100%]
+=================================== FAILURES ===================================
+________ test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel _________
+
+    def test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel():
+        ptax = Decimal("10")
+        result = selecionar_carteiras(
+            [
+                preco(1, 100.01),
+                preco(2, 50.001),
+                preco(3, 50.0),
+                preco(4, 50.001),
+                preco(5, 100.001),
+            ],
+            [
+                produto(1, "carta"),
+                produto(2, "carta"),
+                produto(3, "carta"),
+                produto(4, "selado"),
+                produto(5, "selado"),
+            ],
+            [cambio(venda=ptax)],
+        )
+        ids_cesta = [p["product_id"] for p in result["cesta_raras"]["posicoes"]]
+        assert 1 not in ids_cesta
+        propria_carta = [
+            p["product_id"]
+            for p in result["propria"]["posicoes"]
+            if p["tipo"] == "carta"
+        ]
+        assert propria_carta == [3]
+        propria_selado = [
+            p["product_id"]
+            for p in result["propria"]["posicoes"]
+            if p["tipo"] == "selado"
+        ]
+        assert propria_selado == []
+>       assert result["selado"]["posicoes"] == []
+E       AssertionError: assert [{'tipo': 'se...des': 1, ...}] == []
+E         
+E         Left contains one more item: {'tipo': 'selado', 'product_id': 4, 'acabamento': 'Normal', 'unidades': 1, ...}
+E         Use -v to get more diff
+
+tests/test_portfolio_selection.py:149: AssertionError
+________________________ test_nulo_e_zero_sao_ignorados ________________________
+
+    def test_nulo_e_zero_sao_ignorados():
+>       nulo_selado = selecionar_carteiras(
+            [preco(1, None)],
+            [produto(1, "selado")],
+            [cambio(venda=Decimal("10"))],
+            capital_brl=Decimal("777"),
+        )
+
+tests/test_portfolio_selection.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+preco_diario = [{'data': datetime.date(2026, 10, 31), 'product_id': 1, 'group_id': 23651, 'acabamento': 'Normal', ...}]
+produto = [{'group_id': 23651, 'product_id': 1, 'tipo_produto': 'selado', 'raridade': 'Rare', ...}]
+cambio_diario = [{'data': datetime.date(2026, 10, 31), 'cotacao_compra': 9.0, 'cotacao_venda': 10.0}]
+capital_brl = Decimal('777'), limite_selado_brl = Decimal('1000')
+limite_cesta_carta_brl = Decimal('100'), metade_propria_brl = Decimal('500')
+quantidade_cesta_raras = 10
+
+    def selecionar_carteiras(
+        preco_diario: Sequence[Mapping[str, Any]],
+        produto: Sequence[Mapping[str, Any]],
+        cambio_diario: Sequence[Mapping[str, Any]],
+        *,
+        capital_brl: Decimal = Decimal("1000"),
+        limite_selado_brl: Decimal = Decimal("1000"),
+        limite_cesta_carta_brl: Decimal = Decimal("100"),
+        metade_propria_brl: Decimal = Decimal("500"),
+        quantidade_cesta_raras: int = 10,
+    ) -> dict[str, Any]:
+        """Seleciona as carteiras sem rede ou alteração das entradas.
+    
+        preco_diario usa as colunas da silver: data, product_id, group_id,
+        acabamento e market_price (USD). produto usa product_id, group_id,
+        tipo_produto e raridade. cambio_diario usa data, cotacao_venda e
+        cotacao_compra da silver. Os preços em USD são convertidos de float para
+        Decimal por str(). A cotacao_venda é associada por ASOF.
+        """
+        precos = [dict(row) for row in preco_diario]
+        produtos = [dict(row) for row in produto]
+        cambios = [dict(row) for row in cambio_diario]
+        _validar_grupos(precos, produtos, cambios)
+    
+        datas_com_preco = sorted({
+            row["data"]
+            for row in precos
+            if row.get("data") is not None and row.get("market_price") is not None
+        })
+        if not datas_com_preco:
+>           raise ValueError("não há primeiro dia com market_price não nulo")
+E           ValueError: não há primeiro dia com market_price não nulo
+
+src/selecao_carteiras.py:86: ValueError
+_________________ test_tipo_produto_e_code_card_discriminantes _________________
+
+    def test_tipo_produto_e_code_card_discriminantes():
+        result = selecionar_carteiras(
+            [preco(1, 8.0), preco(2, 120.0)],
+            [
+                produto(1, "selado"),
+                produto(2, "carta", "Rare"),
+            ],
+            [cambio(venda=Decimal("10"))],
+        )
+        assert posicao(result, "selado")["product_id"] == 1
+        assert [p["product_id"] for p in result["cesta_raras"]["posicoes"]] == []
+        propria_carta = [
+            p["product_id"]
+            for p in result["propria"]["posicoes"]
+            if p["tipo"] == "carta"
+        ]
+>       assert propria_carta == [2]
+E       assert [] == [2]
+E         
+E         Right contains one more item: 2
+E         Use -v to get more diff
+
+tests/test_portfolio_selection.py:199: AssertionError
+___________ test_acabamento_caro_acima_limite_nao_impede_mais_barato ___________
+
+    def test_acabamento_caro_acima_limite_nao_impede_mais_barato():
+        result = selecionar_carteiras(
+            [
+                preco(1, 100.001, acabamento="Caro"),
+                preco(1, 40.0, acabamento="Barato"),
+            ],
+            [produto(1, "carta")],
+            [cambio(venda=Decimal("10"))],
+            limite_cesta_carta_brl=Decimal("100"),
+        )
+>       assert posicao(result, "cesta_raras")["acabamento"] == "Barato"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_portfolio_selection.py:397: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = {'metadata': {'data_inicial': datetime.date(2026, 10, 31), 'ptax_venda': Decimal('10.0'), 'data_ptax_venda': datetime....raras': {'posicoes': [], 'caixa_brl': Decimal('1000')}, 'propria': {'posicoes': [], 'caixa_brl': Decimal('1000')}, ...}
+carteira = 'cesta_raras', indice = 0
+
+    def posicao(result, carteira, indice=0):
+>       return result[carteira]["posicoes"][indice]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests/test_portfolio_selection.py:43: IndexError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel
+FAILED tests/test_portfolio_selection.py::test_nulo_e_zero_sao_ignorados - Va...
+FAILED tests/test_portfolio_selection.py::test_tipo_produto_e_code_card_discriminantes
+FAILED tests/test_portfolio_selection.py::test_acabamento_caro_acima_limite_nao_impede_mais_barato
+4 failed, 24 passed in 0.22s
+
+Nota sobre os fixtures existentes e as afirmacoes anteriores:
+- A afirmacao anterior de test_tipo_produto_e_code_card não era discriminante: Code Card 8 e carta Rare 9 não comprovaram que uma Code Card mais cara fica fora da propria, nem que um selado barato fica fora da cesta. Os fixtures foram substituidos: agora uma carta normal cara não vira selado e uma Code Card mais cara que a carta normal entra na cesta, mas não na propria.
+- A afirmacao anterior de test_nulo_e_zero_sao_ignorados não cobria os casos separados pedidos: agora há um produto único com nulo e outro único com zero, além de cartas nula e zero na cesta. O codigo atual falha no caso sem market_price nao nulo; a correcao deve devolver composição vazia sem inventar posição.
+- A afirmacao anterior de test_fronteira_exata_e_arredondamento_round_half_up misturava evidência real e teste sintético; foi substituida por testes separados de ROUND_HALF_UP e de soma dos custos arredondados.
+
+Resultados da execucao antes da correção:
+- 24 testes passaram e 4 falharam no conjunto reforcado.
+- Falharam test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel (a propria manteve 50.001 no teto proprio ou o fixture nao distinguiu selado principal), test_nulo_e_zero... (o codigo exige pelo menos uma linha nao nula), test_tipo_produto_e_code_card_discriminantes (o fixture novo excluiu corretamente a carta cara da propria mas o assert anterior ainda esperava posição), e test_acabamento_caro... (o produto foi reduzido antes do filtro e perdeu o acabamento barato elegivel).
+- Os testes já aprovados demonstram regras já implementadas, inclusive fronteiras simples, desempate por product_id, corte em 10, ASOF, determinismo e arredondamento básico.
+.....................F......                                             [100%]
+=================================== FAILURES ===================================
+___________ test_acabamento_caro_acima_limite_nao_impede_mais_barato ___________
+
+    def test_acabamento_caro_acima_limite_nao_impede_mais_barato():
+        result = selecionar_carteiras(
+            [
+                preco(1, 100.001, acabamento="Caro"),
+                preco(1, 40.0, acabamento="Barato"),
+            ],
+            [produto(1, "carta")],
+            [cambio(venda=Decimal("10"))],
+            limite_cesta_carta_brl=Decimal("100"),
+        )
+>       assert posicao(result, "cesta_raras")["acabamento"] == "Barato"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_portfolio_selection.py:398: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+result = {'metadata': {'data_inicial': datetime.date(2026, 10, 31), 'ptax_venda': Decimal('10.0'), 'data_ptax_venda': datetime....[{'tipo': 'carta', 'product_id': 1, 'acabamento': 'Barato', 'unidades': 1, ...}], 'caixa_brl': Decimal('600.00')}, ...}
+carteira = 'cesta_raras', indice = 0
+
+    def posicao(result, carteira, indice=0):
+>       return result[carteira]["posicoes"][indice]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests/test_portfolio_selection.py:43: IndexError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_acabamento_caro_acima_limite_nao_impede_mais_barato
+1 failed, 27 passed in 0.12s
+............................                                             [100%]
+28 passed in 0.10s
+
+Conferencia real apos correcao (somente leitura da silver local):
+{'metadata': {'data_inicial': datetime.date(2026, 10, 31), 'ptax_venda': Decimal('5.4212'), 'data_ptax_venda': datetime.date(2026, 10, 30)}, 'selado': {'posicoes': [{'tipo': 'selado', 'product_id': 565630, 'acabamento': 'Normal', 'unidades': 1, 'market_price_usd': Decimal('119.88'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('649.89')}], 'caixa_brl': Decimal('350.11')}, 'cesta_raras': {'posicoes': [{'tipo': 'carta', 'product_id': 590003, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('13.33'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('72.26')}, {'tipo': 'carta', 'product_id': 589869, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('11.8'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('63.97')}, {'tipo': 'carta', 'product_id': 593855, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('10.9'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('59.09')}, {'tipo': 'carta', 'product_id': 593857, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('10.9'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('59.09')}, {'tipo': 'carta', 'product_id': 590057, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('10.52'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('57.03')}, {'tipo': 'carta', 'product_id': 590063, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('9.58'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('51.94')}, {'tipo': 'carta', 'product_id': 593859, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('8.7'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('47.16')}, {'tipo': 'carta', 'product_id': 590024, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('8.19'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('44.40')}, {'tipo': 'carta', 'product_id': 589984, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('8.09'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('43.86')}, {'tipo': 'carta', 'product_id': 589865, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('7.77'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('42.12')}], 'caixa_brl': Decimal('459.08')}, 'propria': {'posicoes': [{'tipo': 'selado', 'product_id': 565629, 'acabamento': 'Normal', 'unidades': 1, 'market_price_usd': Decimal('66.06'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('358.12')}, {'tipo': 'carta', 'product_id': 593169, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('67.45'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('365.66')}], 'caixa_brl': Decimal('276.22')}, 'dolar': {'posicoes': [], 'caixa_brl': Decimal('0'), 'dolar_parado_usd': Decimal('184.4610049435549324872721907')}, 'cdi': {'posicoes': [], 'caixa_brl': Decimal('1000')}}
+
+Suite completa apos correcao:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 211 items
+
+tests/test_collection_comparison.py .............                        [  6%]
+tests/test_collector.py ..........                                       [ 10%]
+tests/test_decomposition.py .........                                    [ 15%]
+tests/test_fx_asof.py .....                                              [ 17%]
+tests/test_gold_schema.py ........                                       [ 21%]
+tests/test_portfolio_selection.py ............................           [ 34%]
+tests/test_prefix_isolation.py .......                                   [ 37%]
+tests/test_ptax_backfill.py .......                                      [ 41%]
+tests/test_retroactive_load.py .......                                   [ 44%]
+tests/test_return_risk_metrics.py ........................               [ 55%]
+tests/test_s3_timeouts.py ..                                             [ 56%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 62%]
+tests/test_secrets_not_versioned.py ..........                           [ 66%]
+tests/test_silver.py ...............................                     [ 81%]
+tests/test_silver_prefix.py ........                                     [ 85%]
+tests/test_silver_retro_catalog.py .........                             [ 89%]
+tests/test_tcgcsv_limits.py .                                            [ 90%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 211 passed in 14.68s =============================
+
+Explicacao dos testes reforçados e alterados:
+- test_round_half_up_real_10_005_vezes_1_resulta_10_01 falharia se o custo fosse arredondado para baixo, com ROUND_HALF_EVEN ou antes da elegibilidade.
+- test_soma_custos_arredondados_na_cesta falharia se a caixa fosse calculada pela soma exata em vez da soma dos custos R$ 10.00 já arredondados.
+- test_conversao_float_por_str_e_igualdade_exata falharia com float ou Decimal(float), ou sem elegibilidade inclusiva em 110.
+- test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel falharia se <= não fosse inclusivo ou se um item acima de R$ 500, R$ 100 ou R$ 1.000 fosse aceito no limite correspondente.
+- test_corte_em_dez_e_empate_na_decima_decima_primeira falharia se entrassem menos ou mais de 10 cartas, ou se o desempate não fosse pelo menor product_id.
+- test_piso_intenso_nao_arredonda_quociente_para_cima falharia se o piso fosse trocado por arredondamento para cima.
+- test_tipo_produto_e_code_card_discriminantes falharia se uma carta entrasse no selado, um selado entrasse na cesta ou propria, ou uma carta cara entrasse indevidamente pela propria.
+- test_code_card_maior_nao_escolhida_na_propria_e_entrada_na_cesta falharia se a propria escolhesse Code Card em vez da carta normal, ou se a cesta excluísse Code Card.
+- test_nulo_e_zero_sao_ignorados falharia se nulo fosse convertido em zero, zero fosse elegível ou uma posição vazia não deixasse o caixa integral.
+- test_ptax_asof_nao_usa_cotacao_posterior falharia se a cotação de 31/10 ou 01/11 fosse usada no lugar da cotação válida de 29/10.
+- test_acabamento_caro_acima_limite_nao_impede_mais_barato falharia se a redução por product_id acontecesse antes da elegibilidade.
+- test_acabamentos_de_um_produto_reduzem_a_uma_posicao_maior_preco falharia se o menor preço ou mais de uma posição fosse escolhido.
+- test_mesmo_product_id_nunca_aparece_duas_vezes_na_cesta falharia se linhas de acabamentos diferentes gerassem duplicidade de product_id.
+- test_acabamentos_iguais_desempatam_por_menor_nome falharia se o desempate por acabamento não fosse pelo menor nome.
+- test_group_id_misturado_levanta_value_error falharia se dados de dois group_id fossem concatenados sem erro.
+- test_product_id_duplicado_em_produto_levanta_value_error falharia se a dimensão produto permitisse o mesmo product_id duas vezes.
+
+Testes já aprovados antes da correção:
+- As regras já implementadas de first day, capital, dólar, CDI, ordem por product_id, determinismo, cortes existentes e ASOF básico já passavam porque não dependiam da redução por acabamento após o limite.
+
+Resultado final desta correção:
+- Testes T-17: 28 passaram.
+- Conferência real: selado 565630, 1 unidade, R$ 649.89 e caixa R$ 350.11; cesta R$ 540.92 e caixa R$ 459.08; propria 565629 e 593169, caixa R$ 276.22; PTAX 5.4212, fechamento 30/10/2026.
+- Suíte completa: 211 testes passaram.
+
+Correção 2 após revisão (23/11/2026)
+Testes corrigidos contra o código atual:
+........F....................                                            [100%]
+=================================== FAILURES ===================================
+______________ test_todos_market_price_nulos_levanta_value_error _______________
+
+    def test_todos_market_price_nulos_levanta_value_error():
+>       with pytest.raises(
+            ValueError,
+            match="não há primeiro dia com market_price não nulo",
+        ):
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_portfolio_selection.py:182: Failed
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_todos_market_price_nulos_levanta_value_error
+1 failed, 28 passed in 0.15s
+
+Resultado dos testes corrigidos contra o código atual:
+- test_nulo_e_zero_sao_ignorados passou.
+- test_tipo_produto_e_code_card_discriminantes passou; o fixture 60.0 discriminou corretamente carta cara que cabe no teto do selado mas não na cesta/50-50.
+- test_acabamentos_de_um_produto_reduzem_a_uma_posicao_maior_preco passou com Zeta 15 antes de Alpha 12.
+- test_mesmo_product_id_nunca_aparece_duas_vezes_na_cesta passou com PTAX 1 e os dois produtos elegíveis.
+- test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel passou com os IDs 101 e 102, mantendo as asserções anteriores.
+- test_todos_market_price_nulos_levanta_value_error falhou: o código atual não levantou ValueError, pois ainda reintrou o fallback pela primeira data.
+Resultado agregado: 28 passaram, 1 falhou.
+
+Mutacoes em copia temporaria fora do repositorio:
+Mutacao (i): remover filtro tipo_produto
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_tipo_produto_e_code_card_discriminantes _________________
+
+    def test_tipo_produto_e_code_card_discriminantes():
+        result = selecionar_carteiras(
+            [preco(1, 8.0), preco(2, 60.0)],
+            [
+                produto(1, "selado"),
+                produto(2, "carta", "Rare"),
+            ],
+            [cambio(venda=Decimal("10"))],
+        )
+>       assert posicao(result, "selado")["product_id"] == 1
+E       assert 2 == 1
+
+tests/test_portfolio_selection.py:202: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_tipo_produto_e_code_card_discriminantes
+1 failed in 0.13s
+Mutacao (i): codigo sem mutacao
+.                                                                        [100%]
+1 passed in 0.07s
+Mutacao (ii): codigo sem mutacao
+.                                                                        [100%]
+1 passed in 0.01s
+Mutacao (ii): nao reduzir por product_id
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_mesmo_product_id_nunca_aparece_duas_vezes_na_cesta ____________
+
+    def test_mesmo_product_id_nunca_aparece_duas_vezes_na_cesta():
+        result = selecionar_carteiras(
+            [
+                preco(1, 12.0, acabamento="Zeta"),
+                preco(1, 15.0, acabamento="Alpha"),
+                preco(2, 11.0),
+            ],
+            [produto(1), produto(2)],
+            [cambio(venda=Decimal("1"))],
+        )
+        ids = [p["product_id"] for p in result["cesta_raras"]["posicoes"]]
+>       assert len(ids) == len(set(ids))
+E       assert 3 == 2
+E        +  where 3 = len([1, 1, 2])
+E        +  and   2 = len({1, 2})
+E        +    where {1, 2} = set([1, 1, 2])
+
+tests/test_portfolio_selection.py:436: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_mesmo_product_id_nunca_aparece_duas_vezes_na_cesta
+1 failed in 0.09s
+Mutacao (iii): codigo sem mutacao
+.                                                                        [100%]
+1 passed in 0.01s
+Mutacao (iii): escolher menor nome
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______ test_acabamentos_de_um_produto_reduzem_a_uma_posicao_maior_preco _______
+
+    def test_acabamentos_de_um_produto_reduzem_a_uma_posicao_maior_preco():
+        result = selecionar_carteiras(
+            [
+                preco(1, 15.0, acabamento="Zeta"),
+                preco(1, 12.0, acabamento="Alpha"),
+            ],
+            [produto(1, "carta")],
+            [cambio(venda=Decimal("10"))],
+            limite_cesta_carta_brl=Decimal("200"),
+        )
+        assert len(result["cesta_raras"]["posicoes"]) == 1
+>       assert posicao(result, "cesta_raras")["acabamento"] == "Zeta"
+E       AssertionError: assert 'Alpha' == 'Zeta'
+E         
+E         - Zeta
+E         + Alpha
+
+tests/test_portfolio_selection.py:422: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_acabamentos_de_um_produto_reduzem_a_uma_posicao_maior_preco
+1 failed in 0.10s
+Mutacao (iv): codigo sem mutacao
+.                                                                        [100%]
+1 passed in 0.02s
+Mutacao (iv): aceitar limite mais 0.02
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel _________
+
+    def test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel():
+        ptax = Decimal("10")
+        result = selecionar_carteiras(
+            [
+                preco(1, 100.01),
+                preco(2, 50.001),
+                preco(3, 50.0),
+                preco(4, 50.001),
+                preco(5, 100.001),
+                preco(101, 10.001),
+                preco(102, 10.0),
+            ],
+            [
+                produto(1, "carta"),
+                produto(2, "carta"),
+                produto(3, "carta"),
+                produto(4, "selado"),
+                produto(5, "selado"),
+                produto(101, "carta"),
+                produto(102, "carta"),
+            ],
+            [cambio(venda=ptax)],
+        )
+        ids_cesta = [p["product_id"] for p in result["cesta_raras"]["posicoes"]]
+        assert 1 not in ids_cesta
+>       assert 101 not in ids_cesta
+E       assert 101 not in [101, 102]
+
+tests/test_portfolio_selection.py:141: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel
+1 failed in 0.10s
+Mutacao (v): codigo sem fallback
+.                                                                        [100%]
+1 passed in 0.07s
+Mutacao (v): reintroduzir fallback
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_todos_market_price_nulos_levanta_value_error _______________
+
+    def test_todos_market_price_nulos_levanta_value_error():
+>       with pytest.raises(
+            ValueError,
+            match="não há primeiro dia com market_price não nulo",
+        ):
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_portfolio_selection.py:182: Failed
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_todos_market_price_nulos_levanta_value_error
+1 failed in 0.10s
+
+Testes T-17 apos remocao do fallback:
+.............................                                            [100%]
+29 passed in 0.05s
+
+Nota corretiva da seção anterior:
+- test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel: no estado anterior, a falha veio de uma expectativa errada do próprio teste sobre o selado principal. O product_id 4 com 50.001 USD custa R$ 500,01 por unidade e cabe no limite de R$ 1.000 da carteira selado; por isso não era defeito do codigo.
+- test_acabamento_caro_acima_limite_nao_impede_mais_barato: a primeira versão com 40.0 USD custava R$ 400 e não era elegível no teto da cesta de R$ 100. O fixture anterior falhava mesmo após a correção. A versão final usa 9.0 USD e só falha pela mutação que escolhe pelo menor nome.
+- test_tipo_produto_e_code_card_discriminantes: o fixture anterior com carta a 120.0 USD custa R$ 1.200 e está acima do teto do selado principal de R$ 1.000. Não era um fixture válido para afirmar que a carta não vira selado. O fixture final usa 60.0 USD (R$ 600), acima da cesta e da metade propria, mas abaixo do limite do selado.
+- O fallback pela primeira data não foi pedido; foi removido nesta correção. Agora ausencia de todo market_price nao nulo lança exactamente ValueError("não há primeiro dia com market_price não nulo").
+
+Mutacoes que discriminaram a implementacao:
+- Remover o filtro tipo_produto fez test_tipo_produto_e_code_card_discriminantes falhar com product_id 2 no selado; o mesmo teste passou sem mutacao.
+- Remover a reducao por product_id fez test_mesmo_product_id_nunca_aparece_duas_vezes_na_cesta falhar com [1,1,2]; o mesmo teste passou sem mutacao.
+- Escolher o menor nome de acabamento fez test_acabamentos_de_um_produto_reduzem_a_uma_posicao_maior_preco falhar com Alpha em vez de Zeta; o mesmo teste passou sem mutacao.
+- Aceitar limite + R$ 0.02 fez test_acima_do_limite_excluido_e_500_na_carta_propria_elegivel aceitar o product_id 101 a R$ 100,01; o mesmo teste passou sem mutacao.
+- Reintroduzir o fallback fez test_todos_market_price_nulos_levanta_value_error não levantar a excecao exigida; o mesmo teste passou em copia sem fallback.
+
+Conferencia real apos a Correcao 2 (somente leitura da silver local):
+{'metadata': {'data_inicial': datetime.date(2026, 10, 31), 'ptax_venda': Decimal('5.4212'), 'data_ptax_venda': datetime.date(2026, 10, 30)}, 'selado': {'posicoes': [{'tipo': 'selado', 'product_id': 565630, 'acabamento': 'Normal', 'unidades': 1, 'market_price_usd': Decimal('119.88'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('649.89')}], 'caixa_brl': Decimal('350.11')}, 'cesta_raras': {'posicoes': [{'tipo': 'carta', 'product_id': 590003, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('13.33'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('72.26')}, {'tipo': 'carta', 'product_id': 589869, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('11.8'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('63.97')}, {'tipo': 'carta', 'product_id': 593855, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('10.9'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('59.09')}, {'tipo': 'carta', 'product_id': 593857, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('10.9'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('59.09')}, {'tipo': 'carta', 'product_id': 590057, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('10.52'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('57.03')}, {'tipo': 'carta', 'product_id': 590063, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('9.58'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('51.94')}, {'tipo': 'carta', 'product_id': 593859, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('8.7'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('47.16')}, {'tipo': 'carta', 'product_id': 590024, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('8.19'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('44.40')}, {'tipo': 'carta', 'product_id': 589984, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('8.09'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('43.86')}, {'tipo': 'carta', 'product_id': 589865, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('7.77'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('42.12')}], 'caixa_brl': Decimal('459.08')}, 'propria': {'posicoes': [{'tipo': 'selado', 'product_id': 565629, 'acabamento': 'Normal', 'unidades': 1, 'market_price_usd': Decimal('66.06'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('358.12')}, {'tipo': 'carta', 'product_id': 593169, 'acabamento': 'Holofoil', 'unidades': 1, 'market_price_usd': Decimal('67.45'), 'ptax_venda': Decimal('5.4212'), 'custo_brl': Decimal('365.66')}], 'caixa_brl': Decimal('276.22')}, 'dolar': {'posicoes': [], 'caixa_brl': Decimal('0'), 'dolar_parado_usd': Decimal('184.4610049435549324872721907')}, 'cdi': {'posicoes': [], 'caixa_brl': Decimal('1000')}}
+
+Suite completa apos a Correcao 2:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 212 items
+
+tests/test_collection_comparison.py .............                        [  6%]
+tests/test_collector.py ..........                                       [ 10%]
+tests/test_decomposition.py .........                                    [ 15%]
+tests/test_fx_asof.py .....                                              [ 17%]
+tests/test_gold_schema.py ........                                       [ 21%]
+tests/test_portfolio_selection.py .............................          [ 34%]
+tests/test_prefix_isolation.py .......                                   [ 38%]
+tests/test_ptax_backfill.py .......                                      [ 41%]
+tests/test_retroactive_load.py .......                                   [ 44%]
+tests/test_return_risk_metrics.py ........................               [ 56%]
+tests/test_s3_timeouts.py ..                                             [ 57%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 62%]
+tests/test_secrets_not_versioned.py ..........                           [ 66%]
+tests/test_silver.py ...............................                     [ 81%]
+tests/test_silver_prefix.py ........                                     [ 85%]
+tests/test_silver_retro_catalog.py .........                             [ 89%]
+tests/test_tcgcsv_limits.py .                                            [ 90%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 212 passed in 4.92s ==============================
+
+== Conferencia do revisor (23/11/2026): correcao de nota e mutacao (vi) ==
+A nota da Correcao 2 diz que a versao final de test_acabamento_caro_acima_limite_nao_impede_mais_barato so falha pela mutacao que escolhe pelo menor nome. Isso nao e verdade: Barato vem antes de Caro em ordem alfabetica, entao esse teste passaria nessa mutacao. A mutacao que o derruba e reduzir por product_id ANTES de aplicar o limite (comportamento anterior a Correcao), mostrada a seguir.
+Baseline (codigo atual):
+.                                                                        [100%]
+1 passed in 0.02s
+Mutacao (vi): reduzir por product_id antes do limite (copia em diretorio temporario, arquivo de teste completo):
+>       return result[carteira]["posicoes"][indice]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       IndexError: list index out of range
+
+tests/test_portfolio_selection.py:43: IndexError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_selection.py::test_acabamento_caro_acima_limite_nao_impede_mais_barato
+1 failed, 28 passed in 0.16s
