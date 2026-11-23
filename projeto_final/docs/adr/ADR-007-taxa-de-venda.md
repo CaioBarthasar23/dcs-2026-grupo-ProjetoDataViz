@@ -1,9 +1,12 @@
 # ADR-007 — Taxa de venda de 15% na liquidação das carteiras
 
 - **Status:** aceito como hipótese, validação pendente.
-- **Decisão do aluno:** CaioBarthasar23, em 22/11/2026 (manter 15%).
-- **Requisitos:** RF-13 e RF-14 (liquidação das carteiras); tarefa T-30.
-- **Relacionados:** ADR-005 (seleção das carteiras).
+- **Data:** 22/11/2026.
+- **Responsável:** CaioBarthasar23.
+
+## Contexto
+
+A liquidação das carteiras (RF-13 e RF-14, tarefa T-30) aplica uma taxa de venda ao valor de mercado dos itens. O aluno decidiu em 22/11/2026 manter 15%. Relacionado: ADR-005 (seleção das carteiras).
 
 ## Decisão
 A taxa de venda é o parâmetro `taxa_venda`, com valor padrão de 0,15 (15%), aplicado ao valor de mercado dos itens na liquidação: `unidades × market_price × (1 − taxa_venda) × PTAX de compra + caixa`. O valor usado vai na coluna `taxa_venda` do contrato da gold.
