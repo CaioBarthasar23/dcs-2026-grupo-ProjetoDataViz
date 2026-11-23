@@ -150,23 +150,23 @@ O dashboard deve apresentar valores em reais e oferecer a chave R$/US$ para alte
 
 ### RF-13 — Calcular as cinco carteiras e apresentar resultados no contrato comum
 
-O desafio deve calcular cinco carteiras: `selado`, `cesta_raras`, `propria`, `dolar` e `cdi`. `selado` compra unidades inteiras do booster box; se o box não tiver preço no primeiro dia, usa o selado de maior preço, com a escolha detalhada em ADR. `cesta_raras` investe R$ 100 em cada uma das dez cartas com maior `market_price` no primeiro dia, em unidades inteiras. A regra da carteira `propria` será definida pelo aluno em ADR e registrada em commit anterior ao primeiro cálculo (**hipótese: validação pendente**). `dolar` converte R$ 1.000 pela PTAX de venda do primeiro dia. `cdi` corrige R$ 1.000 pelo CDI de cada dia útil, com juros compostos.
+O desafio deve calcular cinco carteiras: `selado`, `cesta_raras`, `propria`, `dolar` e `cdi`. `selado` considera os produtos com `tipo_produto = selado` e `market_price > 0` no primeiro dia e escolhe o de maior `market_price` em US$ tal que `market_price × PTAX de venda ≤ R$ 1.000`, com desempate pelo menor `product_id`; compra o máximo de unidades inteiras e aplica a sobra em CDI. `cesta_raras` considera as cartas com `tipo_produto = carta`, incluindo Code Card, com preço no primeiro dia e `market_price × PTAX de venda ≤ R$ 100`, escolhe as 10 de maior `market_price`, com desempate pelo menor `product_id`, e compra uma unidade de cada; a sobra rende CDI. A seleção usa somente preços e câmbio do primeiro dia. A regra da carteira `propria` será definida pelo aluno em ADR e registrada em commit anterior ao primeiro cálculo (**hipótese: validação pendente**). `dolar` converte R$ 1.000 pela PTAX de venda do primeiro dia. `cdi` corrige R$ 1.000 pelo CDI de cada dia útil, com juros compostos.
 
 O valor de liquidação é unidades × `market_price` × (1 − taxa de venda) × PTAX de compra, mais sobra em caixa rendendo CDI. A taxa de venda é parâmetro; 15% permanece hipótese a declarar em ADR. Produto sem preço no dia usa o último preço observado; o painel marca esses dias e nenhum valor inventado é gravado na silver. As métricas são retorno acumulado, excesso sobre o CDI, perda máxima e dias com preço carregado. O dashboard mostra resultados com e sem a taxa. Os resultados seguem o contrato comum `tcg/gold_turma/carteira/`: `data DATE`, `group_id INTEGER`, `carteira VARCHAR`, `valor_brl DOUBLE`, `retorno_acumulado DOUBLE`, `taxa_venda DOUBLE`.
 
-**Origem:** OBJ-06; RES-03 e RES-05; desafio da carteira e contrato comum do enunciado; invariantes de carteira em `projeto_final/AGENTS.md`.
+**Origem:** OBJ-06; decisão do aluno, ADR-005; ADR-007; RES-03 e RES-05; desafio da carteira e contrato comum do enunciado; invariantes de carteira em `projeto_final/AGENTS.md`.
 
 **Critério de aceite:**
 
 - **Dado** preços, PTAX e CDI disponíveis para o período e a regra da carteira `propria` registrada em ADR,
 - **Quando** as cinco carteiras forem calculadas com uma taxa de venda configurada,
-- **Então** `selado`, `cesta_raras`, `propria`, `dolar` e `cdi` seguem as regras descritas, as compras e liquidações usam respectivamente PTAX de venda e de compra, as unidades são inteiras, o CDI é composto em dias úteis, preços carregados são identificados no painel sem gravar valores inventados na silver, as métricas são produzidas, o dashboard mostra resultados com e sem taxa e os registros seguem o caminho e esquema definidos.
+- **Então** `selado` considera no primeiro dia somente produtos com `tipo_produto = selado` e `market_price > 0`, escolhe o de maior `market_price` em US$ tal que `market_price × PTAX de venda ≤ R$ 1.000`, aplica o menor `product_id` em empate, compra o máximo de unidades inteiras e rende CDI sobre a sobra; `cesta_raras` considera no primeiro dia somente cartas com `tipo_produto = carta`, incluindo Code Card, com preço e `market_price × PTAX de venda ≤ R$ 100`, escolhe as 10 de maior `market_price`, aplica o menor `product_id` em empate, compra uma unidade de cada e rende CDI sobre a sobra; `propria`, `dolar` e `cdi` seguem suas regras registradas, as compras usam PTAX de venda, as liquidações usam PTAX de compra, unidades inteiras são usadas, o CDI é composto em dias úteis, a sobra rende CDI, preços carregados são identificados no painel sem gravar valores inventados na silver, as métricas são produzidas, o dashboard mostra resultados com e sem taxa e os registros seguem o caminho e esquema definidos.
 
 ### RF-14 — Manter estável a composição da cesta de raras com dados posteriores
 
 A seleção da cesta deve usar somente os dados disponíveis no primeiro dia da janela da carteira; dados incluídos posteriormente na silver não podem alterar a composição selecionada para aquela janela.
 
-**Origem:** OBJ-06; invariante de carteira em `projeto_final/AGENTS.md`.
+**Origem:** OBJ-06; decisão do aluno, ADR-005; invariante de carteira em `projeto_final/AGENTS.md`.
 
 **Critério de aceite:**
 
@@ -188,9 +188,9 @@ O README deve informar o comando que executa o pipeline de reconstrução e como
 
 ### RF-16 — Classificar produtos da silver como carta ou selado
 
-A silver deve classificar cada produto como carta ou selado a partir dos campos da fonte: produto com número de carta é carta; produto sem número de carta é selado. Code Card, que tem raridade Code Card, é classificado como carta e excluído das perguntas 1, 3 e 4 pela raridade. O método exato de classificação será confirmado no ADR-005.
+A silver deve classificar cada produto como carta ou selado a partir dos campos da fonte: produto com número de carta é carta; produto sem número de carta é selado. Code Card, que tem raridade Code Card, é classificado como carta e excluído das perguntas 1, 3 e 4 pela raridade. O método foi confirmado no ADR-005 pela função `classificar` de `src/silver.py`: produto com `Number` preenchido é carta; produto com `Rarity == "Code Card"` também é carta, mesmo sem número; os demais são selado. A classificação não foi conferida produto a produto contra o site do TCGplayer (**hipótese, validação pendente**).
 
-**Origem:** decisão do aluno no plano; comportamento do código existente em `src/silver.py`; regra de exclusão de Code Card em `projeto_final/AGENTS.md`. O método exato será confirmado no ADR-005.
+**Origem:** decisão do aluno no plano; método confirmado no ADR-005 pela função `classificar` de `src/silver.py`; regra de exclusão de Code Card em `projeto_final/AGENTS.md`. Conferência produto a produto no site (**hipótese, validação pendente**).
 
 **Critério de aceite:**
 
