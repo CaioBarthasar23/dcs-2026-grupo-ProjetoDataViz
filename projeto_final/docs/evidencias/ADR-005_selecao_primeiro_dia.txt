@@ -53,3 +53,57 @@ product_id repetido entre as 10 (acabamentos diferentes): False
 empate de market_price entre a 10a e a 11a: False
 cartas Code Card entre as 10: []
 cartas com preco no primeiro dia e acima de R$ 100: 12
+
+== Conferencia do metodo de classificacao carta/selado (23/11/2026) ==
+16:    produto       product_id INTEGER, group_id INTEGER, nome, tipo_produto, raridade,
+17:                  numero, image_url, url            (+ categoria_selado, extra)
+73:    tipo_produto: Literal["carta", "selado"]
+75:    numero: Optional[str] = None
+126:    """'carta' se tem numero; Code Card tambem e carta (sem numero), excluida por raridade."""
+127:    if _ext(produto, "Number"):
+167:        tipo_produto=tipo,
+169:        numero=_ext(p, "Number"),
+304:                ("product_id", i32), ("group_id", i32), ("nome", s), ("tipo_produto", s),
+305:                ("raridade", s), ("numero", s), ("image_url", s), ("url", s),
+tipo_produto, tem_numero, quantidade:
+   ('carta', False, 10)
+   ('carta', True, 252)
+   ('selado', False, 27)
+inconsistentes (selado com numero ou carta sem numero; esperado 0): 10
+
+== Esclarecimento (23/11/2026) ==
+O rotulo 'esperado 0' do bloco anterior ignorava que a spec (linha 191) e src/silver.py:126 preveem Code Card como carta sem numero. Os 10 casos sao listados a seguir para conferencia.
+                v = v.strip()
+            return v or None
+    return None
+
+
+def classificar(produto: dict) -> str:
+    """'carta' se tem numero; Code Card tambem e carta (sem numero), excluida por raridade."""
+    if _ext(produto, "Number"):
+        return "carta"
+    if _ext(produto, "Rarity") == "Code Card":
+        return "carta"
+    return "selado"
+
+
+def categoria_selado(nome: str) -> str:
+    n = nome.lower()
+    caixa = bool(re.search(r"\bcase\b", n))
+    if "half booster box" in n:
+        return "half_booster_box"
+    if "booster box" in n:
+        return "booster_box_case" if caixa else "booster_box"
+cartas sem numero (product_id, nome, raridade):
+   (594248, 'Code Card - Surging Sparks Booster Pack', 'Code Card')
+   (598075, 'Code Card - Surging Spark Elite Trainer Box', 'Code Card')
+   (602788, 'Code Card - Surging Sparks Pokemon Center Elite Trainer Box', 'Code Card')
+   (604405, 'Code Card - Surging Sparks 3 Pack Blister [Zapdos]', 'Code Card')
+   (616131, 'Code Card - Surging Sparks Build & Battle Box', 'Code Card')
+   (616160, 'Code Card - Surging Sparks Blister [Hisuian Arcanine]', 'Code Card')
+   (616164, 'Code Card - Surging Sparks Blister [Sinistcha]', 'Code Card')
+   (616166, 'Code Card - Surging Sparks Blister [Wooper]', 'Code Card')
+   (616169, 'Code Card - Surging Sparks Blister [Pachirisu]', 'Code Card')
+   (620134, 'Code Card - Surging Sparks Elite Trainer Box', 'Code Card')
+cartas sem numero com raridade diferente de Code Card (esperado 0): 0
+produtos com raridade Code Card por tipo_produto: [('carta', 10)]

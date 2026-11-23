@@ -1,12 +1,13 @@
 # ADR-005 — Classificação carta/selado, Code Card e seleção das carteiras `selado` e `cesta_raras`
 
 - **Status:** aceito; hipóteses marcadas, validação pendente.
-- **Decisão do aluno:** CaioBarthasar23, em 22/11/2026. Seleção calculada em 23/11/2026.
-- **Requisitos:** RF-13 e RF-14 (carteiras e seleção só com dados do primeiro dia).
-- **Relacionados:** ADR-006 (carteira `propria`), ADR-007 (taxa de venda).
-- **Evidência:** `docs/evidencias/ADR-005_selecao_primeiro_dia.txt` (leitura da silver local, reconstruída do bucket na T-35).
+- **Data:** 22/11/2026 (decisão); seleção calculada em 23/11/2026.
+- **Responsável:** CaioBarthasar23.
 
 ## Contexto
+
+Requisitos: RF-13 e RF-14 (carteiras e seleção só com dados do primeiro dia). Relacionados: ADR-006 (carteira `propria`) e ADR-007 (taxa de venda). Evidência: `docs/evidencias/ADR-005_selecao_primeiro_dia.txt` (leitura da silver local, reconstruída do bucket na T-35).
+
 A especificação descreve `selado` como unidades de booster box ("Surging Sparks Booster Box", product_id 565606) e `cesta_raras` como R$ 100 em cada uma das 10 cartas de maior `market_price`, no primeiro dia (31/10/2026), com unidades inteiras e PTAX de venda por ASOF. No primeiro dia a PTAX de venda é 5,4212 (fechamento de 30/10).
 
 Com esses preços, o texto literal da spec não compra nada:
@@ -15,7 +16,7 @@ Com esses preços, o texto literal da spec não compra nada:
 - As duas carteiras ficariam 100% em caixa e seriam iguais à carteira `cdi`. Isso é uma consequência dos preços da SSP em 31/10, não um erro de cálculo.
 
 ## Decisão
-1. **Classificação.** Carta ou selado é o `tipo_produto` que a silver já grava (`carta` ou `selado`; os selados têm `categoria_selado`), conforme `src/silver.py` (ADR-001). *Hipótese, validação pendente:* a classificação não foi conferida produto a produto contra o site do TCGplayer.
+1. **Classificação (método confirmado).** A função `classificar` de `src/silver.py` (linhas 125–131, ADR-001) decide: produto com o campo `Number` preenchido é `carta`; produto com `Rarity == "Code Card"` também é `carta`, mesmo sem número; os demais são `selado` (os selados recebem `categoria_selado` pelo nome). Conferência na silver local em 23/11/2026 (evidência): 252 cartas com número, 10 cartas sem número, todas com raridade Code Card e nenhuma de outra raridade, e 27 selados sem número; nenhum produto de raridade Code Card fora de `carta`. As 10 Code Cards são códigos de produtos selados (pelos nomes). *Hipótese, validação pendente:* a classificação não foi conferida produto a produto contra o site do TCGplayer.
 2. **Code Card.** É a carta com `raridade == "Code Card"` (mesmo critério de `src/concentracao_valor.py`). Fica fora das perguntas 1, 3 e 4 do dashboard (AGENTS.md) e **dentro** da `cesta_raras`. Em 31/10 nenhuma das 10 cartas escolhidas é Code Card.
 3. **`selado`.** Entre os produtos com `tipo_produto = selado` e `market_price > 0` no primeiro dia, escolhe-se o de maior `market_price` em US$ tal que `market_price × PTAX de venda ≤ R$ 1.000`; desempate pelo menor `product_id`. Compra-se o máximo de unidades inteiras e a sobra rende CDI.
 4. **`cesta_raras`.** Entre as cartas (`tipo_produto = carta`, com Code Card) com preço no primeiro dia e `market_price × PTAX de venda ≤ R$ 100`, escolhem-se as 10 de maior `market_price`; desempate pelo menor `product_id`. Uma unidade de cada; a sobra rende CDI.
