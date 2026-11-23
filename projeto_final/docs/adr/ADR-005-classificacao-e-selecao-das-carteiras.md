@@ -54,3 +54,12 @@ Não houve empate entre a 10ª e a 11ª carta; o empate entre a 3ª e a 4ª (US$
 - A `cesta_raras` não contém as 10 cartas mais caras: as 12 mais caras passam de R$ 100 e ficam de fora. Cerca de 46% do capital fica em caixa rendendo CDI, e o `selado` deixa cerca de 35%.
 - O `selado` concentra o capital em um produto (1 ETB).
 - Os valores em reais dependem da PTAX de 30/10 (5,4212); a reconstrução a partir do raw reproduz a seleção.
+
+## Adendo de 23/11/2026 — unidade de seleção, primeiro dia e arredondamento
+
+Decisão do aluno CaioBarthasar23, tomada durante a implementação da T-17 (`src/selecao_carteiras.py`, evidência em `docs/evidencias/T-17_selecao_carteiras.txt`). O ADR original não definia esses pontos.
+
+1. **Unidade de seleção (opção c).** Uma carta ou um selado é um `product_id`. Para cada carteira, consideram-se as linhas `(product_id, acabamento)` do primeiro dia com `market_price > 0`, `tipo_produto` correto e `market_price × PTAX de venda ≤ limite`; por `product_id` fica a linha de maior `market_price` entre as elegíveis (empate de preço entre acabamentos do mesmo produto: menor nome do acabamento, hipótese, validação pendente). Um `product_id` aparece no máximo uma vez em cada carteira; depois ordena-se por `market_price` decrescente e `product_id` crescente. Motivo: coerente com "10 cartas" e evita excluir um produto por causa de um acabamento caro que não cabe no limite.
+2. **Primeiro dia.** É a menor data com pelo menos um `market_price` não nulo. Se não houver nenhum `market_price` não nulo, a seleção falha com erro, e não devolve carteiras vazias, para não esconder uma coleta quebrada.
+3. **Arredondamento.** A elegibilidade e o número de unidades usam o valor exato (Decimal, convertido de float por `str()`). O `custo_brl` de cada posição é `unidades × market_price × PTAX de venda` arredondado a centavos (ROUND_HALF_UP) e o caixa é o capital menos a soma dos custos arredondados; é o que reproduz os valores acima (cesta R$ 540,92 e sobra R$ 459,08).
+4. **Menos de 10 cartas elegíveis na `cesta_raras`.** Compram-se as que houver e o resto fica em caixa (hipótese, validação pendente).
