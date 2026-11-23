@@ -1046,3 +1046,40 @@ Pare ao terminar e liste perguntas abertas.
 
 Respostas do aluno ao Copilot:
 1. Confirmação do plano: "Confirmado, com estes acréscimos: no teste do catálogo fixo, confira também que os preços do produto que só existe no catálogo posterior ficam válidos, com cadastro_retroativo falso, no dia posterior. Na evidência, explique para cada teste novo que alteração do código o faria falhar. Se algum teste novo falhar, pare e mostre a saída, sem alterar src/ nem testes existentes. Na evidência, só acrescente com tee -a, sem editar nem apagar texto existente. Sem rede, sem bucket, sem commit nem push. Ao terminar, pare e liste perguntas abertas."
+
+**Data:** 2026-11-23, entre 01h58 e 02h04 (Brasília); início aproximado.
+- **Agente e modelo:** GitHub Copilot, Fusion.
+- **Arquivos alterados:** `specs/spec.md` e `specs/tasks.md` (sem commit pelo agente).
+- **Confirmação do plano:** o aluno confirmou o plano com quatro ajustes (texto em "Respostas do aluno ao Copilot").
+- **Resultado:** o plano propôs alterar RF-13, RF-14 e RF-16 (linha 191) na spec e criar a T-36 na tasks.md, com ajustes nas T-17, T-18 e T-19. Após a confirmação, o diff trouxe: RF-13 com as regras do ADR-005, origens de RF-13 e RF-14 atualizadas, método confirmado no RF-16, T-36 criada (origem no estilo da T-30), T-36 nas dependências da T-17 com testes sintéticos e conferência da evidência, e coberturas atualizadas. A revisão apontou duas omissões do Copilot: o "Então" do RF-13 perdeu a cláusula "preços carregados são identificados no painel sem gravar valores inventados na silver", e a T-19 não recebeu o acréscimo previsto no plano. As duas foram corrigidas pelo aluno com um script do agente revisor, não com novo prompt. O OBJ-06 previsto no plano para as T-17 e T-18 não foi aplicado (não era exigido). Commits: 3fbe09c (spec) e 568c6ac (tasks).
+
+Prompt 33 (T-36): ajustar a spec e a tasks.md à decisão do ADR-005
+
+[C] Personagem
+Você é o engenheiro de especificação que ajusta specs/spec.md e specs/tasks.md à decisão do aluno registrada em docs/adr/ADR-005-classificacao-e-selecao-das-carteiras.md (commits 96e3708 e bbca40e). Requisitos: RF-13, RF-14; objetivo OBJ-06. Relacionados: docs/adr/ADR-007-taxa-de-venda.md.
+
+[R] Pedido
+Contexto: o ADR-005 registra que a regra literal da spec para as carteiras selado (booster box) e cesta_raras (R$ 100 em cada uma das 10 cartas de maior preço) resulta, com os preços de 31/10/2026, em duas carteiras 100% em caixa, iguais à carteira cdi. O aluno decidiu, no ADR-005, as regras abaixo, que divergem do texto atual de RF-13:
+- selado: entre os produtos com tipo_produto = selado e market_price > 0 no primeiro dia, o de maior market_price em US$ tal que market_price × PTAX de venda ≤ R$ 1.000; desempate pelo menor product_id; máximo de unidades inteiras; a sobra rende CDI.
+- cesta_raras: entre as cartas (tipo_produto = carta, inclui Code Card) com preço no primeiro dia e market_price × PTAX de venda ≤ R$ 100, as 10 de maior market_price; desempate pelo menor product_id; uma unidade de cada; a sobra rende CDI.
+- A seleção usa só preços e câmbio do primeiro dia.
+- O método de classificação carta/selado foi confirmado no ADR-005 (função classificar de src/silver.py).
+
+Mostre um plano em tópicos, sem editar nada, com:
+1. Leia, sem alterar: AGENTS.md, specs/spec.md, specs/tasks.md e os ADR-005 e ADR-007. Liste todos os trechos de spec.md e tasks.md que citam booster box, "R$ 100", "10 cartas de maior preço", selado ou cesta_raras, e o trecho da linha 191 de spec.md que diz que o método de classificação "será confirmado no ADR-005". Para cada trecho, cite arquivo e linha.
+2. Para cada trecho que precise mudar, mostre o texto atual e o texto proposto, só o necessário: RF-13 (e RF-14 se repetir a regra) mantendo Dado/Quando/Então, a ligação ao objetivo e a Origem ("decisão do aluno, ADR-005"); a linha 191 passa a dizer que o método foi confirmado no ADR-005. Hipóteses mantêm a marca "hipótese, validação pendente".
+3. Proponha uma nova tarefa em specs/tasks.md para o ADR-005 (a tasks.md hoje só tem tarefa para os ADR-006 e ADR-007, não para o 005), com número seguinte ao último existente, requisito, origem e verificação executável (conferir no histórico os commits do ADR-005 e a presença das regras e do método no arquivo). Deixe a caixa de seleção desmarcada.
+4. Proponha, para as tarefas de implementação das carteiras selado e cesta_raras e do teste de seleção só com dados do primeiro dia, o ajuste mínimo dos campos de requisito e verificação para a regra do ADR-005, e inclua na verificação a conferência com docs/evidencias/ADR-005_selecao_primeiro_dia.txt (selado: product_id 565630, 1 unidade; cesta_raras: os 10 product_id da tabela do ADR-005). Preserve as dependências já escritas (ADR-007 antes da execução da T-18; ADR da carteira propria antes do primeiro cálculo).
+5. Se alguma mudança tocar mais que o necessário, ou se encontrar conflito entre o ADR-005 e o texto da spec além do descrito, pare e liste como pergunta aberta, sem resolver.
+
+[A] Ajustes
+Altere somente specs/spec.md e specs/tasks.md, e só depois da minha confirmação do plano. Não altere src/, tests/, docs/adr/ nem docs/evidencias/. Não crie requisito novo além do que o ADR-005 decide; não invente números: os valores vêm do ADR-005 e da evidência. Não leia nem imprima .env. Sem git commit nem git push; proponha as mensagens no formato tipo(T-xx): descrição [RF-yy], uma para a spec e outra para a tasks.md. Não declare sucesso sem mostrar a saída real de git --no-pager diff dos dois arquivos.
+
+[T] Tipo de saída
+Plano em tópicos, citando arquivo e linha, com texto atual e texto proposto lado a lado. Depois da confirmação: os arquivos editados e o diff completo.
+
+[E] Extras
+Ao terminar o plano, liste as perguntas abertas e pare.
+
+Respostas do aluno ao Copilot:
+1. Confirmação do plano: "Confirmado, com estes ajustes: (1) escreva o "Então" do RF-13 seguindo exatamente a regra do ADR-005, sem acrescentar regra nova; o texto vai aparecer no diff. (2) Na T-36, use a mesma coluna e o mesmo estilo da T-30 para a origem ("Decisão do aluno no ADR-005, 22/11/2026"), sem "Dependências: Nenhuma"; mostre o cabeçalho da tabela da tasks.md para confirmar os nomes das colunas. (3) Acrescente a T-36 às dependências da T-17. (4) Na verificação da T-17, inclua testes com dados sintéticos para cada regra do ADR-005: fronteira de R$ 1.000 e de R$ 100 (igual ao limite conta como cabe), desempate pelo menor product_id, produto sem preço ignorado, Code Card incluída na cesta_raras e unidades inteiras com sobra em CDI, além da conferência com a evidência. Se algum ajuste exigir mudar algo além do que descrevi, pare e pergunte. Altere só specs/spec.md e specs/tasks.md. Sem git commit nem git push. Ao final, mostre o git --no-pager diff dos dois arquivos, liste as perguntas abertas e pare."
