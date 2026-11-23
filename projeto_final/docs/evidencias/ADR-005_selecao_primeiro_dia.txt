@@ -1,0 +1,55 @@
+Selecao do primeiro dia (somente leitura da silver local)
+primeiro dia da silver: 2026-10-31
+tipos em produto (tipo_produto, categoria_selado, quantidade):
+   ('carta', None, 262)
+   ('selado', 'blister', 8)
+   ('selado', 'booster_pack', 2)
+   ('selado', 'booster_pack_bundle', 2)
+   ('selado', 'booster_bundle', 2)
+   ('selado', 'elite_trainer_box', 2)
+   ('selado', 'elite_trainer_box_case', 2)
+   ('selado', 'build_and_battle_box', 1)
+   ('selado', 'build_and_battle_box_display', 1)
+   ('selado', 'booster_pack_case', 1)
+   ('selado', 'booster_bundle_case', 1)
+   ('selado', 'half_booster_box', 1)
+   ('selado', 'blister_case', 1)
+   ('selado', 'booster_box', 1)
+   ('selado', 'booster_box_case', 1)
+   ('selado', 'fun_pack', 1)
+linhas com preco no primeiro dia: 452
+PTAX usada (data, venda): [(datetime.date(2026, 10, 30), 5.4212)]
+
+== SELADO: cabem em R$ 1.000 (maior preco primeiro, desempate menor product_id)
+   (565630, 'Normal', 'Surging Sparks Elite Trainer Box', 'elite_trainer_box', 119.88, 649.89, 1, 350.11)
+   (565629, 'Normal', 'Surging Sparks Booster Bundle (LGS)', 'booster_bundle', 66.06, 358.12, 2, 283.75)
+   (565599, 'Normal', 'Surging Sparks Build & Battle Box', 'build_and_battle_box', 62.48, 338.72, 2, 322.57)
+   (679564, 'Normal', 'Surging Sparks Booster Bundle (Retail)', 'booster_bundle', 54.81, 297.14, 3, 108.59)
+   (565634, 'Normal', 'Surging Sparks 3 Pack Blisters [Zapdos]', 'blister', 48.0, 260.22, 3, 219.35)
+   (565635, 'Normal', 'Surging Sparks 3 Pack Blisters [Quagsire]', 'blister', 45.43, 246.29, 4, 14.86)
+   (565603, 'Normal', 'Surging Sparks Sleeved Booster Pack Bundle [Set of 4]', 'booster_pack_bundle', 43.71, 236.96, 4, 52.16)
+   (565639, 'Normal', 'Surging Sparks Premium Checklane Blister [Chandelure]', 'blister', 38.04, 206.22, 4, 175.11)
+== SELADO: os 3 mais baratos que NAO cabem (conferencia da fronteira)
+   (646039, 'Normal', 'Surging Sparks Half Booster Box', 194.71, 1055.56)
+   (565632, 'Normal', 'Surging Sparks Pokemon Center Elite Trainer Box (Exclusive)', 246.53, 1336.49)
+   (565606, 'Normal', 'Surging Sparks Booster Box', 298.42, 1617.79)
+
+== CESTA_RARAS: cartas com preco_brl <= R$ 100 (13 primeiras)
+   (1, 590003, 'Holofoil', 'Mesprit - 204/191', 'Illustration Rare', 13.33, 72.26)
+   (2, 589869, 'Holofoil', 'Archaludon ex - 241/191', 'Special Illustration Rare', 11.8, 63.97)
+   (3, 593855, 'Holofoil', 'Alolan Exeggutor ex - 248/191', 'Hyper Rare', 10.9, 59.09)
+   (4, 593857, 'Holofoil', 'Gravity Mountain - 250/191', 'Hyper Rare', 10.9, 59.09)
+   (5, 590057, 'Holofoil', 'Slakoth - 212/191', 'Illustration Rare', 10.52, 57.03)
+   (6, 590063, 'Holofoil', 'Spheal - 199/191', 'Illustration Rare', 9.58, 51.94)
+   (7, 593859, 'Holofoil', 'Night Stretcher - 251/191', 'Hyper Rare', 8.7, 47.16)
+   (8, 590024, 'Holofoil', 'Phanpy - 205/191', 'Illustration Rare', 8.19, 44.4)
+   (9, 589984, 'Holofoil', 'Latias ex - 220/191', 'Ultra Rare', 8.09, 43.86)
+   (10, 589865, 'Holofoil', 'Appletun - 211/191', 'Illustration Rare', 7.77, 42.12)
+   (11, 590052, 'Holofoil', 'Skarmory - 209/191', 'Illustration Rare', 7.7, 41.74)
+   (12, 589902, 'Holofoil', "Clemont's Quick Wit - 243/191", 'Special Illustration Rare', 7.16, 38.82)
+   (13, 589944, 'Holofoil', 'Feebas - 198/191', 'Illustration Rare', 7.06, 38.27)
+soma das 10 primeiras (R$): 540.92 | sobra em caixa (R$): 459.08
+product_id repetido entre as 10 (acabamentos diferentes): False
+empate de market_price entre a 10a e a 11a: False
+cartas Code Card entre as 10: []
+cartas com preco no primeiro dia e acima de R$ 100: 12
