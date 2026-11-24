@@ -33,3 +33,11 @@ Os 15% ficam no meio dessa faixa (13,5% a 18%) e servem como valor redondo conse
 
 ## Consequências
 - A taxa é parâmetro: o resultado das carteiras muda com ela. Prevê-se rodar a análise também com 10% e 20% para mostrar a sensibilidade.
+
+## Adendo de 24/11/2026 — taxa nas carteiras `dolar` e `cdi` e na sobra
+
+Decisão do aluno CaioBarthasar23, na confirmação do plano da T-18 (`src/valor_carteiras.py`, evidência em `docs/evidencias/T-18_valor_carteiras.txt`). O ADR original e o RF-13 definiam a taxa para as posições, mas não para `dolar`, `cdi` e a sobra em caixa.
+
+- A taxa de venda incide só nas posições de carta e selado. A sobra em caixa não é vendida e continua rendendo CDI sem taxa; as carteiras `dolar` e `cdi` não pagam taxa.
+- Consequência: para `dolar` e `cdi`, os valores com taxa e sem taxa são iguais.
+- Hipótese, validação pendente. Registro completo das regras da T-18 em ADR-011.
