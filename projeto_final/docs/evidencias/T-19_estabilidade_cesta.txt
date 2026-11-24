@@ -1,0 +1,177 @@
+T-19 estabilidade da composição inicial
+Caminhos lidos:
+- data_local/silver/produto/group_id=23651/produto.parquet
+- data_local/silver/cambio_diario/group_id=23651/cambio.parquet
+- data_local/silver/preco_diario/group_id=23651/data=*/preco.parquet
+Somente 22 partições sob data_local/silver/preco_diario/group_id=23651 foram lidas.
+arquivos_preco_diario= 22
+linhas_preco_diario= 9955
+primeira_data= 2026-10-31
+ultima_data= 2026-11-21
+datas_distintas= 22
+
+Testes sintéticos T-19 contra o código atual:
+....                                                                     [100%]
+4 passed in 0.02s
+- test_composicao_identica_primeiro_dia_e_periodo_completo passou porque a função ignora linhas posteriores.
+- test_precos_posteriores_que_mudariam_escolha_nao_afetam passou porque só filtra data_inicial.
+- test_adicao_incremental_d1_d2_d3_mantem_composicao passou porque a escolha permanece fixa a cada extensão.
+- test_ordem_das_linhas_nao_altera_resultado passou porque o resultado é independente da ordem das entradas.
+
+Mutacoes em copia temporaria fora do repositorio:
+Mutacao usar ultima data: baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.03s
+Mutacao usar ultima data: mutacao
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_composicao_identica_primeiro_dia_e_periodo_completo ___________
+
+    def test_composicao_identica_primeiro_dia_e_periodo_completo():
+        only = [
+            preco(1, 119.88, D1),
+            preco(2, 13.33, D1),
+            preco(3, 11.80, D1),
+        ]
+        complete = only + [
+            preco(1, 300.0, D2),
+            preco(2, 200.0, D2),
+            preco(3, 5.0, D2),
+        ]
+        produtos = [
+            produto(1, "selado"),
+            produto(2),
+            produto(3),
+        ]
+        first = selecionar_carteiras(only, produtos, [cambio(D1)])
+        all_days = selecionar_carteiras(
+            complete,
+            produtos,
+            [cambio(D1), cambio(D2)],
+        )
+>       assert snapshot(first) == snapshot(all_days)
+E       AssertionError: assert {'selado': {'...imal('1000')}} == {'selado': {'...al('950.00')}}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'cesta_raras': {'posicoes': [], 'caixa_brl': Decimal('1000')}} != {'cesta_raras': {'posicoes': [(3, 'Normal', 1, Decimal('50.00'))], 'caixa_brl': Decimal('950.00')}}
+E         Use -v to get more diff
+
+tests/test_rare_basket_stability.py:84: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_rare_basket_stability.py::test_composicao_identica_primeiro_dia_e_periodo_completo
+1 failed in 0.05s
+Mutacao remover filtro do primeiro dia: baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.02s
+Mutacao remover filtro do primeiro dia: mutacao
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_precos_posteriores_que_mudariam_escolha_nao_afetam ____________
+
+    def test_precos_posteriores_que_mudariam_escolha_nao_afetam():
+        initial = [
+            preco(1, 100.0, D1),
+            preco(2, 9.0, D1),
+            preco(3, 8.0, D1),
+        ]
+        later = [
+            preco(1, 500.0, D2),
+            preco(2, 9.5, D2),
+            preco(3, 60.0, D2),
+            preco(4, 50.0, D2),
+        ]
+        produtos = [
+            produto(1, "selado"),
+            produto(2),
+            produto(3),
+            produto(4),
+        ]
+        first = selecionar_carteiras(initial, produtos, [cambio(D1)])
+        all_days = selecionar_carteiras(
+            initial + later,
+            produtos,
+            [cambio(D1), cambio(D2)],
+        )
+>       assert snapshot(first) == snapshot(all_days)
+E       AssertionError: assert {'selado': {'...al('830.00')}} == {'selado': {'...al('825.00')}}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'cesta_raras': {'posicoes': [(2, 'Normal', 1, Decimal('90.00')), (3, 'Normal', 1, Decimal('80.00'))], 'caixa_brl': Decimal('830.00')}} != {'cesta_raras': {'posicoes': [(2, 'Normal', 1, Decimal('95.00')), (3, 'Normal', 1, Decimal('80.00'))], 'caixa_brl': Decimal('825.00')}}
+E         Use -v to get more diff
+
+tests/test_rare_basket_stability.py:111: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_rare_basket_stability.py::test_precos_posteriores_que_mudariam_escolha_nao_afetam
+1 failed in 0.04s
+
+Conferencia real somente de data_local/silver:
+arquivos_preco_diario= 22
+linhas_preco_diario= 9955
+primeira_data= 2026-10-31
+ultima_data= 2026-11-21
+datas_distintas= 22
+selado primeiro= {'posicoes': [(565630, 'Normal', 1, '649.89')], 'caixa_brl': '350.11', 'extras': {}} todos= {'posicoes': [(565630, 'Normal', 1, '649.89')], 'caixa_brl': '350.11', 'extras': {}} igual= True
+cesta_raras primeiro= {'posicoes': [(590003, 'Holofoil', 1, '72.26'), (589869, 'Holofoil', 1, '63.97'), (593855, 'Holofoil', 1, '59.09'), (593857, 'Holofoil', 1, '59.09'), (590057, 'Holofoil', 1, '57.03'), (590063, 'Holofoil', 1, '51.94'), (593859, 'Holofoil', 1, '47.16'), (590024, 'Holofoil', 1, '44.40'), (589984, 'Holofoil', 1, '43.86'), (589865, 'Holofoil', 1, '42.12')], 'caixa_brl': '459.08', 'extras': {}} todos= {'posicoes': [(590003, 'Holofoil', 1, '72.26'), (589869, 'Holofoil', 1, '63.97'), (593855, 'Holofoil', 1, '59.09'), (593857, 'Holofoil', 1, '59.09'), (590057, 'Holofoil', 1, '57.03'), (590063, 'Holofoil', 1, '51.94'), (593859, 'Holofoil', 1, '47.16'), (590024, 'Holofoil', 1, '44.40'), (589984, 'Holofoil', 1, '43.86'), (589865, 'Holofoil', 1, '42.12')], 'caixa_brl': '459.08', 'extras': {}} igual= True
+propria primeiro= {'posicoes': [(565629, 'Normal', 1, '358.12'), (593169, 'Holofoil', 1, '365.66')], 'caixa_brl': '276.22', 'extras': {}} todos= {'posicoes': [(565629, 'Normal', 1, '358.12'), (593169, 'Holofoil', 1, '365.66')], 'caixa_brl': '276.22', 'extras': {}} igual= True
+dolar primeiro= {'posicoes': [], 'caixa_brl': '0', 'extras': {'dolar_parado_usd': '184.4610049435549324872721907'}} todos= {'posicoes': [], 'caixa_brl': '0', 'extras': {'dolar_parado_usd': '184.4610049435549324872721907'}} igual= True
+cdi primeiro= {'posicoes': [], 'caixa_brl': '1000', 'extras': {}} todos= {'posicoes': [], 'caixa_brl': '1000', 'extras': {}} igual= True
+selado_confirmacao= True
+cesta_confirmacao= True
+
+Explicacao dos testes sintéticos:
+- test_composicao_identica_primeiro_dia_e_periodo_completo falharia se a seleção deixasse de usar somente a menor data com preco nao nulo.
+- test_precos_posteriores_que_mudariam_escolha_nao_afetam falharia se preços posteriores fossem adicionados ao universo elegivel ou substituissem o primeiro dia.
+- test_adicao_incremental_d1_d2_d3_mantem_composicao falharia se a composição mudasse em alguma extensão incremental D+1, D+2 ou D+3.
+- test_ordem_das_linhas_nao_altera_resultado falharia se o resultado dependesse da ordem das linhas de entrada.
+
+Os quatro testes passaram contra o codigo atual porque src/selecao_carteiras.py determina data_inicial pela menor data e executa elegiveis somente com row.data != data_inicial.
+
+Mutacao 1 (usar ultima data): baseline passou no mesmo teste; mutacao falhou test_composicao_identica_primeiro_dia_e_periodo_completo.
+Mutacao 2 (remover filtro do primeiro dia): baseline passou no mesmo teste; mutacao falhou test_precos_posteriores_que_mudariam_escolha_nao_afetam.
+
+Suite completa apos T-19:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 233 items
+
+tests/test_collection_comparison.py .............                        [  5%]
+tests/test_collector.py ..........                                       [  9%]
+tests/test_decomposition.py .........                                    [ 13%]
+tests/test_fx_asof.py .....                                              [ 15%]
+tests/test_gold_schema.py ........                                       [ 19%]
+tests/test_portfolio_returns.py .................                        [ 26%]
+tests/test_portfolio_selection.py .............................          [ 39%]
+tests/test_prefix_isolation.py .......                                   [ 42%]
+tests/test_ptax_backfill.py .......                                      [ 45%]
+tests/test_rare_basket_stability.py ....                                 [ 46%]
+tests/test_retroactive_load.py .......                                   [ 49%]
+tests/test_return_risk_metrics.py ........................               [ 60%]
+tests/test_s3_timeouts.py ..                                             [ 60%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 65%]
+tests/test_secrets_not_versioned.py ..........                           [ 69%]
+tests/test_silver.py ...............................                     [ 83%]
+tests/test_silver_prefix.py ........                                     [ 86%]
+tests/test_silver_retro_catalog.py .........                             [ 90%]
+tests/test_tcgcsv_limits.py .                                            [ 90%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 233 passed in 4.86s ==============================
+
+== Conferencia do revisor (24/11/2026): mutacoes dos testes incremental e de ordem ==
+As mutacoes 1 e 2 acima so mostram falha para os dois primeiros testes. Abaixo, o arquivo de teste completo rodado contra duas copias mutadas fora do repositorio, para ver quais testes falham em cada uma.
+Baseline (codigo atual):
+....                                                                     [100%]
+4 passed in 0.01s
+Mutacao A (usar a ultima data em vez da primeira):
+FAILED tests/test_rare_basket_stability.py::test_composicao_identica_primeiro_dia_e_periodo_completo
+FAILED tests/test_rare_basket_stability.py::test_precos_posteriores_que_mudariam_escolha_nao_afetam
+FAILED tests/test_rare_basket_stability.py::test_adicao_incremental_d1_d2_d3_mantem_composicao
+3 failed, 1 passed in 0.05s
+Mutacao C (primeiro dia = data da primeira linha da entrada, nao a menor data):
+FAILED tests/test_rare_basket_stability.py::test_ordem_das_linhas_nao_altera_resultado
+1 failed, 3 passed in 0.05s
