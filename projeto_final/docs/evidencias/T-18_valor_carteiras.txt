@@ -1,0 +1,412 @@
+T-18: falha inicial antes da implementação
+market_price_zero_linhas_posicoes_cinco_carteiras=0
+
+==================================== ERRORS ====================================
+_______________ ERROR collecting tests/test_portfolio_returns.py _______________
+ImportError while importing test module '/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/tests/test_portfolio_returns.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.14.2/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_portfolio_returns.py:7: in <module>
+    from src.valor_carteiras import calcular_valor_carteiras
+E   ModuleNotFoundError: No module named 'src.valor_carteiras'
+=========================== short test summary info ============================
+ERROR tests/test_portfolio_returns.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.31s
+...F........                                                             [100%]
+=================================== FAILURES ===================================
+____________________ test_sobra_cdi_composta_em_dias_uteis _____________________
+
+    def test_sobra_cdi_composta_em_dias_uteis():
+        result = calcular_valor_carteiras(
+            composicao(caixa_cesta=900),
+            [preco(2, 10), preco(2, 10, D2), preco(2, 10, D3)],
+            [cambio(D1, compra=1), cambio(D2, compra=1), cambio(D3, compra=1)],
+            [cdi(D2, 0.05), cdi(D3, 0.10)],
+            taxas_venda=(Decimal("0"),),
+        )
+>       assert linha(result, D1, "cesta_raras", 0)["valor_brl"] == Decimal("1000.00")
+E       AssertionError: assert Decimal('910.00') == Decimal('1000.00')
+E        +  where Decimal('1000.00') = Decimal('1000.00')
+
+tests/test_portfolio_returns.py:168: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_returns.py::test_sobra_cdi_composta_em_dias_uteis
+1 failed, 11 passed in 0.06s
+............                                                             [100%]
+12 passed in 0.05s
+
+Explicacao dos testes T-18:
+- test_ptax_compra_asof_nao_usa_cotacao_posterior falharia se fosse usada a cotação de dia posterior.
+- test_cdi_taxa_porcentagem_e_sabado_sem_taxa falharia sem dividir taxa_dia por 100 ou aplicando taxa no dia inicial.
+- test_taxa_apenas_em_posicoes_e_dolar_cdi_iguais falharia se taxa fosse aplicada ao dolar ou CDI.
+- test_sobra_cdi_composta_em_dias_uteis falharia se CDI nao fosse composto ou divisor/percentagem estivesse errado.
+- test_dolar_valorizado_por_ptax_compra falharia se usasse PTAX de venda.
+- test_preco_carregado_dia_sem_linha_e_nulo falharia se nulo fosse usado como 0 ou nao houvesse ultimo preço conhecido.
+- test_grade_so_preco_diario_e_sem_datas_de_cambio_cdi falharia se datas só de cambio/CDI criassem linha.
+- test_ptax_ausente_levanta_value_error falharia se faltasse PTAX fosse retornada composição com valor inventado.
+- test_nenhum_preco_conhecido_levanta_value_error falharia se posição sem preço fosse valorizada zero.
+- test_retorno_excesso_cdi_e_perda_maxima_conferiveis falharia se retorno/excesso/drawdown fossem calculados incorretamente.
+- test_composicao_nao_muda_e_entrada_nao_e_mutada falharia se entradas fossem alteradas ou datas posteriores mudassem a composição.
+- test_saida_contrato_tipos_sem_nulos falharia sem as colunas/Tipos e nulo em valor_brl.
+
+Conferencia real com dados da silver local (somente leitura):
+primeira_data 2026-10-31 ultima_data 2026-11-21
+selado taxa 0 primeiro 999.93 ultimo 1069.15 carregados 0
+cesta_raras taxa 0 primeiro 999.95 ultimo 1051.72 carregados 0
+propria taxa 0 primeiro 999.92 ultimo 1079.51 carregados 0
+dolar taxa 0 primeiro 999.89 ultimo 1086.16 carregados 0
+cdi taxa 0 primeiro 1000.00 ultimo 1006.62 carregados 0
+
+Suite completa T-18:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 224 items
+
+tests/test_collection_comparison.py .............                        [  5%]
+tests/test_collector.py ..........                                       [ 10%]
+tests/test_decomposition.py .........                                    [ 14%]
+tests/test_fx_asof.py .....                                              [ 16%]
+tests/test_gold_schema.py ........                                       [ 20%]
+tests/test_portfolio_returns.py ............                             [ 25%]
+tests/test_portfolio_selection.py .............................          [ 38%]
+tests/test_prefix_isolation.py .......                                   [ 41%]
+tests/test_ptax_backfill.py .......                                      [ 44%]
+tests/test_retroactive_load.py .......                                   [ 47%]
+tests/test_return_risk_metrics.py ........................               [ 58%]
+tests/test_s3_timeouts.py ..                                             [ 59%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 64%]
+tests/test_secrets_not_versioned.py ..........                           [ 68%]
+tests/test_silver.py ...............................                     [ 82%]
+tests/test_silver_prefix.py ........                                     [ 86%]
+tests/test_silver_retro_catalog.py .........                             [ 90%]
+tests/test_tcgcsv_limits.py .                                            [ 90%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 224 passed in 13.70s =============================
+Conferencia real com taxa 0,15 (Decimal):
+selado primeiro 902.46 ultimo 961.64 carregados 0
+cesta_raras primeiro 918.82 ultimo 963.28 carregados 0
+propria primeiro 891.37 ultimo 959.29 carregados 0
+dolar primeiro 999.89 ultimo 1086.16 carregados 0
+cdi primeiro 1000.00 ultimo 1006.62 carregados 0
+
+Resumo real final da T-18:
+- Sem taxa: selado 999.93 -> 1069.15; cesta 999.95 -> 1051.72; propria 999.92 -> 1079.51; dolar 999.89 -> 1086.16; cdi 1000.00 -> 1006.62.
+- Com taxa 15%: selado 902.46 -> 961.64; cesta 918.82 -> 963.28; propria 891.37 -> 959.29; dolar 999.89 -> 1086.16; cdi 1000.00 -> 1006.62.
+- Dias com preco carregado em todas as carteiras: 0.
+
+Correção após revisão (24/11/2026)
+Testes reforçados contra o código atual:
+........F......F                                                         [100%]
+=================================== FAILURES ===================================
+________ test_composicao_sem_metadata_data_inicial_levanta_value_error _________
+
+    def test_composicao_sem_metadata_data_inicial_levanta_value_error():
+        composition = composicao()
+        del composition["metadata"]
+>       with pytest.raises(ValueError, match="composição inicial sem data_inicial"):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_portfolio_returns.py:226: Failed
+____________ test_dias_preco_carregado_conta_carteira_e_dia_uma_vez ____________
+
+    def test_dias_preco_carregado_conta_carteira_e_dia_uma_vez():
+        composition = composicao()
+        composition["selado"]["posicoes"].append({
+            "tipo": "selado",
+            "product_id": 11,
+            "acabamento": "Normal",
+            "unidades": 1,
+            "market_price_usd": Decimal("10"),
+            "ptax_venda": Decimal("10"),
+            "custo_brl": Decimal("100"),
+        })
+        result = calcular_valor_carteiras(
+            composition,
+            [
+                preco(1, 10),
+                preco(11, 10),
+                preco(2, 9, D2),
+                preco(1, None, D2),
+                preco(11, None, D2),
+                preco(1, 10, D3),
+                preco(11, None, D3),
+            ],
+            [
+                cambio(D1, compra=10),
+                cambio(D2, compra=10),
+                cambio(D3, compra=10),
+            ],
+            [],
+            taxas_venda=(Decimal("0"),),
+        )
+>       assert result["metricas"]["selado"][Decimal("0")]["dias_preco_carregado"] == 2
+E       assert 3 == 2
+
+tests/test_portfolio_returns.py:356: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_returns.py::test_composicao_sem_metadata_data_inicial_levanta_value_error
+FAILED tests/test_portfolio_returns.py::test_dias_preco_carregado_conta_carteira_e_dia_uma_vez
+2 failed, 14 passed in 0.15s
+................                                                         [100%]
+16 passed in 0.04s
+Mutacao CDI sem divisao por 100: baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.06s
+Mutacao CDI sem divisao por 100: mutacao
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_cdi_taxa_porcentagem_e_sabado_sem_taxa __________________
+
+    def test_cdi_taxa_porcentagem_e_sabado_sem_taxa():
+        result = calcular_valor_carteiras(
+            composicao(data_inicial=D1),
+            [preco(1, 10), preco(1, 10, D2), preco(1, 10, D3)],
+            [cambio(D1, compra=1), cambio(D2, compra=1), cambio(D3, compra=1)],
+            [cdi(D1, 0.05), cdi(D2, 0.05)],
+            taxas_venda=(Decimal("0"),),
+        )
+        assert linha(result, D1, "cdi", 0)["valor_brl"] == Decimal("1000.00")
+>       assert linha(result, D2, "cdi", 0)["valor_brl"] == Decimal("1000.50")
+E       AssertionError: assert Decimal('1050.00') == Decimal('1000.50')
+E        +  where Decimal('1000.50') = Decimal('1000.50')
+
+tests/test_portfolio_returns.py:139: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_returns.py::test_cdi_taxa_porcentagem_e_sabado_sem_taxa
+1 failed in 0.09s
+Mutacao taxa na sobra: baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.05s
+Mutacao taxa na sobra: mutacao
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_taxa_apenas_em_posicoes_e_dolar_cdi_iguais ________________
+
+    def test_taxa_apenas_em_posicoes_e_dolar_cdi_iguais():
+        result = calcular_valor_carteiras(
+            composicao(),
+            [preco(1, 10), preco(2, 10), preco(3, 10)],
+            [cambio(D1, compra=10)],
+            [],
+            taxas_venda=(Decimal("0"), Decimal("0.15")),
+        )
+        assert linha(result, D1, "dolar", 0)["valor_brl"] == Decimal("1000.00")
+        assert linha(result, D1, "dolar", 0.15)["valor_brl"] == Decimal("1000.00")
+        assert linha(result, D1, "cdi", 0)["valor_brl"] == Decimal("1000.00")
+        assert linha(result, D1, "cdi", 0.15)["valor_brl"] == Decimal("1000.00")
+>       assert linha(result, D1, "selado", 0.15)["valor_brl"] == Decimal("985.00")
+E       AssertionError: assert Decimal('850.00') == Decimal('985.00')
+E        +  where Decimal('985.00') = Decimal('985.00')
+
+tests/test_portfolio_returns.py:155: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_returns.py::test_taxa_apenas_em_posicoes_e_dolar_cdi_iguais
+1 failed in 0.09s
+Mutacao >= last_cdi: baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.05s
+Mutacao >= last_cdi: mutacao
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________________ test_cdi_taxa_porcentagem_e_sabado_sem_taxa __________________
+
+    def test_cdi_taxa_porcentagem_e_sabado_sem_taxa():
+        result = calcular_valor_carteiras(
+            composicao(data_inicial=D1),
+            [preco(1, 10), preco(1, 10, D2), preco(1, 10, D3)],
+            [cambio(D1, compra=1), cambio(D2, compra=1), cambio(D3, compra=1)],
+            [cdi(D1, 0.05), cdi(D2, 0.05)],
+            taxas_venda=(Decimal("0"),),
+        )
+>       assert linha(result, D1, "cdi", 0)["valor_brl"] == Decimal("1000.00")
+E       AssertionError: assert Decimal('1000.50') == Decimal('1000.00')
+E        +  where Decimal('1000.00') = Decimal('1000.00')
+
+tests/test_portfolio_returns.py:138: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_returns.py::test_cdi_taxa_porcentagem_e_sabado_sem_taxa
+1 failed in 0.08s
+Mutacao cotacao_venda: baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.03s
+Mutacao cotacao_venda: mutacao
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_ptax_compra_asof_nao_usa_cotacao_posterior ________________
+
+    def test_ptax_compra_asof_nao_usa_cotacao_posterior():
+        result = calcular_valor_carteiras(
+            composicao(),
+            [preco(1, 10), preco(1, 12, D2)],
+            [
+                cambio(D1, compra=2),
+                cambio(D2, compra=3),
+                cambio(D3, compra=99),
+            ],
+            [],
+            taxas_venda=(Decimal("0"),),
+        )
+>       assert linha(result, D1, "selado", 0)["valor_brl"] == Decimal("920.00")
+E       AssertionError: assert Decimal('1000.00') == Decimal('920.00')
+E        +  where Decimal('920.00') = Decimal('920.00')
+
+tests/test_portfolio_returns.py:126: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_returns.py::test_ptax_compra_asof_nao_usa_cotacao_posterior
+1 failed in 0.07s
+Mutacao contagem por posicao: baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.04s
+Mutacao contagem por posicao: mutacao
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_dias_preco_carregado_conta_carteira_e_dia_uma_vez ____________
+
+    def test_dias_preco_carregado_conta_carteira_e_dia_uma_vez():
+        composition = composicao()
+        composition["selado"]["posicoes"].append({
+            "tipo": "selado",
+            "product_id": 11,
+            "acabamento": "Normal",
+            "unidades": 1,
+            "market_price_usd": Decimal("10"),
+            "ptax_venda": Decimal("10"),
+            "custo_brl": Decimal("100"),
+        })
+        result = calcular_valor_carteiras(
+            composition,
+            [
+                preco(1, 10),
+                preco(11, 10),
+                preco(2, 9, D2),
+                preco(1, None, D2),
+                preco(11, None, D2),
+                preco(1, 10, D3),
+                preco(11, None, D3),
+            ],
+            [
+                cambio(D1, compra=10),
+                cambio(D2, compra=10),
+                cambio(D3, compra=10),
+            ],
+            [],
+            taxas_venda=(Decimal("0"),),
+        )
+>       assert result["metricas"]["selado"][Decimal("0")]["dias_preco_carregado"] == 2
+E       assert 9 == 2
+
+tests/test_portfolio_returns.py:356: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_returns.py::test_dias_preco_carregado_conta_carteira_e_dia_uma_vez
+1 failed in 0.07s
+Mutacao linha ausente zero: baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.04s
+Mutacao linha ausente zero: mutacao
+.                                                                        [100%]
+1 passed in 0.05s
+Mutacao linha ausente como zero (repetida): baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.05s
+Mutacao linha ausente como zero (repetida): mutacao
+.                                                                        [100%]
+1 passed in 0.05s
+Mutacao linha ausente como zero (teste separado): baseline sem mutacao
+.                                                                        [100%]
+1 passed in 0.04s
+Mutacao linha ausente como zero (teste separado): mutacao
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________________ test_preco_carregado_dia_sem_linha_e_nulo ___________________
+
+    def test_preco_carregado_dia_sem_linha_e_nulo():
+        result = calcular_valor_carteiras(
+            composicao(),
+            [
+                preco(1, 10),
+                preco(2, 9, D2),
+                preco(1, 12, D3),
+            ],
+            [cambio(D1, compra=10), cambio(D2, compra=10), cambio(D3, compra=10)],
+            [],
+            taxas_venda=(Decimal("0"),),
+        )
+        assert linha(result, D2, "selado", 0)["preco_carregado"] is True
+>       assert linha(result, D2, "selado", 0)["valor_brl"] == Decimal("1000.00")
+E       AssertionError: assert Decimal('900.00') == Decimal('1000.00')
+E        +  where Decimal('1000.00') = Decimal('1000.00')
+
+tests/test_portfolio_returns.py:197: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_portfolio_returns.py::test_preco_carregado_dia_sem_linha_e_nulo
+1 failed in 0.10s
+.................                                                        [100%]
+17 passed in 0.06s
+
+Nota da revisão 24/11/2026:
+- test_sobra_cdi_composta_em_dias_uteis falhou antes por expectativa R$ 1000.00 em vez de R$ 910.00, por não considerar caixa 900 mais posição 10; nao era defeito do CDI.
+- test_cdi_taxa_porcentagem_e_sabado_sem_taxa nao provava taxa no dia inicial; o fixture reforcado inclui cdi(D1,0.05), e D1 permanece 1000.00.
+- test_taxa_apenas_em_posicoes_e_dolar_cdi_iguais foi reforcado com valores exatos: selado 985.00, cesta 985.00, propria 361.00 com taxa 0.15.
+- test_composicao_sem_metadata_data_inicial_levanta_value_error confirma a mensagem exata sem metadata.
+- dias_preco_carregado agora conta carteira-dia uma vez.
+
+Mutacoes testadas: todas falharam o teste discriminante e o mesmo teste passou no baseline sem mutacao, inclusive ausencia de linha como zero.
+
+Conferencia real revisada:
+ultima_data_preco 2026-11-21
+ptax_compra_usada 2026-11-19 5.8883
+ultimo_cdi (datetime.date(2026, 11, 19), 0.050788, Decimal('1.00050788'))
+selado taxa 0 primeiro 999.93 ultimo 1069.15 carregados 0
+selado taxa 0.15 primeiro 902.46 ultimo 961.64 carregados 0
+cesta_raras taxa 0 primeiro 999.95 ultimo 1051.72 carregados 0
+cesta_raras taxa 0.15 primeiro 918.82 ultimo 963.28 carregados 0
+propria taxa 0 primeiro 999.92 ultimo 1079.51 carregados 0
+propria taxa 0.15 primeiro 891.37 ultimo 959.29 carregados 0
+dolar taxa 0 primeiro 999.89 ultimo 1086.16 carregados 0
+dolar taxa 0.15 primeiro 999.89 ultimo 1086.16 carregados 0
+cdi taxa 0 primeiro 1000.00 ultimo 1006.62 carregados 0
+cdi taxa 0.15 primeiro 1000.00 ultimo 1006.62 carregados 0
+
+Suite completa apos correcao da revisao:
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 229 items
+
+tests/test_collection_comparison.py .............                        [  5%]
+tests/test_collector.py ..........                                       [ 10%]
+tests/test_decomposition.py .........                                    [ 13%]
+tests/test_fx_asof.py .....                                              [ 16%]
+tests/test_gold_schema.py ........                                       [ 19%]
+tests/test_portfolio_returns.py .................                        [ 27%]
+tests/test_portfolio_selection.py .............................          [ 39%]
+tests/test_prefix_isolation.py .......                                   [ 42%]
+tests/test_ptax_backfill.py .......                                      [ 45%]
+tests/test_retroactive_load.py .......                                   [ 48%]
+tests/test_return_risk_metrics.py ........................               [ 59%]
+tests/test_s3_timeouts.py ..                                             [ 60%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 65%]
+tests/test_secrets_not_versioned.py ..........                           [ 69%]
+tests/test_silver.py ...............................                     [ 82%]
+tests/test_silver_prefix.py ........                                     [ 86%]
+tests/test_silver_retro_catalog.py .........                             [ 90%]
+tests/test_tcgcsv_limits.py .                                            [ 90%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 229 passed in 4.73s ==============================
+.................                                                        [100%]
+17 passed in 0.05s
+
+== Conferencia do revisor (24/11/2026): correcao da nota sobre a mutacao 'linha ausente como zero' ==
+A nota anterior diz que todas as mutacoes falharam o teste discriminante. Isso nao vale para as duas primeiras tentativas de 'linha ausente como zero': nelas o teste passou com a mutacao aplicada (1 passed), isto e, o teste executado nao discriminava ausencia de linha. Apenas a terceira tentativa, contra test_preco_carregado_dia_sem_linha_e_nulo, mostra falha (900.00 contra 1000.00). O pedido era parar e mostrar quando uma mutacao nao fizesse o teste falhar; a evidencia manteve as tres tentativas, sem apagar nenhuma.
