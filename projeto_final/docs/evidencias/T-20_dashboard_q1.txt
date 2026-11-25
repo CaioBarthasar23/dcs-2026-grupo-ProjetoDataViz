@@ -1,0 +1,353 @@
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 0 items / 1 error
+
+==================================== ERRORS ====================================
+_________________ ERROR collecting tests/test_dashboard_q1.py __________________
+ImportError while importing test module '/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/tests/test_dashboard_q1.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.14.2/lib/python3.14/importlib/__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_dashboard_q1.py:6: in <module>
+    from dashboard.p1 import preparar_ranking_p1
+E   ModuleNotFoundError: No module named 'dashboard.p1'
+=========================== short test summary info ============================
+ERROR tests/test_dashboard_q1.py
+!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+=============================== 1 error in 0.18s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 9 items
+
+tests/test_dashboard_q1.py F........                                     [100%]
+
+=================================== FAILURES ===================================
+___ test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id ____
+
+    def test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id():
+        result = calcular()
+        altas = result["maiores_altas"]
+        quedas = result["maiores_quedas"]
+>       assert [row["product_id"] for row in altas] == [1, 2, 7]
+E       assert [1, 2, 7, 3, 4] == [1, 2, 7]
+E         
+E         Left contains 2 more items, first extra item: 3
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:68: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id
+========================= 1 failed, 8 passed in 0.16s ==========================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 9 items
+
+tests/test_dashboard_q1.py .........                                     [100%]
+
+============================== 9 passed in 0.10s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 9 items
+
+tests/test_dashboard_q1.py .........                                     [100%]
+
+============================== 9 passed in 0.07s ===============================
+Traceback (most recent call last):
+  File "<stdin>", line 7, in <module>
+  File "/workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final/dashboard/common.py", line 26, in carregar_silver
+    if not productos_path.is_file():
+           ^^^^^^^^^^^^^^
+NameError: name 'productos_path' is not defined. Did you mean: 'produtos_path'?
+CAMINHOS LIDOS:
+data_local/silver/produto/group_id=23651/produto.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-10-31/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-01/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-02/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-03/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-04/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-05/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-06/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-07/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-08/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-09/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-10/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-11/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-12/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-13/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-14/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-15/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-16/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-17/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-18/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-19/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-20/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-21/preco.parquet
+data_local/silver/cambio_diario/group_id=23651/cambio.parquet
+PERIODO: 2026-10-31 a 2026-11-21
+CARTAS COM PRECO NO PRIMEIRO DIA, INCLUINDO CODE CARD E ANTES DO FILTRO: 262
+CODE CARD ENTRE ESSAS CARTAS (EXCLUIDAS): 10
+CARTAS NAO-CODE COM PRECO NO PRIMEIRO DIA, ANTES DO FILTRO: 252
+CARTAS NAO-CODE COM PRECO ACIMA DE US$ 1 NO PRIMEIRO DIA: 60
+Traceback (most recent call last):
+  File "<stdin>", line 25, in <module>
+NameError: name 'excluidas' is not defined
+CAMINHOS LIDOS:
+data_local/silver/produto/group_id=23651/produto.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-10-31/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-01/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-02/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-03/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-04/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-05/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-06/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-07/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-08/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-09/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-10/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-11/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-12/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-13/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-14/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-15/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-16/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-17/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-18/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-19/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-20/preco.parquet
+data_local/silver/preco_diario/group_id=23651/data=2026-11-21/preco.parquet
+data_local/silver/cambio_diario/group_id=23651/cambio.parquet
+PERIODO: 2026-10-31 a 2026-11-21
+CARTAS COM PRECO NO PRIMEIRO DIA, INCLUINDO CODE CARD E ANTES DO FILTRO: 262
+CODE CARD ENTRE ESSAS CARTAS (EXCLUIDAS): 10
+CARTAS NAO-CODE COM PRECO NO PRIMEIRO DIA, ANTES DO FILTRO: 252
+CARTAS NAO-CODE COM PRECO ACIMA DE US$ 1 NO PRIMEIRO DIA: 60
+CONTAGENS DE EXCLUSAO DO PREPARO: {'filtro_usd_1': 357, 'preco_inicial_nulo': 0, 'preco_final_nulo': 0, 'code_card': 10}
+10 MAIORES ALTAS
+{'product_id': 589983, 'acabamento': 'Holofoil', 'variacao_brl': 31.131918, 'variacao_percentual': 0.8822212787504096, 'efeito_carta': 0.7327188940092166, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': 0.06322042333470652}
+{'product_id': 589984, 'acabamento': 'Holofoil', 'variacao_brl': 22.390721, 'variacao_percentual': 0.5105898721660038, 'efeito_carta': 0.3906056860321385, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': 0.03370222472737906}
+{'product_id': 593169, 'acabamento': 'Holofoil', 'variacao_brl': 17.70885999999996, 'variacao_percentual': 0.048435221461264, 'efeito_carta': -0.034840622683469324, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.0030061172617530498}
+{'product_id': 589913, 'acabamento': 'Holofoil', 'variacao_brl': 15.594979999999996, 'variacao_percentual': 0.8511787271305802, 'efeito_carta': 0.7041420118343196, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': 0.060754753889774346}
+{'product_id': 593857, 'acabamento': 'Holofoil', 'variacao_brl': 11.103995999999995, 'variacao_percentual': 0.18793403485920335, 'efeito_carta': 0.09357798165137621, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': 0.008074091801340921}
+{'product_id': 589985, 'acabamento': 'Holofoil', 'variacao_brl': 9.583114000000137, 'variacao_percentual': 0.010552145784976652, 'efeito_carta': -0.06971469499820926, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.006015120623300452}
+{'product_id': 589944, 'acabamento': 'Holofoil', 'variacao_brl': 8.660314999999997, 'variacao_percentual': 0.2262984748455661, 'efeito_carta': 0.12889518413597734, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': 0.011121329303102336}
+{'product_id': 589975, 'acabamento': 'Holofoil', 'variacao_brl': 8.415193000000002, 'variacao_percentual': 0.24219138488448455, 'efeito_carta': 0.1435257410296411, 'efeito_cambio': 0.08628196140648647, 'efeito_cruzado': 0.012383682448356866}
+{'product_id': 590024, 'acabamento': 'Holofoil', 'variacao_brl': 6.4801980000000015, 'variacao_percentual': 0.14596778346178785, 'efeito_carta': 0.05494505494505497, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': 0.004740767110246499}
+{'product_id': 593859, 'acabamento': 'Holofoil', 'variacao_brl': 5.953246, 'variacao_percentual': 0.12623715998695473, 'efeito_carta': 0.0367816091954023, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': 0.003173589385066161}
+10 MAIORES QUEDAS
+{'product_id': 590027, 'acabamento': 'Holofoil', 'variacao_brl': -33.30515500000001, 'variacao_percentual': -0.025333700483793797, 'efeito_carta': -0.10275017523605323, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.008865486654226845}
+{'product_id': 589930, 'acabamento': 'Holofoil', 'variacao_brl': -31.27583200000001, 'variacao_percentual': -0.17238751073004477, 'efeito_carta': -0.23812369285927693, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.02054577927725412}
+{'product_id': 589987, 'acabamento': 'Holofoil', 'variacao_brl': -15.190312000000034, 'variacao_percentual': -0.09676555142720356, 'efeito_carta': -0.16850828729281775, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.014539225540872}
+{'product_id': 589891, 'acabamento': 'Holofoil', 'variacao_brl': -15.07201400000001, 'variacao_percentual': -0.13629934245033304, 'efeito_carta': -0.20490196078431377, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.01767934307250552}
+{'product_id': 590006, 'acabamento': 'Holofoil', 'variacao_brl': -8.640954000000079, 'variacao_percentual': -0.015626855088563985, 'efeito_carta': -0.0938143319282424, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.008094484566807902}
+{'product_id': 589857, 'acabamento': 'Holofoil', 'variacao_brl': -6.839945000000007, 'variacao_percentual': -0.17949399501160146, 'efeito_carta': -0.244665718349929, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.02111023806815881}
+{'product_id': 589869, 'acabamento': 'Holofoil', 'variacao_brl': -5.551144000000008, 'variacao_percentual': -0.08678669007183526, 'efeito_carta': -0.15932203389830513, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.013746617580016458}
+{'product_id': 590063, 'acabamento': 'Holofoil', 'variacao_brl': -3.5275219999999976, 'variacao_percentual': -0.06792925649673087, 'efeito_carta': -0.14196242171189977, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.012248796191317461}
+{'product_id': 589990, 'acabamento': 'Holofoil', 'variacao_brl': -3.2007970000000086, 'variacao_percentual': -0.028145261410879474, 'efeito_carta': -0.10533841754051476, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.009088805276851028}
+{'product_id': 590086, 'acabamento': 'Holofoil', 'variacao_brl': -2.5486559999999994, 'variacao_percentual': -0.16439849122577965, 'efeito_carta': -0.23076923076923073, 'efeito_cambio': 0.08628196140648625, 'efeito_cruzado': -0.019911221863035285}
+COMPARACOES BRL COMPLETAS: 60
+MAIOR ERRO ABSOLUTO NA SOMA DOS EFEITOS: 2.63677968348e-16
+EFEITOS FECHAM DENTRO DE 1e-12: True
+BASELINE i_code_card_dupla_defesa: exit=0
+.                                                                        [100%]
+1 passed in 0.08s
+MUTACAO i_code_card_dupla_defesa: exit=1
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____________ test_code_card_com_maior_variacao_e_excluida_e_contada ____________
+
+    def test_code_card_com_maior_variacao_e_excluida_e_contada():
+        result = calcular()
+        ids = {row["product_id"] for row in result["maiores_altas"] + result["maiores_quedas"]}
+>       assert 6 not in ids
+E       assert 6 not in {1, 2, 3, 4, 6, 7}
+
+tests/test_dashboard_q1.py:119: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_code_card_com_maior_variacao_e_excluida_e_contada
+1 failed in 0.10s
+BASELINE ii_limite_inclusivo: exit=0
+.                                                                        [100%]
+1 passed in 0.08s
+MUTACAO ii_limite_inclusivo: exit=1
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________ test_limite_usd_estritamente_maior_que_um_e_nulos_nao_sao_zero ________
+
+    def test_limite_usd_estritamente_maior_que_um_e_nulos_nao_sao_zero():
+        result = calcular()
+        ids = {row["product_id"] for row in result["maiores_altas"] + result["maiores_quedas"]}
+>       assert 5 not in ids
+E       assert 5 not in {1, 2, 3, 4, 5, 7}
+
+tests/test_dashboard_q1.py:109: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_limite_usd_estritamente_maior_que_um_e_nulos_nao_sao_zero
+1 failed in 0.11s
+BASELINE iii_ordem_crescente: exit=0
+.                                                                        [100%]
+1 passed in 0.08s
+MUTACAO iii_ordem_crescente: exit=1
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id ____
+
+    def test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id():
+        result = calcular()
+        altas = result["maiores_altas"]
+        quedas = result["maiores_quedas"]
+>       assert [row["product_id"] for row in altas[:3]] == [1, 2, 7]
+E       assert [3, 4, 7] == [1, 2, 7]
+E         
+E         At index 0 diff: 3 != 1
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:68: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id
+1 failed in 0.11s
+BASELINE iv_usd_com_brl: exit=0
+.                                                                        [100%]
+1 passed in 0.10s
+MUTACAO iv_usd_com_brl: exit=1
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______ test_modo_usd_calcula_variacao_em_dolar_e_efeitos_nao_aplicaveis _______
+
+    def test_modo_usd_calcula_variacao_em_dolar_e_efeitos_nao_aplicaveis():
+        result = calcular(moeda="usd")
+        first = result["maiores_altas"][0]
+        assert first["product_id"] == 1
+>       assert first["variacao_usd"] == pytest.approx(2)
+E       assert 22 == 2 ± 2.0e-06
+E         
+E         comparison failed
+E         Obtained: 22
+E         Expected: 2 ± 2.0e-06
+
+tests/test_dashboard_q1.py:98: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_modo_usd_calcula_variacao_em_dolar_e_efeitos_nao_aplicaveis
+1 failed in 0.09s
+RESULTADO: todas as mutações produziram falha após baseline passando.
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 242 items
+
+tests/test_collection_comparison.py .............                        [  5%]
+tests/test_collector.py ..........                                       [  9%]
+tests/test_dashboard_q1.py .........                                     [ 13%]
+tests/test_decomposition.py .........                                    [ 16%]
+tests/test_fx_asof.py .....                                              [ 19%]
+tests/test_gold_schema.py ........                                       [ 22%]
+tests/test_portfolio_returns.py .................                        [ 29%]
+tests/test_portfolio_selection.py .............................          [ 41%]
+tests/test_prefix_isolation.py .......                                   [ 44%]
+tests/test_ptax_backfill.py .......                                      [ 47%]
+tests/test_rare_basket_stability.py ....                                 [ 48%]
+tests/test_retroactive_load.py .......                                   [ 51%]
+tests/test_return_risk_metrics.py ........................               [ 61%]
+tests/test_s3_timeouts.py ..                                             [ 62%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 66%]
+tests/test_secrets_not_versioned.py ..........                           [ 71%]
+tests/test_silver.py ...............................                     [ 83%]
+tests/test_silver_prefix.py ........                                     [ 87%]
+tests/test_silver_retro_catalog.py .........                             [ 90%]
+tests/test_tcgcsv_limits.py .                                            [ 91%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 242 passed in 11.91s =============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 9 items
+
+tests/test_dashboard_q1.py .........                                     [100%]
+
+============================== 9 passed in 0.09s ===============================
+============================= test session starts ==============================
+platform linux -- Python 3.14.2, pytest-9.2.0, pluggy-1.7.0
+rootdir: /workspaces/dcs-2026-grupo-ProjetoDataViz/projeto_final
+plugins: platformdirs-4.14.0, anyio-4.15.1
+collected 242 items
+
+tests/test_collection_comparison.py .............                        [  5%]
+tests/test_collector.py ..........                                       [  9%]
+tests/test_dashboard_q1.py .........                                     [ 13%]
+tests/test_decomposition.py .........                                    [ 16%]
+tests/test_fx_asof.py .....                                              [ 19%]
+tests/test_gold_schema.py ........                                       [ 22%]
+tests/test_portfolio_returns.py .................                        [ 29%]
+tests/test_portfolio_selection.py .............................          [ 41%]
+tests/test_prefix_isolation.py .......                                   [ 44%]
+tests/test_ptax_backfill.py .......                                      [ 47%]
+tests/test_rare_basket_stability.py ....                                 [ 48%]
+tests/test_retroactive_load.py .......                                   [ 51%]
+tests/test_return_risk_metrics.py ........................               [ 61%]
+tests/test_s3_timeouts.py ..                                             [ 62%]
+tests/test_sealed_vs_singles_metrics.py ...........                      [ 66%]
+tests/test_secrets_not_versioned.py ..........                           [ 71%]
+tests/test_silver.py ...............................                     [ 83%]
+tests/test_silver_prefix.py ........                                     [ 87%]
+tests/test_silver_retro_catalog.py .........                             [ 90%]
+tests/test_tcgcsv_limits.py .                                            [ 91%]
+tests/test_value_concentration.py ..................                     [ 98%]
+tests/test_workflow_schedule.py ...                                      [100%]
+
+============================= 242 passed in 5.46s ==============================
+
+=== INTERPRETACAO E RASTREABILIDADE ===
+
+A primeira execução dos testes ocorreu antes da implementação e falhou na coleta porque dashboard.p1 ainda não existia (ModuleNotFoundError). Após a implementação, uma execução revelou uma expectativa excessivamente restrita no próprio teste de ordenação: o ranking retorna até 10 itens e, por isso, também continha os itens válidos com variação negativa. A asserção foi ajustada para verificar as primeiras posições ordenadas; a execução final ficou verde. Nenhuma falha foi ocultada.
+
+O que cada teste detecta:
+- test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id falha se a ordem das altas/quedas for invertida ou se as variações não forem ordenadas corretamente; os dados de queda empatam e discriminam product_id.
+- test_empate_usa_product_id_e_depois_acabamento falha se o desempate por product_id ou acabamento for removido.
+- test_soma_dos_tres_efeitos_fecha_variacao_total falha se qualquer parcela da decomposição for removida ou calculada incorretamente.
+- test_modo_usd_calcula_variacao_em_dolar_e_efeitos_nao_aplicaveis falha se o modo dólar usar valores BRL, se a variação ou percentual em USD estiver incorreto, ou se os efeitos não aplicáveis virarem zero em vez de None com rótulo.
+- test_limite_usd_estritamente_maior_que_um_e_nulos_nao_sao_zero falha se a fronteira estrita virar inclusiva, se US$ 1,01 deixar de entrar ou se o nulo inicial entrar como zero.
+- test_code_card_com_maior_variacao_e_excluida_e_contada falha se a Code Card não for excluída ou deixar de ser contada. Há defesa em duas camadas: exclusão explícita no preparo do dashboard e filtro existente em decompor_variacao.
+- test_linhas_incluem_product_id_imagem_e_link_originais falha se a junção deixar de carregar qualquer metadado da dimensão.
+- test_tamanho_e_parametro_e_datas_e_contagens_sao_devolvidos falha se o tamanho ficar fixo, as datas não forem expostas ou faltar uma categoria de contagem.
+- test_nao_muta_entradas_e_repeticao_da_mesma_saida falha se o preparo alterar as entradas ou produzir resultado não repetível.
+
+As mutações foram feitas em diretórios temporários fora do repositório. Em cada uma, o mesmo teste passou no baseline antes da mutação e falhou depois: (i) removi a exclusão de Code Card no preparo e em src/decomposicao.py; (ii) troquei <= por < na regra interna equivalente a exigir preço > US$ 1; (iii) inverti a ordenação das altas; (iv) substituí os cálculos de variação US$ por campos BRL. As quatro saídas baseline/mutação estão registradas acima. Todas as mutações produziram falha, portanto não houve caso sem detecção.
+
+Na conferência real, as contagens de cartas são distintas por product_id: 262 cartas com preço no primeiro dia incluindo Code Card; 10 Code Cards entre elas; 252 cartas não-Code antes do limiar; 60 cartas não-Code acima de US$ 1. Logo, 192 cartas não-Code ficaram abaixo ou no limiar. A contagem do preparo é por combinação (product_id, acabamento), por isso o motivo filtro_usd_1 registra 357 combinações, e não 192 cartas. Code Card é contada como produto distinto (10). Não houve preço inicial nem final nulo entre as combinações processadas na janela real.
+
+A soma da decomposição foi conferida nas 60 combinações BRL: erro absoluto máximo observado 2.63677968348e-16; todas fecharam em tolerância de 1e-12. As datas usadas foram os extremos realmente presentes no fato: 2026-10-31 a 2026-11-21. Não se interpolaram dias nem se substituiu preço ausente por preço de outra data.
+
+Observação dos resultados: product_id 593169 aparece entre as maiores altas em BRL embora o efeito da carta seja negativo; o efeito positivo do câmbio mais o cruzado mais que compensa a queda USD nesse intervalo. product_id 590027 é a maior queda BRL mesmo com efeito positivo do câmbio. Ambos parecem consistentes com a decomposição, não sinal de soma quebrada.
+
+Validações finais: `python -m py_compile dashboard/app.py` terminou com código 0 e sem saída; `python -m pytest tests/test_dashboard_q1.py` passou 9 testes; `python -m pytest` passou 242 testes.
+Comando local de execução, a partir de projeto_final: `python -m streamlit run dashboard/app.py`. Nenhum servidor foi iniciado nesta validação; a captura de tela permanece a cargo do aluno.
+
+== Conferencia do revisor (25/11/2026): dois testes acrescentados e mutacoes ==
+O revisor identificou que os fixtures originais nao provavam (1) que o modo US$ ordena pela variacao em dolar, pois as ordens em dolar e em reais coincidiam, e (2) o tratamento de preco final nulo, que nenhum fixture exercitava. Foram acrescentados ao arquivo de testes, pelo revisor, test_modo_usd_ordena_pela_variacao_em_dolar_e_nao_pela_variacao_em_reais e test_preco_final_nulo_e_excluido_e_contado_e_nao_vira_queda_total. O codigo do dashboard nao foi alterado. Os dois ja passam no codigo atual porque a regra existia.
+Testes novos contra o codigo atual:
+...........                                                              [100%]
+11 passed in 0.09s
+Mutacao A (modo US$ usa linhas e ordem em reais), baseline = codigo atual acima:
+E         comparison failed
+FAILED tests/test_dashboard_q1.py::test_modo_usd_calcula_variacao_em_dolar_e_efeitos_nao_aplicaveis
+FAILED tests/test_dashboard_q1.py::test_modo_usd_ordena_pela_variacao_em_dolar_e_nao_pela_variacao_em_reais
+2 failed, 9 passed in 0.12s
+Mutacao B (preco final nulo vira zero em vez de excluir), baseline = codigo atual acima:
+FAILED tests/test_dashboard_q1.py::test_preco_final_nulo_e_excluido_e_contado_e_nao_vira_queda_total
+1 failed, 10 passed in 0.11s
+Suite completa:
+............................                                             [100%]
+244 passed in 3.57s
