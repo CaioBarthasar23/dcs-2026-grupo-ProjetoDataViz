@@ -1,6 +1,6 @@
 # ADR-012 — Dashboard da pergunta 1: fonte, alternador US$, ranking e Code Card
 
-* **Status:** rascunho para revisão do aluno (nada aqui vale como decisão até o aluno revisar e assinar).
+* **Status:** confirmado pelo aluno (CaioBarthasar23) em 26/11/2026.
 * **Data:** 25/11/2026
 * **Decisor:** CaioBarthasar23 (responsável pendente de confirmação do professor)
 * **Tarefa e requisitos:** T-20; RF-10, RF-11, RF-12; RNF-01; OBJ-01
