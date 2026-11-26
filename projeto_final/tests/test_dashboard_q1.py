@@ -65,22 +65,56 @@ def test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id():
     result = calcular()
     altas = result["maiores_altas"]
     quedas = result["maiores_quedas"]
-    assert [row["product_id"] for row in altas[:3]] == [1, 2, 7]
+    assert [row["product_id"] for row in altas[:3]] == [7, 1, 2]
     assert [row["product_id"] for row in quedas[:2]] == [3, 4]
-    assert altas[0]["variacao_brl"] == pytest.approx(22)
-    assert altas[0]["variacao_percentual"] == pytest.approx(0.44)
+    assert altas[0]["variacao_brl"] == pytest.approx(4.95)
+    assert altas[0]["variacao_percentual"] == pytest.approx(10 / 5.05 - 1)
+    assert altas[1]["variacao_brl"] == pytest.approx(22)
+    assert altas[1]["variacao_percentual"] == pytest.approx(0.44)
+
+
+def test_ranking_brl_ordena_por_variacao_percentual_quando_absoluta_difere():
+    fatos = [
+        linha(40, INICIO, 2, 10), linha(40, FIM, 4, 20),
+        linha(41, INICIO, 100, 500), linha(41, FIM, 110, 550),
+    ]
+    result = calcular(fatos, [produto(40), produto(41)])
+    altas = result["maiores_altas"]
+    assert [row["product_id"] for row in altas] == [40, 41]
+    assert altas[0]["variacao_percentual"] == pytest.approx(1.0)
+    assert altas[0]["variacao_brl"] == pytest.approx(10)
+    assert altas[1]["variacao_percentual"] == pytest.approx(0.1)
+    assert altas[1]["variacao_brl"] == pytest.approx(50)
 
 
 def test_empate_usa_product_id_e_depois_acabamento():
     fatos = [
-        linha(9, INICIO, 5, 10, "Reverse Holo"), linha(9, FIM, 6, 20, "Reverse Holo"),
-        linha(9, INICIO, 5, 10, "Normal"), linha(9, FIM, 6, 20, "Normal"),
-        linha(2, INICIO, 5, 10), linha(2, FIM, 6, 20),
+        linha(9, INICIO, 10, 50, "Reverse Holo"), linha(9, FIM, 20, 100, "Reverse Holo"),
+        linha(2, INICIO, 100, 500), linha(2, FIM, 200, 1000),
+        linha(9, INICIO, 5, 25, "Normal"), linha(9, FIM, 10, 50, "Normal"),
     ]
     result = calcular(fatos, [produto(9), produto(2)])
-    assert [(r["product_id"], r["acabamento"]) for r in result["maiores_altas"]] == [
+    altas = result["maiores_altas"]
+    assert [(r["product_id"], r["acabamento"]) for r in altas] == [
         (2, "Normal"), (9, "Normal"), (9, "Reverse Holo")
     ]
+    assert [r["variacao_percentual"] for r in altas] == [1.0, 1.0, 1.0]
+    assert sorted(r["variacao_brl"] for r in altas) == pytest.approx([25, 50, 500])
+
+
+def test_maiores_quedas_comecam_pela_mais_negativa_em_percentual():
+    fatos = [
+        linha(60, INICIO, 10, 50), linha(60, FIM, 5, 25),
+        linha(61, INICIO, 1000, 5000), linha(61, FIM, 900, 4500),
+    ]
+    produtos = [produto(60), produto(61)]
+    brl = calcular(fatos, produtos, moeda="brl")
+    usd = calcular(fatos, produtos, moeda="usd")
+    assert [r["product_id"] for r in brl["maiores_quedas"]] == [60, 61]
+    assert brl["maiores_quedas"][0]["variacao_percentual"] == pytest.approx(-0.5)
+    assert brl["maiores_quedas"][0]["variacao_brl"] == pytest.approx(-25)
+    assert [r["product_id"] for r in usd["maiores_quedas"]] == [60, 61]
+    assert usd["maiores_quedas"][0]["variacao_usd"] == pytest.approx(-5)
 
 
 def test_soma_dos_tres_efeitos_fecha_variacao_total():
@@ -93,14 +127,29 @@ def test_soma_dos_tres_efeitos_fecha_variacao_total():
 
 def test_modo_usd_calcula_variacao_em_dolar_e_efeitos_nao_aplicaveis():
     result = calcular(moeda="usd")
-    first = result["maiores_altas"][0]
-    assert first["product_id"] == 1
+    assert [row["product_id"] for row in result["maiores_altas"][:3]] == [7, 1, 2]
+    first = next(row for row in result["maiores_altas"] if row["product_id"] == 1)
     assert first["variacao_usd"] == pytest.approx(2)
     assert first["variacao_percentual"] == pytest.approx(0.2)
     assert first["efeito_cambio"] is None
     assert first["efeito_cruzado"] is None
     assert first["rotulo_efeito_cambio"] == "não se aplica"
     assert first["rotulo_efeito_cruzado"] == "não se aplica"
+
+
+def test_modo_usd_ordena_por_variacao_percentual_quando_absoluta_difere():
+    fatos = [
+        linha(50, INICIO, 2, 10), linha(50, FIM, 4, 15),
+        linha(51, INICIO, 100, 500), linha(51, FIM, 110, 1000),
+    ]
+    produtos = [produto(50), produto(51)]
+    usd = calcular(fatos, produtos, moeda="usd")
+    brl = calcular(fatos, produtos, moeda="brl")
+    assert [r["product_id"] for r in usd["maiores_altas"]] == [50, 51]
+    assert usd["maiores_altas"][0]["variacao_usd"] == pytest.approx(2)
+    assert usd["maiores_altas"][0]["variacao_percentual"] == pytest.approx(1.0)
+    assert usd["maiores_altas"][1]["variacao_usd"] == pytest.approx(10)
+    assert [r["product_id"] for r in brl["maiores_altas"]] == [51, 50]
 
 
 def test_limite_usd_estritamente_maior_que_um_e_nulos_nao_sao_zero():

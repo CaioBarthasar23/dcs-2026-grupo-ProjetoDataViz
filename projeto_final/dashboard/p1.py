@@ -24,7 +24,7 @@ def preparar_ranking_p1(
     limite_usd: float = 1.0,
     tamanho: int = 10,
 ) -> dict[str, Any]:
-    """Prepara altas e quedas carta/acabamento sem modificar as entradas."""
+    """Prepara altas e quedas por variação percentual sem modificar as entradas."""
     if moeda not in ("brl", "usd"):
         raise ValueError("moeda deve ser 'brl' ou 'usd'")
     if tamanho < 1:
@@ -135,12 +135,13 @@ def preparar_ranking_p1(
         })
 
     selected = elegiveis_usd if moeda == "usd" else rows_brl
+    # RF-10/RF-11: o ranking usa a variação percentual; a absoluta segue no retorno.
     highs = sorted(selected, key=lambda row: (
-        -(row["variacao_usd"] if moeda == "usd" else row["variacao_brl"]),
+        -row["variacao_percentual"],
         _chave_product_id(row["product_id"]), str(row["acabamento"] or ""),
     ))[:tamanho]
     lows = sorted(selected, key=lambda row: (
-        row["variacao_usd"] if moeda == "usd" else row["variacao_brl"],
+        row["variacao_percentual"],
         _chave_product_id(row["product_id"]), str(row["acabamento"] or ""),
     ))[:tamanho]
     return {
