@@ -351,3 +351,380 @@ FAILED tests/test_dashboard_q1.py::test_preco_final_nulo_e_excluido_e_contado_e_
 Suite completa:
 ............................                                             [100%]
 244 passed in 3.57s
+
+== Correção após revisão (25/11/2026) ==
+Execução em 26/11/2026.
+
+O ranking entregue ordenava pela variação ABSOLUTA em R$ e em US$ (dashboard/p1.py, linhas 138-145, chaves variacao_usd e variacao_brl).
+A spec pede variação PERCENTUAL: RF-10 (specs/spec.md, linha 117) e RF-11 (linhas 129 e 137).
+Decisão do aluno em 25/11/2026: ordenar por variacao_percentual; altas em ordem decrescente, quedas em ordem crescente (a mais negativa primeiro);
+empate por product_id e depois por acabamento. O alternador, a decomposição, os filtros (acima de US$ 1 no primeiro dia, estritamente; Code Card fora)
+e o tamanho do ranking (parâmetro, 10) não mudaram. A variação absoluta continua sendo exibida em dashboard/app.py (linhas 35-38), sem ordenar.
+
+Arquivos alterados: dashboard/p1.py (docstring da linha 27, comentário curto e as duas chaves de ordenação) e tests/test_dashboard_q1.py
+(três testes novos e três testes existentes ajustados, sem remover asserção). dashboard/app.py não foi alterado.
+Este bloco foi anexado somente com tee -a; o conteúdo anterior não foi reescrito.
+
+--- Falha antes do código (testes novos/ajustados contra o p1.py antigo) ---
+$ python -m pytest tests/test_dashboard_q1.py -q
+FFFF.FF.......                                                           [100%]
+=================================== FAILURES ===================================
+___ test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id ____
+
+    def test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id():
+        result = calcular()
+        altas = result["maiores_altas"]
+        quedas = result["maiores_quedas"]
+>       assert [row["product_id"] for row in altas[:3]] == [7, 1, 2]
+E       assert [1, 2, 7] == [7, 1, 2]
+E         
+E         At index 0 diff: 1 != 7
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:68: AssertionError
+____ test_ranking_brl_ordena_por_variacao_percentual_quando_absoluta_difere ____
+
+    def test_ranking_brl_ordena_por_variacao_percentual_quando_absoluta_difere():
+        fatos = [
+            linha(40, INICIO, 2, 10), linha(40, FIM, 4, 20),
+            linha(41, INICIO, 100, 500), linha(41, FIM, 110, 550),
+        ]
+        result = calcular(fatos, [produto(40), produto(41)])
+        altas = result["maiores_altas"]
+>       assert [row["product_id"] for row in altas] == [40, 41]
+E       assert [41, 40] == [40, 41]
+E         
+E         At index 0 diff: 41 != 40
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:83: AssertionError
+________________ test_empate_usa_product_id_e_depois_acabamento ________________
+
+    def test_empate_usa_product_id_e_depois_acabamento():
+        fatos = [
+            linha(9, INICIO, 10, 50, "Reverse Holo"), linha(9, FIM, 20, 100, "Reverse Holo"),
+            linha(2, INICIO, 100, 500), linha(2, FIM, 200, 1000),
+            linha(9, INICIO, 5, 25, "Normal"), linha(9, FIM, 10, 50, "Normal"),
+        ]
+        result = calcular(fatos, [produto(9), produto(2)])
+        altas = result["maiores_altas"]
+>       assert [(r["product_id"], r["acabamento"]) for r in altas] == [
+            (2, "Normal"), (9, "Normal"), (9, "Reverse Holo")
+        ]
+E       AssertionError: assert [(2, 'Normal'...(9, 'Normal')] == [(2, 'Normal'...everse Holo')]
+E         
+E         At index 1 diff: (9, 'Reverse Holo') != (9, 'Normal')
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:98: AssertionError
+_________ test_maiores_quedas_comecam_pela_mais_negativa_em_percentual _________
+
+    def test_maiores_quedas_comecam_pela_mais_negativa_em_percentual():
+        fatos = [
+            linha(60, INICIO, 10, 50), linha(60, FIM, 5, 25),
+            linha(61, INICIO, 1000, 5000), linha(61, FIM, 900, 4500),
+        ]
+        produtos = [produto(60), produto(61)]
+        brl = calcular(fatos, produtos, moeda="brl")
+        usd = calcular(fatos, produtos, moeda="usd")
+>       assert [r["product_id"] for r in brl["maiores_quedas"]] == [60, 61]
+E       assert [61, 60] == [60, 61]
+E         
+E         At index 0 diff: 61 != 60
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:113: AssertionError
+_______ test_modo_usd_calcula_variacao_em_dolar_e_efeitos_nao_aplicaveis _______
+
+    def test_modo_usd_calcula_variacao_em_dolar_e_efeitos_nao_aplicaveis():
+        result = calcular(moeda="usd")
+>       assert [row["product_id"] for row in result["maiores_altas"][:3]] == [7, 1, 2]
+E       assert [1, 2, 7] == [7, 1, 2]
+E         
+E         At index 0 diff: 1 != 7
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:130: AssertionError
+_____ test_modo_usd_ordena_por_variacao_percentual_quando_absoluta_difere ______
+
+    def test_modo_usd_ordena_por_variacao_percentual_quando_absoluta_difere():
+        fatos = [
+            linha(50, INICIO, 2, 10), linha(50, FIM, 4, 15),
+            linha(51, INICIO, 100, 500), linha(51, FIM, 110, 1000),
+        ]
+        produtos = [produto(50), produto(51)]
+        usd = calcular(fatos, produtos, moeda="usd")
+        brl = calcular(fatos, produtos, moeda="brl")
+>       assert [r["product_id"] for r in usd["maiores_altas"]] == [50, 51]
+E       assert [51, 50] == [50, 51]
+E         
+E         At index 0 diff: 51 != 50
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:148: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_ranking_brl_ordena_variacao_decrescente_e_desempata_por_product_id
+FAILED tests/test_dashboard_q1.py::test_ranking_brl_ordena_por_variacao_percentual_quando_absoluta_difere
+FAILED tests/test_dashboard_q1.py::test_empate_usa_product_id_e_depois_acabamento
+FAILED tests/test_dashboard_q1.py::test_maiores_quedas_comecam_pela_mais_negativa_em_percentual
+FAILED tests/test_dashboard_q1.py::test_modo_usd_calcula_variacao_em_dolar_e_efeitos_nao_aplicaveis
+FAILED tests/test_dashboard_q1.py::test_modo_usd_ordena_por_variacao_percentual_quando_absoluta_difere
+6 failed, 8 passed in 0.35s
+
+--- Testes depois do código ---
+$ python -m pytest tests/test_dashboard_q1.py -q
+..............                                                           [100%]
+14 passed in 0.11s
+
+--- Mutações em cópia temporária fora do repositório, com baseline do mesmo teste passando ---
+Cópia: /tmp/opencode/t20-mut (dashboard/, src/, tests/). Para cada mutação, o p1.py correto foi restaurado, o teste-alvo passou no baseline,
+a mutação foi aplicada e o mesmo teste foi reexecutado.
+
+(i) voltar a ordenar por variação absoluta em R$
+Baseline: $ python -m pytest tests/test_dashboard_q1.py::test_ranking_brl_ordena_por_variacao_percentual_quando_absoluta_difere -q
+.                                                                        [100%]
+1 passed in 0.07s
+Mutação aplicada: chave das altas/quedas usa variacao_brl quando moeda == 'brl'.
+$ python -m pytest tests/test_dashboard_q1.py::test_ranking_brl_ordena_por_variacao_percentual_quando_absoluta_difere -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+____ test_ranking_brl_ordena_por_variacao_percentual_quando_absoluta_difere ____
+
+    def test_ranking_brl_ordena_por_variacao_percentual_quando_absoluta_difere():
+        fatos = [
+            linha(40, INICIO, 2, 10), linha(40, FIM, 4, 20),
+            linha(41, INICIO, 100, 500), linha(41, FIM, 110, 550),
+        ]
+        result = calcular(fatos, [produto(40), produto(41)])
+        altas = result["maiores_altas"]
+>       assert [row["product_id"] for row in altas] == [40, 41]
+E       assert [41, 40] == [40, 41]
+E         
+E         At index 0 diff: 41 != 40
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:83: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_ranking_brl_ordena_por_variacao_percentual_quando_absoluta_difere
+1 failed in 0.18s
+
+(ii) voltar a ordenar por variação absoluta em US$
+Baseline: $ python -m pytest tests/test_dashboard_q1.py::test_modo_usd_ordena_por_variacao_percentual_quando_absoluta_difere -q
+.                                                                        [100%]
+1 passed in 0.07s
+Mutação aplicada: chave das altas/quedas usa variacao_usd quando moeda == 'usd'.
+$ python -m pytest tests/test_dashboard_q1.py::test_modo_usd_ordena_por_variacao_percentual_quando_absoluta_difere -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____ test_modo_usd_ordena_por_variacao_percentual_quando_absoluta_difere ______
+
+    def test_modo_usd_ordena_por_variacao_percentual_quando_absoluta_difere():
+        fatos = [
+            linha(50, INICIO, 2, 10), linha(50, FIM, 4, 15),
+            linha(51, INICIO, 100, 500), linha(51, FIM, 110, 1000),
+        ]
+        produtos = [produto(50), produto(51)]
+        usd = calcular(fatos, produtos, moeda="usd")
+        brl = calcular(fatos, produtos, moeda="brl")
+>       assert [r["product_id"] for r in usd["maiores_altas"]] == [50, 51]
+E       assert [51, 50] == [50, 51]
+E         
+E         At index 0 diff: 51 != 50
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:148: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_modo_usd_ordena_por_variacao_percentual_quando_absoluta_difere
+1 failed in 0.10s
+
+(iii) ordenar as quedas de forma decrescente
+Baseline: $ python -m pytest tests/test_dashboard_q1.py::test_maiores_quedas_comecam_pela_mais_negativa_em_percentual -q
+.                                                                        [100%]
+1 passed in 0.07s
+Mutação aplicada: chave das quedas trocada para -row['variacao_percentual'].
+$ python -m pytest tests/test_dashboard_q1.py::test_maiores_quedas_comecam_pela_mais_negativa_em_percentual -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_maiores_quedas_comecam_pela_mais_negativa_em_percentual _________
+
+    def test_maiores_quedas_comecam_pela_mais_negativa_em_percentual():
+        fatos = [
+            linha(60, INICIO, 10, 50), linha(60, FIM, 5, 25),
+            linha(61, INICIO, 1000, 5000), linha(61, FIM, 900, 4500),
+        ]
+        produtos = [produto(60), produto(61)]
+        brl = calcular(fatos, produtos, moeda="brl")
+        usd = calcular(fatos, produtos, moeda="usd")
+>       assert [r["product_id"] for r in brl["maiores_quedas"]] == [60, 61]
+E       assert [61, 60] == [60, 61]
+E         
+E         At index 0 diff: 61 != 60
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:113: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_maiores_quedas_comecam_pela_mais_negativa_em_percentual
+1 failed in 0.10s
+
+(iv) remover o desempate nas duas camadas: chaves explícitas de product_id/acabamento no sorted e a ordenação de pares da linha 71
+O fixture de empate entrega as linhas de entrada em ordem diferente da esperada: 9 Reverse Holo, 2 Normal, 9 Normal.
+Baseline: $ python -m pytest tests/test_dashboard_q1.py::test_empate_usa_product_id_e_depois_acabamento -q
+.                                                                        [100%]
+1 passed in 0.15s
+Mutação aplicada: 'sorted(pares, ...)' virou 'pares' e as chaves de desempate foram removidas dos dois sorted.
+$ python -m pytest tests/test_dashboard_q1.py::test_empate_usa_product_id_e_depois_acabamento -q
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________ test_empate_usa_product_id_e_depois_acabamento ________________
+
+    def test_empate_usa_product_id_e_depois_acabamento():
+        fatos = [
+            linha(9, INICIO, 10, 50, "Reverse Holo"), linha(9, FIM, 20, 100, "Reverse Holo"),
+            linha(2, INICIO, 100, 500), linha(2, FIM, 200, 1000),
+            linha(9, INICIO, 5, 25, "Normal"), linha(9, FIM, 10, 50, "Normal"),
+        ]
+        result = calcular(fatos, [produto(9), produto(2)])
+        altas = result["maiores_altas"]
+>       assert [(r["product_id"], r["acabamento"]) for r in altas] == [
+            (2, "Normal"), (9, "Normal"), (9, "Reverse Holo")
+        ]
+E       AssertionError: assert [(2, 'Normal'...(9, 'Normal')] == [(2, 'Normal'...everse Holo')]
+E         
+E         At index 1 diff: (9, 'Reverse Holo') != (9, 'Normal')
+E         Use -v to get more diff
+
+tests/test_dashboard_q1.py:98: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_dashboard_q1.py::test_empate_usa_product_id_e_depois_acabamento
+1 failed in 0.10s
+
+As quatro mutações produziram falha após o baseline passar; nenhuma mutação ficou sem detecção.
+
+--- Conferência real somente leitura de data_local/silver (nunca silver_t08_*) ---
+Script em heredoc, sem gravar arquivo, lendo dashboard.common.carregar_silver(Path('data_local/silver')) e src.fx_asof.converter_precos.
+CAMINHOS LIDOS (todos): 24
+primeiro: data_local/silver/produto/group_id=23651/produto.parquet
+ultimo: data_local/silver/cambio_diario/group_id=23651/cambio.parquet
+algum caminho com silver_t08_: False
+todos sob data_local/silver: True
+
+======================================================================
+MOEDA BRL | periodo 2026-10-31 a 2026-11-21
+comparacoes elegiveis: 60
+exclusoes: {'filtro_usd_1': 357, 'preco_inicial_nulo': 0, 'preco_final_nulo': 0, 'code_card': 10}
+
+10 MAIORES ALTAS POR PERCENTUAL (BRL)
+ 1. product_id=589983 acabamento='Holofoil' abs=31.131918 pct=88.222128% inicio=6.510000 efeito_carta=73.271889% efeito_cambio=8.628196% efeito_cruzado=6.322042%
+ 2. product_id=589913 acabamento='Holofoil' abs=15.594980 pct=85.117873% inicio=3.380000 efeito_carta=70.414201% efeito_cambio=8.628196% efeito_cruzado=6.075475%
+ 3. product_id=589984 acabamento='Holofoil' abs=22.390721 pct=51.058987% inicio=8.090000 efeito_carta=39.060569% efeito_cambio=8.628196% efeito_cruzado=3.370222%
+ 4. product_id=589892 acabamento='Holofoil' abs=1.423859 pct=25.502479% inicio=1.030000 efeito_carta=15.533981% efeito_cambio=8.628196% efeito_cruzado=1.340302%
+ 5. product_id=589975 acabamento='Holofoil' abs=8.415193 pct=24.219138% inicio=6.410000 efeito_carta=14.352574% efeito_cambio=8.628196% efeito_cruzado=1.238368%
+ 6. product_id=589944 acabamento='Holofoil' abs=8.660315 pct=22.629847% inicio=7.060000 efeito_carta=12.889518% efeito_cambio=8.628196% efeito_cruzado=1.112133%
+ 7. product_id=589911 acabamento='Holofoil' abs=1.465111 pct=19.728888% inicio=1.370000 efeito_carta=10.218978% efeito_cambio=8.628196% efeito_cruzado=0.881713%
+ 8. product_id=590046 acabamento='Holofoil' abs=3.293951 pct=19.352636% inicio=3.140000 efeito_carta=9.872611% efeito_cambio=8.628196% efeito_cruzado=0.851828%
+ 9. product_id=593857 acabamento='Holofoil' abs=11.103996 pct=18.793403% inicio=10.900000 efeito_carta=9.357798% efeito_cambio=8.628196% efeito_cruzado=0.807409%
+10. product_id=590019 acabamento='Holofoil' abs=1.525912 pct=18.766828% inicio=1.500000 efeito_carta=9.333333% efeito_cambio=8.628196% efeito_cruzado=0.805298%
+
+10 MAIORES QUEDAS POR PERCENTUAL (BRL)
+ 1. product_id=589857 acabamento='Holofoil' abs=-6.839945 pct=-17.949400% inicio=7.030000 efeito_carta=-24.466572% efeito_cambio=8.628196% efeito_cruzado=-2.111024%
+ 2. product_id=589982 acabamento='Holofoil' abs=-2.493609 pct=-17.693251% inicio=2.600000 efeito_carta=-24.230769% efeito_cambio=8.628196% efeito_cruzado=-2.090678%
+ 3. product_id=589930 acabamento='Holofoil' abs=-31.275832 pct=-17.238751% inicio=33.470000 efeito_carta=-23.812369% efeito_cambio=8.628196% efeito_cruzado=-2.054578%
+ 4. product_id=590086 acabamento='Holofoil' abs=-2.548656 pct=-16.439849% inicio=2.860000 efeito_carta=-23.076923% efeito_cambio=8.628196% efeito_cruzado=-1.991122%
+ 5. product_id=589891 acabamento='Holofoil' abs=-15.072014 pct=-13.629934% inicio=20.400000 efeito_carta=-20.490196% efeito_cambio=8.628196% efeito_cruzado=-1.767934%
+ 6. product_id=593861 acabamento='Holofoil' abs=-2.017632 pct=-11.488136% inicio=3.240000 efeito_carta=-18.518519% efeito_cambio=8.628196% efeito_cruzado=-1.597814%
+ 7. product_id=589987 acabamento='Holofoil' abs=-15.190312 pct=-9.676555% inicio=28.960000 efeito_carta=-16.850829% efeito_cambio=8.628196% efeito_cruzado=-1.453923%
+ 8. product_id=590028 acabamento='Holofoil' abs=-1.211373 pct=-9.632578% inicio=2.320000 efeito_carta=-16.810345% efeito_cambio=8.628196% efeito_cruzado=-1.450430%
+ 9. product_id=589869 acabamento='Holofoil' abs=-5.551144 pct=-8.678669% inicio=11.800000 efeito_carta=-15.932203% efeito_cambio=8.628196% efeito_cruzado=-1.374662%
+10. product_id=589989 acabamento='Holofoil' abs=-1.184152 pct=-8.306237% inicio=2.630000 efeito_carta=-15.589354% efeito_cambio=8.628196% efeito_cruzado=-1.345080%
+
+ALTAS: sairam 4 de 10; entraram 4
+  sairam: [(589985, 'Holofoil'), (590024, 'Holofoil'), (593169, 'Holofoil'), (593859, 'Holofoil')]
+  entraram: [(589892, 'Holofoil'), (589911, 'Holofoil'), (590019, 'Holofoil'), (590046, 'Holofoil')]
+QUEDAS: sairam 4 de 10; entraram 4
+  sairam: [(589990, 'Holofoil'), (590006, 'Holofoil'), (590027, 'Holofoil'), (590063, 'Holofoil')]
+  entraram: [(589982, 'Holofoil'), (589989, 'Holofoil'), (590028, 'Holofoil'), (593861, 'Holofoil')]
+20 CARTAS UNICAS: sairam 8 de 20; entraram 8
+  sairam: [(589985, 'Holofoil'), (589990, 'Holofoil'), (590006, 'Holofoil'), (590024, 'Holofoil'), (590027, 'Holofoil'), (590063, 'Holofoil'), (593169, 'Holofoil'), (593859, 'Holofoil')]
+  entraram: [(589892, 'Holofoil'), (589911, 'Holofoil'), (589982, 'Holofoil'), (589989, 'Holofoil'), (590019, 'Holofoil'), (590028, 'Holofoil'), (590046, 'Holofoil'), (593861, 'Holofoil')]
+
+altas nao crescentes: True
+quedas nao decrescentes: True
+desempate altas ok: True
+desempate quedas ok: True
+BRL: max |pct - soma efeitos| = 2.637e-16 em 60 comparacoes
+BRL: max |pct - variacao_brl/inicio_brl| = 1.110e-16
+BRL: efeitos fecham em 1e-12: True
+corte das altas: 10a == 11a? False | 10a: 18.766828% 11a: 18.414520%
+corte das quedas: 10a == 11a? False | 10a: -8.306237% 11a: -6.792926%
+altas BRL com efeito_carta negativo: []
+quedas BRL com efeito_cambio positivo: [(589857, 'Holofoil', 0.08628196140648625), (589982, 'Holofoil', 0.08628196140648625), (589930, 'Holofoil', 0.08628196140648625), (590086, 'Holofoil', 0.08628196140648625), (589891, 'Holofoil', 0.08628196140648625), (593861, 'Holofoil', 0.08628196140648625), (589987, 'Holofoil', 0.08628196140648625), (590028, 'Holofoil', 0.08628196140648625), (589869, 'Holofoil', 0.08628196140648625), (589989, 'Holofoil', 0.08628196140648625)]
+altas BRL com preco inicial < US$ 2: [(589892, 'Holofoil', 1.03), (589911, 'Holofoil', 1.37), (590019, 'Holofoil', 1.5)]
+
+======================================================================
+MOEDA USD | periodo 2026-10-31 a 2026-11-21
+comparacoes elegiveis: 60
+exclusoes: {'filtro_usd_1': 357, 'preco_inicial_nulo': 0, 'preco_final_nulo': 0, 'code_card': 10}
+
+10 MAIORES ALTAS POR PERCENTUAL (USD)
+ 1. product_id=589983 acabamento='Holofoil' abs=4.770000 pct=73.271889% inicio=6.510000
+ 2. product_id=589913 acabamento='Holofoil' abs=2.380000 pct=70.414201% inicio=3.380000
+ 3. product_id=589984 acabamento='Holofoil' abs=3.160000 pct=39.060569% inicio=8.090000
+ 4. product_id=589892 acabamento='Holofoil' abs=0.160000 pct=15.533981% inicio=1.030000
+ 5. product_id=589975 acabamento='Holofoil' abs=0.920000 pct=14.352574% inicio=6.410000
+ 6. product_id=589944 acabamento='Holofoil' abs=0.910000 pct=12.889518% inicio=7.060000
+ 7. product_id=589911 acabamento='Holofoil' abs=0.140000 pct=10.218978% inicio=1.370000
+ 8. product_id=590046 acabamento='Holofoil' abs=0.310000 pct=9.872611% inicio=3.140000
+ 9. product_id=593857 acabamento='Holofoil' abs=1.020000 pct=9.357798% inicio=10.900000
+10. product_id=590019 acabamento='Holofoil' abs=0.140000 pct=9.333333% inicio=1.500000
+
+10 MAIORES QUEDAS POR PERCENTUAL (USD)
+ 1. product_id=589857 acabamento='Holofoil' abs=-1.720000 pct=-24.466572% inicio=7.030000
+ 2. product_id=589982 acabamento='Holofoil' abs=-0.630000 pct=-24.230769% inicio=2.600000
+ 3. product_id=589930 acabamento='Holofoil' abs=-7.970000 pct=-23.812369% inicio=33.470000
+ 4. product_id=590086 acabamento='Holofoil' abs=-0.660000 pct=-23.076923% inicio=2.860000
+ 5. product_id=589891 acabamento='Holofoil' abs=-4.180000 pct=-20.490196% inicio=20.400000
+ 6. product_id=593861 acabamento='Holofoil' abs=-0.600000 pct=-18.518519% inicio=3.240000
+ 7. product_id=589987 acabamento='Holofoil' abs=-4.880000 pct=-16.850829% inicio=28.960000
+ 8. product_id=590028 acabamento='Holofoil' abs=-0.390000 pct=-16.810345% inicio=2.320000
+ 9. product_id=589869 acabamento='Holofoil' abs=-1.880000 pct=-15.932203% inicio=11.800000
+10. product_id=589989 acabamento='Holofoil' abs=-0.410000 pct=-15.589354% inicio=2.630000
+
+ALTAS: sairam 3 de 10; entraram 3
+  sairam: [(589865, 'Holofoil'), (590024, 'Holofoil'), (593859, 'Holofoil')]
+  entraram: [(589892, 'Holofoil'), (589911, 'Holofoil'), (590019, 'Holofoil')]
+QUEDAS: sairam 6 de 10; entraram 6
+  sairam: [(589860, 'Holofoil'), (589985, 'Holofoil'), (589990, 'Holofoil'), (590006, 'Holofoil'), (590027, 'Holofoil'), (593169, 'Holofoil')]
+  entraram: [(589857, 'Holofoil'), (589982, 'Holofoil'), (589989, 'Holofoil'), (590028, 'Holofoil'), (590086, 'Holofoil'), (593861, 'Holofoil')]
+20 CARTAS UNICAS: sairam 9 de 20; entraram 9
+  sairam: [(589860, 'Holofoil'), (589865, 'Holofoil'), (589985, 'Holofoil'), (589990, 'Holofoil'), (590006, 'Holofoil'), (590024, 'Holofoil'), (590027, 'Holofoil'), (593169, 'Holofoil'), (593859, 'Holofoil')]
+  entraram: [(589857, 'Holofoil'), (589892, 'Holofoil'), (589911, 'Holofoil'), (589982, 'Holofoil'), (589989, 'Holofoil'), (590019, 'Holofoil'), (590028, 'Holofoil'), (590086, 'Holofoil'), (593861, 'Holofoil')]
+
+altas nao crescentes: True
+quedas nao decrescentes: True
+desempate altas ok: True
+desempate quedas ok: True
+USD: max |pct - variacao_usd/inicio_usd| = 0.000e+00 em 60 comparacoes
+USD: efeitos cambio/cruzado todos None: True
+corte das altas: 10a == 11a? False | 10a: 9.333333% 11a: 9.009009%
+corte das quedas: 10a == 11a? False | 10a: -15.589354% 11a: -14.196242%
+
+--- Compilação e suíte completa ---
+$ python -m py_compile dashboard/app.py
+py_compile exit=0 (sem saída)
+$ python -m pytest -q
+........................................................................ [ 29%]
+........................................................................ [ 58%]
+........................................................................ [ 87%]
+...............................                                          [100%]
+247 passed in 5.31s
+
+--- Observações da conferência real ---
+No R$, saíram 4 das 10 altas, 4 das 10 quedas e 8 das 20 cartas únicas do ranking absoluto anterior; entraram as mesmas quantidades.
+No US$, saíram 3 das 10 altas, 6 das 10 quedas e 9 das 20 cartas únicas; entraram as mesmas quantidades.
+No R$, três cartas baratas (589892 com US$ 1,03; 589911 com US$ 1,37; 590019 com US$ 1,50) entram nas maiores altas por percentual,
+embora suas variações absolutas sejam pequenas (R$ 1,42; R$ 1,47; R$ 1,53). Isso é consequência direta de ordenar por percentual com o filtro estrito acima de US$ 1.
+Todas as 10 maiores quedas em R$ têm efeito do câmbio positivo (8,628196%) e efeito da carta negativo; nenhuma alta em R$ tem efeito da carta negativo.
+A 10ª e a 11ª posições não empatam em nenhuma das quatro listas, então o corte não depende do desempate.
+A soma dos três efeitos fecha: erro absoluto máximo 2,637e-16 em 60 comparações R$, dentro de 1e-12. Em US$, o percentual confere exatamente com variacao_usd / market_price_inicio_usd.
+Todas as linhas lidas estão sob data_local/silver; nenhum caminho contém silver_t08_. Não houve leitura nem gravação no bucket, leitura de .env, pip install, git commit ou git push.
+
